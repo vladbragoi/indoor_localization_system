@@ -1,5 +1,6 @@
 package it.univr.vlad.fingerprinting.wifi;
 
+import it.univr.vlad.fingerprinting.Manager;
 import it.univr.vlad.fingerprinting.Observer;
 import it.univr.vlad.fingerprinting.ScanResults;
 
