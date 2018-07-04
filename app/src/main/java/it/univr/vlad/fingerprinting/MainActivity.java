@@ -1,9 +1,6 @@
 package it.univr.vlad.fingerprinting;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -14,6 +11,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
+import it.univr.vlad.fingerprinting.mv.Direction;
+import it.univr.vlad.fingerprinting.mv.MvManager;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -34,6 +36,19 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Direction.create(getApplicationContext());
+        MvManager t = new MvManager(this);
+        t.bind();
+        new Observer() {
+            @Override
+            public void update(List<Node> results) {}
+
+            @Override
+            public void update(float[] mv) {
+                System.out.println(mv);
+            }
+        };
     }
 
     @Override
