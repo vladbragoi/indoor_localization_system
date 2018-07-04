@@ -2,9 +2,11 @@ package it.univr.vlad.fingerprinting.mv;
 
 import android.content.Context;
 
+import java.util.List;
+
 import it.univr.vlad.fingerprinting.Manager;
+import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.Observer;
-import it.univr.vlad.fingerprinting.mv.Direction;
 
 public class MvManager extends Manager {
 
@@ -23,10 +25,12 @@ public class MvManager extends Manager {
         });
     }
 
-    @Override
-    protected void unBind() {
+    @Override public void unBind() {
         direction.stopListening();
     }
+
+    @Override
+    public void notifyObservers(List<Node> results) {}
 
     @Override
     public void notifyObservers() {

@@ -16,9 +16,13 @@ import java.util.List;
 
 import it.univr.vlad.fingerprinting.mv.Direction;
 import it.univr.vlad.fingerprinting.mv.MvManager;
+import it.univr.vlad.fingerprinting.wifi.WifiManager;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private MvManager mvManager;
+    private WifiManager wifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,17 +42,43 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Direction.create(getApplicationContext());
-        MvManager t = new MvManager(this);
-        t.bind();
-        new Observer() {
+        mvManager = new MvManager(this);
+        wifiManager = new WifiManager(this);
+
+        /*mvManager.registerObserver(new Observer() {
             @Override
             public void update(List<Node> results) {}
 
             @Override
             public void update(float[] mv) {
-                System.out.println(mv);
+                System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
             }
-        };
+        });*/
+
+        wifiManager.registerObserver(new Observer() {
+            @Override
+            public void update(List<Node> results) {
+                System.out.println(results);
+            }
+
+            @Override
+            public void update(float[] mv) {
+
+            }
+        });
+
+    }
+
+    @Override protected void onStart() {
+        super.onStart();
+        //mvManager.bind();
+        wifiManager.bind();
+    }
+
+    @Override protected void onStop() {
+        wifiManager.unBind();
+        //mvManager.unBind();
+        super.onStop();
     }
 
     @Override

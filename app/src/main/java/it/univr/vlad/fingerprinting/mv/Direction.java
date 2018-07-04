@@ -62,10 +62,10 @@ public class Direction implements SensorEventListener {
             if (success) {
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
-                azimut = (float) Math.toDegrees(orientation[0]); // orientation contains: azimut, pitch and roll
+                // orientation contains: azimut, pitch and roll
+                azimut = (float) Math.toDegrees(orientation[0]);
 
-                if (listener != null)
-                    listener.onDirectionUpdated(mGeomagnetic);
+                if (listener != null) listener.onDirectionUpdated(mGeomagnetic);
             }
         }
     }
