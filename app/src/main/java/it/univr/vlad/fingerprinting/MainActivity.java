@@ -1,8 +1,13 @@
 package it.univr.vlad.fingerprinting;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,8 +20,15 @@ import android.view.MenuItem;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
+import it.univr.vlad.fingerprinting.ble.BleManager;
+import it.univr.vlad.fingerprinting.ble.BleNode;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +46,29 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //requesting ble permissions
+        requestPermissions();
+
+        BleManager mBleManager = new BleManager(this);
+        mBleManager.registerObserver(new Observer(){
+
+            @Override
+            public void update(List<Node> results) {
+                for (Node n: results) {
+                    if(n instanceof BleNode)
+                        Log.d("LISTA",  n.id +" value: "+ n.value);
+                }
+
+            }
+
+            @Override
+            public void update(float[] mv) {
+
+            }
+        });
+        mBleManager.bind();
+
     }
 
     @Override
@@ -92,4 +127,25 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void requestPermissions(){
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        PERMISSION_REQUEST_COARSE_LOCATION);
+            }
+        } else {
+            // Permission has already been granted
+        }
+    }
+
 }

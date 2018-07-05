@@ -1,4 +1,9 @@
 package it.univr.vlad.fingerprinting;
 
-public class Node {
+public abstract class Node {
+
+    protected String id;      /// Mac Address
+    protected int value;      /// Rssi
+
+
 }
