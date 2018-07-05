@@ -7,7 +7,7 @@ public abstract class Manager implements ScanResults {
 
     protected Set<Observer> mObservers;
 
-    public Manager() {
+    protected Manager() {
         mObservers = new HashSet<>();
     }
 
