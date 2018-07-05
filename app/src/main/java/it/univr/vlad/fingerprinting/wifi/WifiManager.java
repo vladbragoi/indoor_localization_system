@@ -17,7 +17,8 @@ public class WifiManager extends Manager {
         mWifiScanner.setWifiListerner(this::notifyObservers);
     }
 
-    @Override public void bind() {
+    @Override
+    public void bind() {
         mWifiScanner.register();
         mWifiScanner.start();
     }
