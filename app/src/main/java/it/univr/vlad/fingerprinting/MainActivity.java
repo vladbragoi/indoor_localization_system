@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import it.univr.vlad.fingerprinting.ble.BleManager;
 import it.univr.vlad.fingerprinting.mv.Direction;
 import it.univr.vlad.fingerprinting.mv.MvManager;
 import it.univr.vlad.fingerprinting.wifi.WifiManager;
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity
 
     private MvManager mvManager;
     private WifiManager wifiManager;
+    private BleManager bleManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,23 +44,26 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Direction.create(getApplicationContext());
-        mvManager = new MvManager(this);
+        mvManager = new MvManager();
         wifiManager = new WifiManager(this);
+        bleManager = new BleManager(this);
 
-        /*mvManager.registerObserver(new Observer() {
+        mvManager.registerObserver(new Observer() {
             @Override
-            public void update(List<Node> results) {}
+            public void update(int type, List<Node> results) {}
 
             @Override
             public void update(float[] mv) {
-                System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
+                // System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
             }
-        });*/
+        });
 
         wifiManager.registerObserver(new Observer() {
             @Override
-            public void update(List<Node> results) {
-                System.out.println(results);
+            public void update(int type, List<Node> results) {
+                if (type == 0) {
+                    System.out.println("Wifi nodes: " + results);
+                }
             }
 
             @Override
@@ -66,17 +71,30 @@ public class MainActivity extends AppCompatActivity
 
         });
 
+        bleManager.registerObserver(new Observer() {
+            @Override
+            public void update(int type, List<Node> results) {
+                if (type == 1) {
+                    System.out.println("Beacons: " + results);
+                }
+            }
+
+            @Override
+            public void update(float[] mv) {}
+        });
     }
 
     @Override protected void onStart() {
         super.onStart();
-        //mvManager.bind();
+        mvManager.bind();
         wifiManager.bind();
+        bleManager.bind();
     }
 
     @Override protected void onStop() {
-        wifiManager.unBind();
-        //mvManager.unBind();
+        bleManager.unbind();
+        wifiManager.unbind();
+        mvManager.unbind();
         super.onStop();
     }
 

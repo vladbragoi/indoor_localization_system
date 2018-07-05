@@ -12,7 +12,7 @@ public abstract class Manager implements ScanResults {
     }
 
     protected abstract void bind();
-    protected abstract void unBind();
+    protected abstract void unbind();
 
     @Override public void registerObserver(Observer observer) {
         mObservers.add(observer);

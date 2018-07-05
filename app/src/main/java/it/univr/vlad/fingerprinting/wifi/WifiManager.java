@@ -24,7 +24,7 @@ public class WifiManager extends Manager {
     }
 
     @Override
-    public void unBind() {
+    public void unbind() {
         mWifiScanner.stop();
         mWifiScanner.unregister();
     }
@@ -32,7 +32,7 @@ public class WifiManager extends Manager {
     @Override
     public void notifyObservers(List<Node> results) {
         for (Observer observer : super.mObservers) {
-            observer.update(results);
+            observer.update(0, results);
         }
     }
 
