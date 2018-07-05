@@ -62,9 +62,8 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void update(float[] mv) {
+            public void update(float[] mv) {}
 
-            }
         });
 
     }

@@ -46,7 +46,7 @@ public class WifiScanner extends BroadcastReceiver {
     }
 
     private boolean permissionsGranted(Activity activity, String[] permissions) {
-        for (String s : permissions) {
+        for (String s: permissions) {
             if (ContextCompat.checkSelfPermission(activity, s) != PackageManager.PERMISSION_GRANTED)
                 return false;
         }
