@@ -1,9 +1,6 @@
 package it.univr.vlad.fingerprinting;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -15,8 +12,17 @@ import android.view.MenuItem;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
+import it.univr.vlad.fingerprinting.mv.Direction;
+import it.univr.vlad.fingerprinting.mv.MvManager;
+import it.univr.vlad.fingerprinting.wifi.WifiManager;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private MvManager mvManager;
+    private WifiManager wifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +40,44 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Direction.create(getApplicationContext());
+        mvManager = new MvManager(this);
+        wifiManager = new WifiManager(this);
+
+        /*mvManager.registerObserver(new Observer() {
+            @Override
+            public void update(List<Node> results) {}
+
+            @Override
+            public void update(float[] mv) {
+                System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
+            }
+        });*/
+
+        wifiManager.registerObserver(new Observer() {
+            @Override
+            public void update(List<Node> results) {
+                System.out.println(results);
+            }
+
+            @Override
+            public void update(float[] mv) {}
+
+        });
+
+    }
+
+    @Override protected void onStart() {
+        super.onStart();
+        //mvManager.bind();
+        wifiManager.bind();
+    }
+
+    @Override protected void onStop() {
+        wifiManager.unBind();
+        //mvManager.unBind();
+        super.onStop();
     }
 
     @Override
