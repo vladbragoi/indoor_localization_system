@@ -9,15 +9,13 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collection;
 
 import it.univr.vlad.fingerprinting.Node;
-import it.univr.vlad.fingerprinting.wifi.WifiScanner;
+import it.univr.vlad.fingerprinting.R;
 
 public class BeaconScanner implements BeaconConsumer {
 
@@ -27,11 +25,11 @@ public class BeaconScanner implements BeaconConsumer {
     private BeaconManager mBeaconManager;
     private List<Node> updatingList;
 
-    public BeaconScanner(Context appContext){
+    public BeaconScanner(Context context){
         updatingList = new ArrayList<>();
-        mContext = appContext;
+        mContext = context;
 
-        mBeaconManager= BeaconManager.getInstanceForApplication(appContext);
+        mBeaconManager= BeaconManager.getInstanceForApplication(context);
 
         //protocollo iBeacon
         mBeaconManager.getBeaconParsers().add(new BeaconParser("iBeacon").
@@ -72,14 +70,12 @@ public class BeaconScanner implements BeaconConsumer {
     }
 
     @Override
-    public void unbindService(ServiceConnection serviceConnection) {
-    }
+    public void unbindService(ServiceConnection serviceConnection) {}
 
     @Override
     public boolean bindService(Intent intent, ServiceConnection serviceConnection, int i) {
         return false;
     }
-
 
     protected void bind() {
         try {

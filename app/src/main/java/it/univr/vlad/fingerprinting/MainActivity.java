@@ -1,5 +1,6 @@
 package it.univr.vlad.fingerprinting;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,19 +13,12 @@ import android.view.MenuItem;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-import it.univr.vlad.fingerprinting.ble.BleManager;
 import it.univr.vlad.fingerprinting.mv.Direction;
-import it.univr.vlad.fingerprinting.mv.MvManager;
-import it.univr.vlad.fingerprinting.wifi.WifiManager;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private MvManager mvManager;
-    private WifiManager wifiManager;
-    private BleManager bleManager;
+    private Fingerprinting fingerprinting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,57 +38,16 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Direction.create(getApplicationContext());
-        mvManager = new MvManager();
-        wifiManager = new WifiManager(this);
-        bleManager = new BleManager(this);
-
-        mvManager.registerObserver(new Observer() {
-            @Override
-            public void update(int type, List<Node> results) {}
-
-            @Override
-            public void update(float[] mv) {
-                // System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
-            }
-        });
-
-        wifiManager.registerObserver(new Observer() {
-            @Override
-            public void update(int type, List<Node> results) {
-                if (type == 0) {
-                    System.out.println("Wifi nodes: " + results);
-                }
-            }
-
-            @Override
-            public void update(float[] mv) {}
-
-        });
-
-        bleManager.registerObserver(new Observer() {
-            @Override
-            public void update(int type, List<Node> results) {
-                if (type == 1) {
-                    System.out.println("Beacons: " + results);
-                }
-            }
-
-            @Override
-            public void update(float[] mv) {}
-        });
+        fingerprinting = new Fingerprinting(this);
     }
 
     @Override protected void onStart() {
         super.onStart();
-        mvManager.bind();
-        wifiManager.bind();
-        bleManager.bind();
+        fingerprinting.start();
     }
 
     @Override protected void onStop() {
-        bleManager.unbind();
-        wifiManager.unbind();
-        mvManager.unbind();
+        fingerprinting.stop();
         super.onStop();
     }
 
@@ -153,5 +106,17 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 42:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission granted
+                } else {
+                    // do stuff without the permission
+                }
+                break;
+        }
     }
 }

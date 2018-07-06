@@ -21,4 +21,8 @@ public abstract class Manager implements ScanResults {
     @Override public void unregisterObserver(Observer observer) {
         mObservers.remove(observer);
     }
+
+    public abstract boolean isDeviceEnabled();
+
+    public abstract void enableDevice();
 }
