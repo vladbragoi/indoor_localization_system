@@ -1,14 +1,6 @@
 package it.univr.vlad.fingerprinting;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,12 +15,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.ble.BleManager;
-import it.univr.vlad.fingerprinting.ble.BleNode;
+import it.univr.vlad.fingerprinting.mv.Direction;
+import it.univr.vlad.fingerprinting.mv.MvManager;
+import it.univr.vlad.fingerprinting.wifi.WifiManager;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
+    private MvManager mvManager;
+    private WifiManager wifiManager;
+    private BleManager bleManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,28 +43,59 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //requesting ble permissions
-        requestPermissions();
+        Direction.create(getApplicationContext());
+        mvManager = new MvManager();
+        wifiManager = new WifiManager(this);
+        bleManager = new BleManager(this);
 
-        BleManager mBleManager = new BleManager(this);
-        mBleManager.registerObserver(new Observer(){
-
+        mvManager.registerObserver(new Observer() {
             @Override
-            public void update(List<Node> results) {
-                for (Node n: results) {
-                    if(n instanceof BleNode)
-                        Log.d("LISTA",  n.id +" value: "+ n.value);
-                }
-
-            }
+            public void update(int type, List<Node> results) {}
 
             @Override
             public void update(float[] mv) {
-
+                // System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
             }
         });
-        mBleManager.bind();
 
+        wifiManager.registerObserver(new Observer() {
+            @Override
+            public void update(int type, List<Node> results) {
+                if (type == 0) {
+                    System.out.println("Wifi nodes: " + results);
+                }
+            }
+
+            @Override
+            public void update(float[] mv) {}
+
+        });
+
+        bleManager.registerObserver(new Observer() {
+            @Override
+            public void update(int type, List<Node> results) {
+                if (type == 1) {
+                    System.out.println("Beacons: " + results);
+                }
+            }
+
+            @Override
+            public void update(float[] mv) {}
+        });
+    }
+
+    @Override protected void onStart() {
+        super.onStart();
+        mvManager.bind();
+        wifiManager.bind();
+        bleManager.bind();
+    }
+
+    @Override protected void onStop() {
+        bleManager.unbind();
+        wifiManager.unbind();
+        mvManager.unbind();
+        super.onStop();
     }
 
     @Override
@@ -127,25 +154,4 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-    private void requestPermissions(){
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        PERMISSION_REQUEST_COARSE_LOCATION);
-            }
-        } else {
-            // Permission has already been granted
-        }
-    }
-
 }

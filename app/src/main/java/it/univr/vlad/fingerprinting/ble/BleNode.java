@@ -11,8 +11,7 @@ public class BleNode extends Node {
     private String minor;
 
     public BleNode(String id, int value, String uid, String major, String minor){
-        this.id = id;
-        this.value = value;
+        super(id, value);
         this.uid = uid;
         this.major = major;
         this.minor = minor;

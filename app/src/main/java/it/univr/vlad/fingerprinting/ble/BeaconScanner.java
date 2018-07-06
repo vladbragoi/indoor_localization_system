@@ -17,26 +17,25 @@ import java.util.List;
 import java.util.Collection;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.wifi.WifiScanner;
 
 public class BeaconScanner implements BeaconConsumer {
 
-    protected BeaconManager mBeaconManager;
+    private BeaconListener mListener;
+    private Context mContext;
 
-    public List<Node> getUpdatingList() {
-        return updatingList;
-    }
+    private BeaconManager mBeaconManager;
+    private List<Node> updatingList;
 
-    private List<Node> updatingList = new ArrayList<>();
-    BleManager mBleManager;
+    public BeaconScanner(Context appContext){
+        updatingList = new ArrayList<>();
+        mContext = appContext;
 
-    public BeaconScanner(BleManager manager, Context appContext){
         mBeaconManager= BeaconManager.getInstanceForApplication(appContext);
-        mBleManager = manager;
 
         //protocollo iBeacon
         mBeaconManager.getBeaconParsers().add(new BeaconParser("iBeacon").
                 setBeaconLayout("m:0-3=4c000215,i:4-19,i:20-21,i:22-23,p:24-24"));
-
         //protocollo Eddystone
         mBeaconManager.getBeaconParsers().add(new BeaconParser("Eddystone").
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
@@ -44,37 +43,36 @@ public class BeaconScanner implements BeaconConsumer {
 
     @Override
     public void onBeaconServiceConnect() {
-        mBeaconManager.addRangeNotifier(new RangeNotifier() {
-            @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, org.altbeacon.beacon.Region region) {
+        mBeaconManager.addRangeNotifier((beacons, region) -> {
+            if (beacons.size() <= 0) return;
 
-                if (beacons.size() > 0) {
+            for (Beacon b: beacons) {
+                if (b.getParserIdentifier().equals("iBeacon"))
+                    updatingList.add(new BleNode(b.getBluetoothAddress(),
+                            b.getRssi(),
+                            b.getId1().toString(),
+                            b.getId2().toString(),
+                            b.getId3().toString()));
 
-                    for (Beacon b : beacons) {
-                        if(b.getParserIdentifier().equals("iBeacon"))
-                            updatingList.add(new BleNode(b.getBluetoothAddress(), b.getRssi(), b.getId1().toString(),
-                                    b.getId2().toString(), b.getId3().toString()));
+                else if (b.getParserIdentifier().equals("Eddystone"))
+                    updatingList.add(new BleNode(b.getBluetoothAddress(),
+                            b.getRssi(),
+                            b.getId1().toString(),
+                            null,
+                            null));
 
-                        else if(b.getParserIdentifier().equals("Eddystone"))
-                            updatingList.add(new BleNode(b.getBluetoothAddress(), b.getRssi(), b.getId1().toString(),
-                                   null, null));
-
-                        mBleManager.notifyObservers();
-                    }
-                }
+                mListener.onResultsChanged(updatingList);
             }
         });
     }
 
-
     @Override
     public Context getApplicationContext() {
-        return null;
+        return mContext;
     }
 
     @Override
     public void unbindService(ServiceConnection serviceConnection) {
-
     }
 
     @Override
@@ -86,18 +84,34 @@ public class BeaconScanner implements BeaconConsumer {
     protected void bind() {
         try {
             mBeaconManager.bind(this);
-            mBeaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+            mBeaconManager.startRangingBeaconsInRegion(
+                    new Region("myRangingUniqueId",
+                            null,
+                            null,
+                            null));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
 
-    protected void unBind() {
+    protected void unbind() {
         try {
             mBeaconManager.unbind(this);
-            mBeaconManager.stopRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+            mBeaconManager.stopRangingBeaconsInRegion(
+                    new Region("myRangingUniqueId",
+                            null,
+                            null,
+                            null));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setBeaconListerner(BeaconListener listerner) {
+        mListener = listerner;
+    }
+
+    public interface BeaconListener {
+        void onResultsChanged(List<Node> mResults);
     }
 }

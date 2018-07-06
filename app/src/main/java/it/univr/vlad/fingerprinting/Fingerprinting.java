@@ -1,20 +1,22 @@
 package it.univr.vlad.fingerprinting;
 
-import android.util.Log;
-
 import java.util.List;
 
-public class Fingerprinting {
+import it.univr.vlad.fingerprinting.mv.MvManager;
+import it.univr.vlad.fingerprinting.wifi.WifiManager;
 
-    Observer observer = new Observer() {
-        @Override
-        public void update(float[] mv) {
+public class Fingerprinting implements Observer {
 
-        }
+    private WifiManager wifiManager;
+    private MvManager mvManager;
 
-        @Override
-        public void update(List results) {
-            Log.d("LISTA", results.toString());
-        }
-    };
+    @Override
+    public void update(int type, List<Node> results) {
+
+    }
+
+    @Override
+    public void update(float[] mv) {
+
+    }
 }

@@ -2,36 +2,39 @@ package it.univr.vlad.fingerprinting.ble;
 
 import android.content.Context;
 
+import java.util.List;
+
 import it.univr.vlad.fingerprinting.Manager;
+import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.Observer;
 
 public class BleManager extends Manager {
 
     private BeaconScanner mBeaconScanner;
 
-    public BleManager(Context appContext){
-        mBeaconScanner = new BeaconScanner(this, appContext);
-
-    }
-
-    @Override
-    public void notifyObservers() {
-        for (Observer o: mObservers) {
-            o.update(mBeaconScanner.getUpdatingList());
-        }
+    public BleManager(Context context){
+        mBeaconScanner = new BeaconScanner(context);
+        mBeaconScanner.setBeaconListerner(this::notifyObservers);
     }
 
     @Override
     public void bind() {
-
         mBeaconScanner.bind();
-
     }
 
     @Override
-    protected void unBind() {
-        mBeaconScanner.unBind();
+    public void unbind() {
+        mBeaconScanner.unbind();
     }
 
+    @Override
+    public void notifyObservers(List<Node> results) {
+        for (Observer observer : super.mObservers) {
+            observer.update(1, results);
+        }
+    }
 
+    @Override
+    public void notifyObservers() {
+    }
 }
