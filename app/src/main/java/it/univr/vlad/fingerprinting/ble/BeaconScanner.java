@@ -1,17 +1,9 @@
 package it.univr.vlad.fingerprinting.ble;
 
-import android.Manifest;
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.os.RemoteException;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -23,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.R;
 
-
-public class BeaconScanner extends AppCompatActivity implements BeaconConsumer {
+public class BeaconScanner implements BeaconConsumer {
 
     private BeaconListener mListener;
     private Context mContext;
@@ -33,12 +25,7 @@ public class BeaconScanner extends AppCompatActivity implements BeaconConsumer {
     private BeaconManager mBeaconManager;
     private List<Node> updatingList;
 
-    private static final int REQUEST_ENABLE_BT = 1;
-    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-
-
     public BeaconScanner(Context context){
-
         updatingList = new ArrayList<>();
         mContext = context;
 
@@ -52,11 +39,10 @@ public class BeaconScanner extends AppCompatActivity implements BeaconConsumer {
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
     }
 
-
     /**
-     * when a list of beacons is received, it adds all beacons to updatingList, depending if the beacon is
-     * iBeacon or Eddystone, major and minor fields are filled or null. In the end, mListener will notify
-     * changes.
+     * When a list of beacons is received, it parses each beacon and create a new BleNode
+     * with the needed parameters and finally adds it to updatingList. Then it notify the BleManager
+     * listener
      */
     @Override
     public void onBeaconServiceConnect() {
@@ -83,53 +69,23 @@ public class BeaconScanner extends AppCompatActivity implements BeaconConsumer {
         });
     }
 
-    @Override
     public Context getApplicationContext() {
         return mContext;
     }
 
     @Override
-    public void unbindService(ServiceConnection serviceConnection) {
-    }
+    public void unbindService(ServiceConnection serviceConnection) {}
 
     @Override
     public boolean bindService(Intent intent, ServiceConnection serviceConnection, int i) {
         return false;
     }
 
-    private void checkPermissions(){
-        //coarse location
-        if (ContextCompat.checkSelfPermission(mContext,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity)mContext,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions((Activity)mContext,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        PERMISSION_REQUEST_COARSE_LOCATION);
-            }
-        }
-
-        //bluetooth
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(mBluetoothAdapter==null) {
-            Toast.makeText(getApplicationContext(), "Device doesn't support Bluetooth", Toast.LENGTH_LONG).show();
-            finish();
-        }
-        //handled by onActivityResult() of mContext (MainActivity.java)
-        else if(!mBluetoothAdapter.isEnabled()){
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            ((Activity)mContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-    }
-
+    /**
+     * @brief bind the BleManager with the scanner and start ranging beacons in region
+     */
     protected void bind() {
         try {
-            checkPermissions();
             mBeaconManager.bind(this);
             mBeaconManager.startRangingBeaconsInRegion(
                     new Region("myRangingUniqueId",
@@ -140,7 +96,9 @@ public class BeaconScanner extends AppCompatActivity implements BeaconConsumer {
             e.printStackTrace();
         }
     }
-
+    /**
+     * @brief unbind the BleManager with the scanner and stop ranging beacons in region
+     */
     protected void unbind() {
         try {
             mBeaconManager.unbind(this);
