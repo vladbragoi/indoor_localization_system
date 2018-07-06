@@ -1,5 +1,6 @@
 package it.univr.vlad.fingerprinting;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +23,8 @@ import it.univr.vlad.fingerprinting.wifi.WifiManager;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final int REQUEST_ENABLE_BT = 1;
 
     private MvManager mvManager;
     private WifiManager wifiManager;
@@ -153,5 +157,21 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUEST_ENABLE_BT){
+            if (resultCode == RESULT_OK){
+                Toast.makeText(getApplicationContext(), "Bluetooth is now Enabled", Toast.LENGTH_LONG).show();
+            }
+            if(resultCode == RESULT_CANCELED){
+                Toast.makeText(getApplicationContext(), "Error occured while enabling.Leaving the application..", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+
     }
 }
