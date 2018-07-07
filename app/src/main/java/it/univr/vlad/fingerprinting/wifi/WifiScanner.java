@@ -13,6 +13,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class WifiScanner extends BroadcastReceiver {
 
     private boolean isScanning = false;
 
-    public WifiScanner(Context context) {
+    public WifiScanner(@NotNull Context context) {
         mContext = context;
         mWifiManager = (WifiManager) context
                 .getApplicationContext()
@@ -45,7 +47,7 @@ public class WifiScanner extends BroadcastReceiver {
         }
     }
 
-    private boolean permissionsGranted(Activity activity, String[] permissions) {
+    private boolean permissionsGranted(@NotNull Activity activity, String[] permissions) {
         for (String s: permissions) {
             if (ContextCompat.checkSelfPermission(activity, s) != PackageManager.PERMISSION_GRANTED)
                 return false;
@@ -63,7 +65,7 @@ public class WifiScanner extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(@NotNull Context context, Intent intent) {
         if (!isScanning) return;
 
         mResults.clear();
