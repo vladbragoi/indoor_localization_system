@@ -1,10 +1,10 @@
 package it.univr.vlad.fingerprinting.ble;
 
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import java.util.List;
