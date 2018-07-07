@@ -42,12 +42,6 @@ public class Fingerprinting implements Observer {
         checkForPermissions();
     }
 
-    /**
-     * @brief registers all observers and bind managers
-     * At first the method checks if location is enabled (needed both for wifi and beacons)
-     * calling enableLocation() method if not. Then calls all registerObserver() and bind() methods
-     * of the managers.
-     */
     public void start() {
         if (!isLocationEnabled()) enableLocation();
 
@@ -60,11 +54,6 @@ public class Fingerprinting implements Observer {
         bleManager.bind();
     }
 
-    /**
-     * @brief unbinds all managers and unregisters observers
-     * The method calls the methods unbind() and unregisterObservers() of all managers due to stop the
-     * execution of scans.
-     */
     public void stop() {
         bleManager.unbind();
         wifiManager.unbind();
@@ -75,11 +64,6 @@ public class Fingerprinting implements Observer {
         mvManager.unregisterObserver(this);
     }
 
-    /**
-     * @brief prints wifi and beacons nodes received
-     * @param type 0 for WifiManager, 1 for BleManager
-     * @param results list of beacons or wifi nodes
-     */
     @Override public void update(int type, List<Node> results) {
         if (type == 0) {
             System.out.println("Wifi nodes: " + results);
@@ -103,9 +87,6 @@ public class Fingerprinting implements Observer {
         return gps_enabled || network_enabled;
     }
 
-    /**
-     * @brief asks for the localization to be enabled
-     */
     private void enableLocation() {
         final AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
         dialog.setTitle(mContext.getString(R.string.location_title));
@@ -116,10 +97,6 @@ public class Fingerprinting implements Observer {
         dialog.show();
     }
 
-    /**
-     * @brief asks for permission if not granted
-     * For each permission, if not granted, asks it to be given
-     */
     private void checkForPermissions() {
         String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_WIFI_STATE,
@@ -137,12 +114,6 @@ public class Fingerprinting implements Observer {
         }
     }
 
-    /**
-     * @brief return whether permissions are granted or not
-     * @param activity the application activity
-     * @param permissions the list of permissions needed
-     * @return true if all permissions are granted, false otherwise
-     */
     private boolean permissionsGranted(@NotNull Activity activity, String[] permissions) {
         for (String s: permissions) {
             if (ContextCompat.checkSelfPermission(activity, s) != PackageManager.PERMISSION_GRANTED)

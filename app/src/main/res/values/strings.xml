@@ -6,4 +6,17 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="location_title">Attivare la localizzazione</string>
+    <string name="location_message">Ho bisogno di attivare la Localizzazione del dispositivo.</string>
+    <string name="no_bluetooth_support">Il device non supporta il Bluetooth</string>
+    <string name="wifi_title">Attivare il wifi</string>
+    <string name="wifi_message">Ho bisogno di attivare il wifi.</string>
+    <string name="wifi_enabled">Wifi attivato</string>
+    <string name="bluetooth_enabled">Bluetooth attivato</string>
+    <string name="bluetooth_title">Attivare il Bluetooth</string>
+    <string name="bluetooth_message">Ho bisogno di attivare il Bluetooth.</string>
+    <string name="location_permissions_title">Ho bisogno dei permessi di localizzazione</string>
+    <string name="location_permissions_message">
+        Quest\'app richiede i permessi di localizzazione per poter effettuare scansioni sui segnali
+        rilevati dai beacon (ble) e dagli access point (wifi).</string>
 </resources>

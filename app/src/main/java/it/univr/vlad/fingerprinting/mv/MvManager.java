@@ -28,6 +28,14 @@ public class MvManager extends Manager {
     }
 
     @Override
+    public boolean isDeviceEnabled() {
+        return true;
+    }
+
+    @Override
+    public void enableDevice() {}
+
+    @Override
     public void notifyObservers(List<Node> results) {}
 
     @Override

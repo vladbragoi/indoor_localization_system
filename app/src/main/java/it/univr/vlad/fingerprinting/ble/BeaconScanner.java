@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.R;
 
 public class BeaconScanner implements BeaconConsumer {
 
@@ -38,11 +39,6 @@ public class BeaconScanner implements BeaconConsumer {
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
     }
 
-    /**
-     * When a list of beacons is received, it parses each beacon and create a new BleNode
-     * with the needed parameters and finally adds it to updatingList. Then it notify the BleManager
-     * listener
-     */
     @Override
     public void onBeaconServiceConnect() {
         mBeaconManager.addRangeNotifier((beacons, region) -> {
@@ -68,6 +64,7 @@ public class BeaconScanner implements BeaconConsumer {
         });
     }
 
+    @Override
     public Context getApplicationContext() {
         return mContext;
     }
@@ -80,9 +77,6 @@ public class BeaconScanner implements BeaconConsumer {
         return false;
     }
 
-    /**
-     * @brief bind the BleManager with the scanner and start ranging beacons in region
-     */
     protected void bind() {
         try {
             mBeaconManager.bind(this);
@@ -95,9 +89,7 @@ public class BeaconScanner implements BeaconConsumer {
             e.printStackTrace();
         }
     }
-    /**
-     * @brief unbind the BleManager with the scanner and stop ranging beacons in region
-     */
+
     protected void unbind() {
         try {
             mBeaconManager.unbind(this);

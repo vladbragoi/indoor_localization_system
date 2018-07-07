@@ -1,16 +1,13 @@
 package it.univr.vlad.fingerprinting.wifi;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.R;
 
 public class WifiScanner extends BroadcastReceiver {
 
@@ -36,23 +34,6 @@ public class WifiScanner extends BroadcastReceiver {
                 .getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
         mResults = new ArrayList<>();
-
-        int permissions_code = 0;
-        String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.CHANGE_WIFI_STATE};
-
-        if(!permissionsGranted((Activity) context, permissions)){
-            ActivityCompat.requestPermissions((Activity) context, permissions, permissions_code);
-        }
-    }
-
-    private boolean permissionsGranted(@NotNull Activity activity, String[] permissions) {
-        for (String s: permissions) {
-            if (ContextCompat.checkSelfPermission(activity, s) != PackageManager.PERMISSION_GRANTED)
-                return false;
-        }
-        return true;
     }
 
     public void register() {
@@ -80,16 +61,33 @@ public class WifiScanner extends BroadcastReceiver {
     }
 
     public void start() {
-        if (!mWifiManager.isWifiEnabled()){
-            mWifiManager.setWifiEnabled(true);
-            Toast.makeText(mContext, "Wifi enabled", Toast.LENGTH_SHORT).show();
-        }
         mWifiManager.startScan();
         isScanning = true;
     }
 
     public void stop() {
         isScanning = false;
+    }
+
+    public boolean isWifiEnabled() {
+        return mWifiManager.isWifiEnabled();
+    }
+
+    public void enableWifi() {
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+        dialog.setTitle(mContext.getString(R.string.wifi_title));
+        dialog.setMessage(mContext.getString(R.string.wifi_message));
+        dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
+            mWifiManager.setWifiEnabled(true);
+            Toast.makeText(mContext,
+                    mContext.getString(R.string.wifi_enabled),
+                    Toast.LENGTH_SHORT).show();
+        });
+        dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> dialog2.dismiss());
+        dialog.setOnCancelListener(diag -> mContext
+                .startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS))
+        );
+        dialog.show();
     }
 
     public void setWifiListerner(WifiListener wifiListerner) {
