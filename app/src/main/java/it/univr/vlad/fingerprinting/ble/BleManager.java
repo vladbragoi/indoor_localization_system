@@ -27,6 +27,10 @@ public class BleManager extends Manager {
         mBeaconScanner.setBeaconListerner(this::notifyObservers);
     }
 
+    /**
+     * @brief binds the scanner if bluetooth is enabled
+     * If bluetooth is enabled calls bind() method of BeaconScanner's instance, otherwise calls enableDevice()
+     */
     @Override
     public void bind() {
         if (!isDeviceEnabled()) enableDevice();
@@ -38,6 +42,12 @@ public class BleManager extends Manager {
         mBeaconScanner.unbind();
     }
 
+    /**
+     * @brief for each registered observer notify the update
+     * Calls the update() method of each observer, passing 1 that identify the type beacon,
+     * and results
+     * @param results the list of beacons received by BeaconScanner
+     */
     @Override
     public void notifyObservers(List<Node> results) {
         for (Observer observer : super.mObservers) {
@@ -49,11 +59,18 @@ public class BleManager extends Manager {
     public void notifyObservers() {
     }
 
+    /**
+     * @brief return whether bluetooth is enabled or not
+     * @return true if enabled, false otheriwise
+     */
     @Override
     public boolean isDeviceEnabled() {
         return mBluetoothAdapter != null && mBluetoothAdapter.isEnabled();
     }
 
+    /**
+     * @brief Show a dialog asking for bluetooth to be enabled
+     */
     @Override
     public void enableDevice() {
         /*
