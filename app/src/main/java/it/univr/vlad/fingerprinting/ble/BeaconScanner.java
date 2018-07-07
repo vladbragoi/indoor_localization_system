@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
-import it.univr.vlad.fingerprinting.R;
 
 public class BeaconScanner implements BeaconConsumer {
 
