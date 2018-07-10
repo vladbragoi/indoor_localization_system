@@ -39,33 +39,43 @@ public class BeaconScanner implements BeaconConsumer {
     }
 
     /**
-     * When a list of beacons is received, it parses each beacon and create a new BleNode
+     * set a range notifier: When a list of beacons is received, it parses each beacon and create a new BleNode
      * with the needed parameters and finally adds it to updatingList. Then it notify the BleManager
      * listener
+     * Then onBeaconServiceConnect starts ranging beacons in region
      */
     @Override
     public void onBeaconServiceConnect() {
         mBeaconManager.addRangeNotifier((beacons, region) -> {
             if (beacons.size() <= 0) return;
 
+            updatingList.clear();
             for (Beacon b: beacons) {
                 if (b.getParserIdentifier().equals("iBeacon"))
-                    updatingList.add(new BleNode(b.getBluetoothAddress(),
+                    updatingList.add(new IBeaconNode(b.getBluetoothAddress(),
                             b.getRssi(),
                             b.getId1().toString(),
                             b.getId2().toString(),
                             b.getId3().toString()));
 
                 else if (b.getParserIdentifier().equals("Eddystone"))
-                    updatingList.add(new BleNode(b.getBluetoothAddress(),
+                    updatingList.add(new EddystoneNode(b.getBluetoothAddress(),
                             b.getRssi(),
-                            b.getId1().toString(),
-                            null,
-                            null));
+                            b.getId1().toString()));
 
                 mListener.onResultsChanged(updatingList);
             }
         });
+
+        try {
+            mBeaconManager.startRangingBeaconsInRegion(
+                    new Region("myRangingUniqueId",
+                            null,
+                            null,
+                            null));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -82,23 +92,14 @@ public class BeaconScanner implements BeaconConsumer {
     }
 
     /**
-     * @brief bind the BleManager with the scanner and start ranging beacons in region
+     * bind the BleManager with the scanner
      */
     protected void bind() {
-        try {
-            mBeaconManager.bind(this);
-            mBeaconManager.startRangingBeaconsInRegion(
-                    new Region("myRangingUniqueId",
-                            null,
-                            null,
-                            null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        mBeaconManager.bind(this);
     }
 
     /**
-     * @brief unbind the BleManager with the scanner and stop ranging beacons in region
+     * unbind the BleManager with the scanner and stop ranging beacons in region
      */
     protected void unbind() {
         try {

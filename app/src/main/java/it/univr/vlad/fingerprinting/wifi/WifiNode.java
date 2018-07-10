@@ -11,8 +11,7 @@ public class WifiNode extends Node {
         this.ssid = ssid;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return super.toString() + " ssid: " + ssid;
     }
 }

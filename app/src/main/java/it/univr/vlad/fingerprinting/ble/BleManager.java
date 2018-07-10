@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.widget.Toast;
 
@@ -28,7 +29,7 @@ public class BleManager extends Manager {
     }
 
     /**
-     * @brief binds the scanner if bluetooth is enabled
+     * binds the scanner if bluetooth is enabled
      * If bluetooth is enabled calls bind() method of BeaconScanner's instance, otherwise calls enableDevice()
      */
     @Override
@@ -43,7 +44,7 @@ public class BleManager extends Manager {
     }
 
     /**
-     * @brief for each registered observer notify the update
+     * for each registered observer notify the update
      * Calls the update() method of each observer, passing 1 that identify the type beacon,
      * and results
      * @param results the list of beacons received by BeaconScanner
@@ -60,7 +61,7 @@ public class BleManager extends Manager {
     }
 
     /**
-     * @brief return whether bluetooth is enabled or not
+     * return whether bluetooth is enabled or not
      * @return true if enabled, false otheriwise
      */
     @Override
@@ -69,27 +70,34 @@ public class BleManager extends Manager {
     }
 
     /**
-     * @brief Show a dialog asking for bluetooth to be enabled
+     * Show a dialog asking for bluetooth to be enabled
      */
     @Override
     public void enableDevice() {
-        /*
-        * Should use this method, but just to uniform the requests
-        * mContext.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
-        */
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-        dialog.setTitle(mContext.getString(R.string.bluetooth_title));
-        dialog.setMessage(mContext.getString(R.string.bluetooth_message));
-        dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
-            mBluetoothAdapter.enable();
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(mContext,
-                    mContext.getString(R.string.bluetooth_enabled),
+                    R.string.ble_not_supported,
                     Toast.LENGTH_SHORT).show();
-        });
-        dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> dialog2.dismiss());
-        dialog.setOnCancelListener(diag -> mContext
-                .startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
-        );
-        dialog.show();
+        }
+        else {
+            /*
+             * Should use this method, but just to uniform the requests
+             * mContext.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+             */
+            final AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+            dialog.setTitle(mContext.getString(R.string.bluetooth_title));
+            dialog.setMessage(mContext.getString(R.string.bluetooth_message));
+            dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
+                mBluetoothAdapter.enable();
+                Toast.makeText(mContext,
+                        mContext.getString(R.string.bluetooth_enabled),
+                        Toast.LENGTH_SHORT).show();
+            });
+            dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> dialog2.dismiss());
+            dialog.setOnCancelListener(diag -> mContext
+                    .startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+            );
+            dialog.show();
+        }
     }
 }

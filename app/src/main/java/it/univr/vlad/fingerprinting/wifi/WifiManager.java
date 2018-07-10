@@ -17,36 +17,30 @@ public class WifiManager extends Manager {
         mWifiScanner.setWifiListerner(this::notifyObservers);
     }
 
-    @Override
-    public void bind() {
+    @Override public void bind() {
         if (!isDeviceEnabled()) enableDevice();
         mWifiScanner.register();
         mWifiScanner.start();
     }
 
-    @Override
-    public void unbind() {
+    @Override public void unbind() {
         mWifiScanner.stop();
         mWifiScanner.unregister();
     }
 
-    @Override
-    public void notifyObservers(List<Node> results) {
+    @Override public void notifyObservers(List<Node> results) {
         for (Observer observer : super.mObservers) {
             observer.update(0, results);
         }
     }
 
-    @Override
-    public void notifyObservers() {}
+    @Override public void notifyObservers() {}
 
-    @Override
-    public boolean isDeviceEnabled() {
+    @Override public boolean isDeviceEnabled() {
         return mWifiScanner.isWifiEnabled();
     }
 
-    @Override
-    public void enableDevice() {
+    @Override public void enableDevice() {
         mWifiScanner.enableWifi();
     }
 }

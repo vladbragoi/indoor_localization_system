@@ -1,5 +1,6 @@
 package it.univr.vlad.fingerprinting;
 
+import android.app.Fragment;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 
 import org.jetbrains.annotations.NotNull;
 
+import it.univr.vlad.fingerprinting.fragments.FingerprintingFragment;
 import it.univr.vlad.fingerprinting.mv.Direction;
 
 public class MainActivity extends AppCompatActivity
@@ -30,7 +32,11 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this,
+                drawer,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -38,23 +44,23 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Direction.create(getApplicationContext());
-        fingerprinting = new Fingerprinting(this);
     }
 
     @Override protected void onStart() {
         super.onStart();
-        fingerprinting.start();
     }
 
     @Override protected void onStop() {
-        fingerprinting.stop();
         super.onStop();
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        FingerprintingFragment f = (FingerprintingFragment)
+                getSupportFragmentManager().findFragmentById(R.id.fingerprinting_fragment);
+        if (f.closeDial()) {}
+        else if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();

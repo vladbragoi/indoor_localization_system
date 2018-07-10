@@ -45,8 +45,7 @@ public class WifiScanner extends BroadcastReceiver {
         mContext.unregisterReceiver(this);
     }
 
-    @Override
-    public void onReceive(@NotNull Context context, Intent intent) {
+    @Override public void onReceive(@NotNull Context context, Intent intent) {
         if (!isScanning) return;
 
         mResults.clear();
