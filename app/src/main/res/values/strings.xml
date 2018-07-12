@@ -31,4 +31,10 @@
     <string name="dial_restart">Restart</string>
     <string name="dial_stop">Stop</string>
     <string name="dial_save">Salva</string>
+    <string name="type">Type</string>
+    <string name="ble">BLE</string>
+    <string name="bssid">BSSID</string>
+    <string name="bssid_example">00:00:00:00:00:00</string>
+    <string name="value">Value</string>
+    <string name="value_example">-89</string>
 </resources>

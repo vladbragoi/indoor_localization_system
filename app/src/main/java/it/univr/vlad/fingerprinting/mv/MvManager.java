@@ -1,5 +1,7 @@
 package it.univr.vlad.fingerprinting.mv;
 
+import android.content.Context;
+
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Manager;
@@ -11,8 +13,8 @@ public class MvManager extends Manager {
     private Direction direction;
     private float[] mGeomagnetic;
 
-    public MvManager() {
-        direction = Direction.getInstance();
+    public MvManager(Context context) {
+        direction = Direction.getInstance(context);
     }
 
     @Override public void bind() {
@@ -41,6 +43,6 @@ public class MvManager extends Manager {
     @Override
     public void notifyObservers() {
         for (Observer o: super.mObservers)
-            o.update(mGeomagnetic);
+            o.update(new MagneticVector(mGeomagnetic));
     }
 }

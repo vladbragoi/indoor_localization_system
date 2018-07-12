@@ -7,7 +7,7 @@ public class WifiNode extends Node {
     private String ssid;    /// Access Point name
 
     public WifiNode(String id, String ssid, int value) {
-        super(id, value);
+        super(id, value, "WIFI");
         this.ssid = ssid;
     }
 

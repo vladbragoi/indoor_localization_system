@@ -18,7 +18,7 @@ public class WifiManager extends Manager {
     }
 
     @Override public void bind() {
-        if (!isDeviceEnabled()) enableDevice();
+        // if (!isDeviceEnabled()) enableDevice();
         mWifiScanner.register();
         mWifiScanner.start();
     }

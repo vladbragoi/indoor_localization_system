@@ -19,12 +19,8 @@ public class Direction implements SensorEventListener {
     private float[] mGravity;
     private float[] mGeomagnetic;
 
-    public static void create(Context context) {
-        if (direction == null)
-            direction = new Direction(context);
-    }
-
-    public static Direction getInstance() {
+    public static Direction getInstance(Context context) {
+        if (direction == null) direction = new Direction(context);
         return direction;
     }
 

@@ -7,7 +7,7 @@ public abstract class BleNode extends Node {
     private String uid;
 
     public BleNode(String id, int value, String uid){
-        super(id, value);
+        super(id, value, "BLE");
         this.uid = uid;
     }
 

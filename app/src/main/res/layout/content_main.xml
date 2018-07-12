@@ -9,7 +9,7 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <fragment android:name="it.univr.vlad.fingerprinting.fragments.FingerprintingFragment"
+    <fragment android:name="it.univr.vlad.fingerprinting.view.FingerprintingFragment"
         android:id="@+id/fingerprinting_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

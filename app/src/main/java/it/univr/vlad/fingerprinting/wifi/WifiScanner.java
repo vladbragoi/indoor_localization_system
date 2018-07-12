@@ -4,21 +4,37 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.R;
 
 public class WifiScanner extends BroadcastReceiver {
+
+    private static Set<String> addresses;
 
     private WifiListener mListener;
 
@@ -34,6 +50,8 @@ public class WifiScanner extends BroadcastReceiver {
                 .getApplicationContext()
                 .getSystemService(Context.WIFI_SERVICE);
         mResults = new ArrayList<>();
+
+        if (addresses == null) new LoadDataAsyncTask(context).execute();
     }
 
     public void register() {
@@ -51,8 +69,12 @@ public class WifiScanner extends BroadcastReceiver {
         mResults.clear();
 
         for (ScanResult result : mWifiManager.getScanResults()) {
-            mResults.add(new WifiNode(result.BSSID, result.SSID, result.level));
+            //if (addresses.contains(result.BSSID)) {
+                mResults.add(new WifiNode(result.BSSID, result.SSID, result.level));
+            //}
         }
+
+        Collections.sort(mResults, (o1, o2) -> o1.getId().compareTo(o2.getId()));
 
         if (mResults != null && !mResults.isEmpty()) mListener.onResultsChanged(mResults);
 
@@ -73,20 +95,7 @@ public class WifiScanner extends BroadcastReceiver {
     }
 
     public void enableWifi() {
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-        dialog.setTitle(mContext.getString(R.string.wifi_title));
-        dialog.setMessage(mContext.getString(R.string.wifi_message));
-        dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
-            mWifiManager.setWifiEnabled(true);
-            Toast.makeText(mContext,
-                    mContext.getString(R.string.wifi_enabled),
-                    Toast.LENGTH_SHORT).show();
-        });
-        dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> dialog2.dismiss());
-        dialog.setOnCancelListener(diag -> mContext
-                .startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS))
-        );
-        dialog.show();
+        mWifiManager.setWifiEnabled(true);
     }
 
     public void setWifiListerner(WifiListener wifiListerner) {
@@ -95,5 +104,55 @@ public class WifiScanner extends BroadcastReceiver {
 
     public interface WifiListener {
         void onResultsChanged(List<Node> mResults);
+    }
+
+    private static class LoadDataAsyncTask extends AsyncTask<Void,Void,Set<String>> {
+
+        private WeakReference<Context> context;
+
+        LoadDataAsyncTask(Context context){
+            this.context = new WeakReference<>(context);
+        }
+
+        @Override
+        protected Set<String> doInBackground(Void... voids) {
+            String rawJson;
+            try {
+                InputStream is = context.get().getAssets().open("access_points.json");
+
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+
+                rawJson = new String(buffer, "UTF-8");
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                return null;
+            }
+            return parseAddresses(rawJson);
+        }
+
+        @Override
+        protected void onPostExecute(Set<String> data) {
+            addresses = data;
+        }
+
+        private Set<String> parseAddresses(String rawJson) {
+            Set<String> addresses = new HashSet<>();
+            JsonElement jElement = new JsonParser().parse(rawJson).getAsJsonObject();
+
+            JsonObject jobject = jElement.getAsJsonObject();
+            jobject = jobject.getAsJsonObject("mac_addresses");
+
+            JsonArray jarray = jobject.getAsJsonArray("5GHz");
+            for (JsonElement je: jarray) addresses.add(je.getAsString());
+
+            jarray = jobject.getAsJsonArray("24GHz");
+            for (JsonElement je: jarray) addresses.add(je.getAsString());
+
+            return addresses;
+        }
     }
 }

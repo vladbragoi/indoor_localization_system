@@ -34,7 +34,7 @@ public class BleManager extends Manager {
      */
     @Override
     public void bind() {
-        if (!isDeviceEnabled()) enableDevice();
+        // if (!isDeviceEnabled()) enableDevice();
         mBeaconScanner.bind();
     }
 

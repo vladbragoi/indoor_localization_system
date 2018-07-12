@@ -16,9 +16,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.ble.BleManager;
+import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.mv.MvManager;
 import it.univr.vlad.fingerprinting.wifi.WifiManager;
 
+@Deprecated
 public class Fingerprinting implements Observer {
 
     private static final int PERMISSIONS_REQUEST = 42;
@@ -34,7 +36,7 @@ public class Fingerprinting implements Observer {
         mLocationManager = (LocationManager)mContext
                 .getSystemService(Context.LOCATION_SERVICE);
 
-        mvManager = new MvManager();
+        mvManager = new MvManager(context);
         wifiManager = new WifiManager(context);
         bleManager = new BleManager(context);
 
@@ -75,7 +77,7 @@ public class Fingerprinting implements Observer {
     }
 
     /**
-     * @brief prints wifi and beacons nodes received
+     * prints wifi and beacons nodes received
      * @param type 0 for WifiManager, 1 for BleManager
      * @param results list of beacons or wifi nodes
      */
@@ -88,7 +90,7 @@ public class Fingerprinting implements Observer {
         }
     }
 
-    @Override public void update(float[] mv) {
+    @Override public void update(MagneticVector mv) {
         // System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
     }
 

@@ -2,6 +2,8 @@ package it.univr.vlad.fingerprinting;
 
 import java.util.List;
 
+import it.univr.vlad.fingerprinting.mv.MagneticVector;
+
 public interface Observer {
     /**
      *
@@ -14,5 +16,5 @@ public interface Observer {
      *
      * @param mv magnetic vector
      */
-    void update(float[] mv);
+    void update(MagneticVector mv);
 }
