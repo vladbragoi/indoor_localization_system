@@ -1,16 +1,13 @@
 package it.univr.vlad.fingerprinting.viewmodel;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.Observer;
-import it.univr.vlad.fingerprinting.ble.BleManager;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
-import it.univr.vlad.fingerprinting.mv.MvManager;
 import it.univr.vlad.fingerprinting.wifi.WifiManager;
 
 public class WifiListLiveData extends LiveData<List<Node>> implements Observer{

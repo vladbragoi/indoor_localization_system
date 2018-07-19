@@ -45,7 +45,7 @@ public class NodesDiffCallback extends DiffUtil.Callback{
     @Nullable
     @Override
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
-        Node newNode = newNodes.get(newItemPosition);
+        /*Node newNode = newNodes.get(newItemPosition);
         Node oldNode = oldNodes.get(oldItemPosition);
 
         Bundle diff = new Bundle();
@@ -56,7 +56,7 @@ public class NodesDiffCallback extends DiffUtil.Callback{
         if (diff.size() == 0) {
             return null;
         }
-        return diff;
-        //return super.getChangePayload(oldItemPosition, newItemPosition);
+        return diff;*/
+        return super.getChangePayload(oldItemPosition, newItemPosition);
     }
 }

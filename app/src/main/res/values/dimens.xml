@@ -11,5 +11,6 @@
     <dimen name="header_height">150dp</dimen>
     <dimen name="card_view_height">100dp</dimen>
     <dimen name="font_small">12sp</dimen>
+    <dimen name="font_med">16sp</dimen>
     <dimen name="font_big">20sp</dimen>
 </resources>

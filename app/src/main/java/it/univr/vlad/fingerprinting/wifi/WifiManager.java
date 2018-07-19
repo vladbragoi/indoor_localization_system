@@ -18,7 +18,7 @@ public class WifiManager extends Manager {
     }
 
     @Override public void bind() {
-        // if (!isDeviceEnabled()) enableDevice();
+        //if (!isDeviceEnabled()) enableDevice();
         mWifiScanner.register();
         mWifiScanner.start();
     }
@@ -34,7 +34,7 @@ public class WifiManager extends Manager {
         }
     }
 
-    @Override public void notifyObservers() {}
+    @Override public void notifyObservers(float[] geomagneticField, float azimut) {}
 
     @Override public boolean isDeviceEnabled() {
         return mWifiScanner.isWifiEnabled();

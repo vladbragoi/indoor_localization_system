@@ -1,7 +1,6 @@
 package it.univr.vlad.fingerprinting.viewmodel;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import java.util.List;

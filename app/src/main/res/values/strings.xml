@@ -37,4 +37,10 @@
     <string name="bssid_example">00:00:00:00:00:00</string>
     <string name="value">Value</string>
     <string name="value_example">-89</string>
+    <string name="mv">MV</string>
+    <string name="x">x:</string>
+    <string name="uT">µT</string>
+    <string name="y">y:</string>
+    <string name="z">z:</string>
+    <string name="mag_value_example">-47.5</string>
 </resources>

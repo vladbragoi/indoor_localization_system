@@ -17,7 +17,7 @@ public class Direction implements SensorEventListener {
 
     private float azimut;
     private float[] mGravity;
-    private float[] mGeomagnetic;
+    private float[] mGeomagneticField;
 
     public static Direction getInstance(Context context) {
         if (direction == null) direction = new Direction(context);
@@ -50,18 +50,18 @@ public class Direction implements SensorEventListener {
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
             mGravity = sensorEvent.values;
         if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = sensorEvent.values;
-        if (mGravity != null && mGeomagnetic != null) {
+            mGeomagneticField = sensorEvent.values;
+        if (mGravity != null && mGeomagneticField != null) {
             float R[] = new float[9];
             float I[] = new float[9];
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagneticField);
             if (success) {
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
                 // orientation contains: azimut, pitch and roll
                 azimut = (float) Math.toDegrees(orientation[0]);
 
-                if (listener != null) listener.onDirectionUpdated(mGeomagnetic);
+                if (listener != null) listener.onDirectionUpdated(mGeomagneticField, azimut);
             }
         }
     }
@@ -93,6 +93,6 @@ public class Direction implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int i) {}
 
     public interface DirectionListener {
-        void onDirectionUpdated(float[] mGeomagnetic);
+        void onDirectionUpdated(float[] mGeomagneticField, float azimut);
     }
 }

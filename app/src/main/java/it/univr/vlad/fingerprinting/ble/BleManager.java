@@ -57,7 +57,7 @@ public class BleManager extends Manager {
     }
 
     @Override
-    public void notifyObservers() {
+    public void notifyObservers(float[] geomagneticField, float azimut) {
     }
 
     /**

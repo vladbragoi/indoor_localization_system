@@ -1,8 +1,6 @@
 package it.univr.vlad.fingerprinting.view;
 
-import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -26,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.leinardi.android.speeddial.SpeedDialActionItem;
@@ -33,47 +32,136 @@ import com.leinardi.android.speeddial.SpeedDialView;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.R;
+import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
 
 public class FingerprintingFragment extends Fragment {
 
-    // private OnFragmentInteractionListener mListener;
-    private SpeedDialView mSpeedDialView;
-
-    private String[] devices = new String[]{"wifi", "beacons"};
+    private final String[] devices = new String[]{"wifi", "beacons"};
     private boolean[] devicesChecked = new boolean[]{false, false};
+
+    private SpeedDialView mSpeedDialView;
+    private TextView mDirection;
 
     private RecyclerView mRecyclerView;
     private NodeListAdapter mAdapter;
-    private NodeViewModel viewModel;
-
-    public FingerprintingFragment() {
-    }
+    private NodeViewModel mViewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
-        mAdapter = new NodeListAdapter();
+        mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
+        mAdapter = new NodeListAdapter(getContext());
 
-        viewModel.getWifiList()
+        mViewModel.getWifiList()
                 .observe(this, wifiNodes -> mAdapter.setNodes(wifiNodes));
 
-        viewModel.getBeaconList()
-                .observe(this, beaconNodes -> mAdapter.setNodes(beaconNodes));
+        mViewModel.getMv().observe(this, magneticVector ->
+                mDirection.setText(magneticVector != null ? magneticVector.toString() : "NORTH"));
 
-        viewModel.getMv().observe(this, mv -> mAdapter.setMv(mv));
+        /*mViewModel.getBeaconList()
+                .observe(this, beaconNodes -> mAdapter.setNodes(beaconNodes));*/
+
+        mViewModel.getMv().observe(this, mv -> mAdapter.setMv(mv));
 
         Context context = getContext();
-        if (context != null) {
+        if (context != null && savedInstanceState == null) {
             turnWifiOn(context);
             turnBluetoothOn(context);
             turnLocationOn(context);
         }
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_fingerprinting, container, false);
+        mRecyclerView = rootView.findViewById(R.id.nodesRecyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setItemAnimator(null);
+        mRecyclerView.setAdapter(mAdapter);
+        return rootView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (getUserVisibleHint()) {
+            mSpeedDialView = view.findViewById(R.id.start_stop_button);
+            setupSpeedDial(savedInstanceState == null);
+            mDirection = view.findViewById(R.id.directionValue);
+        }
+        else {
+            Log.e(getClass().getName(),"User visibility = " + getUserVisibleHint());
+        }
+    }
+
+    private void setupSpeedDial(boolean addActionItems) {
+        if (addActionItems && getContext() != null) {
+            Drawable drawable = AppCompatResources
+                    .getDrawable(getContext(), R.drawable.ic_replay_white_24dp);
+            mSpeedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_replay, drawable)
+                            .setLabel(getString(R.string.dial_restart))
+                            .setTheme(R.style.AppTheme_Fab)
+                            .create());
+
+            drawable = AppCompatResources
+                    .getDrawable(getContext(), R.drawable.ic_stop_white_24dp);
+            mSpeedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_stop, drawable)
+                            .setLabel(getString(R.string.dial_stop))
+                            .setTheme(R.style.AppTheme_Fab)
+                            .create());
+
+            drawable = AppCompatResources
+                    .getDrawable(getContext(), R.drawable.ic_save_white_24dp);
+            mSpeedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_save, drawable)
+                            .setLabel(getString(R.string.dial_save))
+                            .setTheme(R.style.AppTheme_Fab)
+                            .create());
+        }
+
+        mSpeedDialView.setOnChangeListener(new SpeedDialView.OnChangeListener() {
+            @Override
+            public boolean onMainActionSelected() {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Dispositivi");
+                builder.setMultiChoiceItems(devices, devicesChecked, null);
+                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == DialogInterface.BUTTON_POSITIVE) {
+                            // START COUNTDOWN
+                        }
+                    }
+                });
+                builder.setNegativeButton(android.R.string.no, null);
+                builder.show();
+                return false; // True to keep the Speed Dial open
+            }
+
+            @Override
+            public void onToggleChanged(boolean isOpen) {}
+        });
+
+        mSpeedDialView.setOnActionSelectedListener(actionItem -> {
+            Toast.makeText(getContext(), "DialAction", Toast.LENGTH_SHORT).show();
+            return false; // True to keep the Speed Dial open
+        });
+
+    }
+
+    public boolean closeSpeedDial() {
+        //Closes menu if its opened.
+        if (mSpeedDialView.isOpen()) {
+            mSpeedDialView.close();
+            return true;
+        }
+        return false;
     }
 
     private void turnLocationOn(@NotNull Context context) {
@@ -153,132 +241,5 @@ public class FingerprintingFragment extends Fragment {
             );
             dialog.show();
         }
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_fingerprinting, container, false);
-        mRecyclerView = rootView.findViewById(R.id.nodesRecyclerView);
-        mRecyclerView.setItemAnimator(null);
-        mRecyclerView.setAdapter(mAdapter);
-        return rootView;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        if (getUserVisibleHint()) {
-            mSpeedDialView = view.findViewById(R.id.start_stop_button);
-            setupSpeedDial(savedInstanceState == null);
-        }
-        else {
-            Log.e(getClass().getName(),"User visibility = " + getUserVisibleHint());
-        }
-    }
-
-    private void setupSpeedDial(boolean addActionItems) {
-        if (addActionItems && getContext() != null) {
-            Drawable drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_replay_white_24dp);
-            mSpeedDialView.addActionItem(
-                    new SpeedDialActionItem.Builder(R.id.fab_replay, drawable)
-                            .setLabel(getString(R.string.dial_restart))
-                            .setTheme(R.style.AppTheme_Fab)
-                            .create());
-
-            drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_stop_white_24dp);
-            mSpeedDialView.addActionItem(
-                    new SpeedDialActionItem.Builder(R.id.fab_stop, drawable)
-                            .setLabel(getString(R.string.dial_stop))
-                            .setTheme(R.style.AppTheme_Fab)
-                            .create());
-
-            drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_save_white_24dp);
-            mSpeedDialView.addActionItem(
-                    new SpeedDialActionItem.Builder(R.id.fab_save, drawable)
-                            .setLabel(getString(R.string.dial_save))
-                            .setTheme(R.style.AppTheme_Fab)
-                            .create());
-        }
-
-        mSpeedDialView.setOnChangeListener(new SpeedDialView.OnChangeListener() {
-            @Override
-            public boolean onMainActionSelected() {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Dispositivi");
-                builder.setMultiChoiceItems(devices, devicesChecked, null);
-                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == DialogInterface.BUTTON_POSITIVE) {
-                            // START COUNTDOWN
-                        }
-                    }
-                });
-                builder.setNegativeButton(android.R.string.no, null);
-                builder.show();
-                return false; // True to keep the Speed Dial open
-            }
-
-            @Override
-            public void onToggleChanged(boolean isOpen) {}
-        });
-
-        mSpeedDialView.setOnActionSelectedListener(actionItem -> {
-            Toast.makeText(getContext(), "DialAction", Toast.LENGTH_SHORT).show();
-            return false; // True to keep the Speed Dial open
-        });
-
-    }
-
-    public boolean closeSpeedDial() {
-        //Closes menu if its opened.
-        if (mSpeedDialView.isOpen()) {
-            mSpeedDialView.close();
-            return true;
-        }
-        return false;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        /*if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }*/
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        /*if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }*/
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }
