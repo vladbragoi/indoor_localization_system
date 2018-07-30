@@ -39,8 +39,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mvCardBackground = ContextCompat.getColor(context, R.color.cardMvBackground);
     }
 
-    @NonNull
-    @Override
+    @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(viewType, parent, false);
@@ -100,10 +99,38 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 */
-    public void setNodes(List<Node> newNodes) {
+    public void setWifiNodes(List<Node> newNodes) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
                 new NodesDiffCallback(this.nodes, newNodes), true);
         this.nodes.clear();
+        this.nodes.addAll(newNodes);
+        diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
+            @Override
+            public void onInserted(int position, int count) {
+                notifyItemRangeInserted(position + 1, count);
+            }
+
+            @Override
+            public void onRemoved(int position, int count) {
+                notifyItemRangeRemoved(position + 1, count + 1);
+            }
+
+            @Override
+            public void onMoved(int fromPosition, int toPosition) {
+                notifyItemMoved(fromPosition + 1, toPosition + 1);
+            }
+
+            @Override
+            public void onChanged(int position, int count, Object payload) {
+                notifyItemRangeChanged(position + 1, count, payload);
+            }
+        });
+    }
+
+    public void setBeaconNodes(List<Node> newNodes) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
+                new NodesDiffCallback(this.nodes, newNodes), true);
+        /*this.nodes.clear();*/
         this.nodes.addAll(newNodes);
         diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
             @Override

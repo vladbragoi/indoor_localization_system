@@ -20,17 +20,16 @@
         Quest\'app richiede i permessi di localizzazione per poter effettuare scansioni sui segnali
         rilevati dai beacon (ble) e dagli access point (wifi).</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="ble_not_supported">Bluetooth low energy non è supportato dal tuo dispositivo.</string>
-    <string name="seconds">Secondi</string>
+    <string name="seconds">Seconds</string>
+    <string name="minutes">Minutes</string>
     <string name="start">Start</string>
     <string name="nullValue">0</string>
-    <string name="direction">Direzione</string>
+    <string name="direction">Direction</string>
     <string name="directionNullValue">NORTH</string>
     <string name="dial_restart">Restart</string>
     <string name="dial_stop">Stop</string>
-    <string name="dial_save">Salva</string>
+    <string name="dial_save">Save</string>
     <string name="type">Type</string>
     <string name="ble">BLE</string>
     <string name="bssid">BSSID</string>
@@ -43,4 +42,9 @@
     <string name="y">y:</string>
     <string name="z">z:</string>
     <string name="mag_value_example">-47.5</string>
+    <string name="seconds_value">00</string>
+    <string name="colon">:</string>
+    <string name="remaining">Remaining time</string>
+    <string name="wifi">wifi</string>
+    <string name="beacons">beacons</string>
 </resources>
