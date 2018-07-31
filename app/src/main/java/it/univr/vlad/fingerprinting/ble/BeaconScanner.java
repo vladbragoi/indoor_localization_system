@@ -66,16 +66,6 @@ public class BeaconScanner implements BeaconConsumer {
                 mListener.onResultsChanged(updatingList);
             }
         });
-
-        try {
-            mBeaconManager.startRangingBeaconsInRegion(
-                    new Region("myRangingUniqueId",
-                            null,
-                            null,
-                            null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -102,8 +92,33 @@ public class BeaconScanner implements BeaconConsumer {
      * unbind the BleManager with the scanner and stop ranging beacons in region
      */
     protected void unbind() {
-        try {
+        mBeaconManager.unbind(this);
+        /*try {
             mBeaconManager.unbind(this);
+            mBeaconManager.stopRangingBeaconsInRegion(
+                    new Region("myRangingUniqueId",
+                            null,
+                            null,
+                            null));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }*/
+    }
+
+    public void start() {
+        try {
+            mBeaconManager.startRangingBeaconsInRegion(
+                    new Region("myRangingUniqueId",
+                            null,
+                            null,
+                            null));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stop() {
+        try {
             mBeaconManager.stopRangingBeaconsInRegion(
                     new Region("myRangingUniqueId",
                             null,

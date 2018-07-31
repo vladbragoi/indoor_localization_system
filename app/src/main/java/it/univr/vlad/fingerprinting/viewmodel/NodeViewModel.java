@@ -30,6 +30,22 @@ public class NodeViewModel extends AndroidViewModel {
         mv = new MagneticVectorLiveData(application);
     }
 
+    public void startWifiScanning() {
+        wifiList.startScanning();
+    }
+
+    public void stopWifiScanning() {
+        wifiList.stopScanning();
+    }
+
+    public void startBeaconsScanning() {
+        beaconList.startScanning();
+    }
+
+    public void stopBeaconsScanning() {
+        beaconList.stopScanning();
+    }
+
     public LiveData<List<Node>> getWifiList() {
         return wifiList;
     }

@@ -20,16 +20,22 @@ class MagneticVectorLiveData extends LiveData<MagneticVector> implements Observe
         mMvManager.registerObserver(this);
     }
 
-    @Override
-    protected void onActive() {
+    @Override protected void onActive() {
         super.onActive();
         mMvManager.bind();
     }
 
-    @Override
-    protected void onInactive() {
+    @Override protected void onInactive() {
         mMvManager.unbind();
         super.onInactive();
+    }
+
+    @Override public void startScanning() {
+        // mMvManager.start();
+    }
+
+    @Override public void stopScanning() {
+        // mMvManager.stop();
     }
 
     @Override

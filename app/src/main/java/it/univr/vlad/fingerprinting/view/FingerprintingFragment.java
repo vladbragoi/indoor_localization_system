@@ -12,9 +12,12 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.content.res.AppCompatResources;
@@ -25,6 +28,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,24 +38,29 @@ import com.leinardi.android.speeddial.SpeedDialView;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
+import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.exceptions.DeviceUnknownException;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
+import it.univr.vlad.fingerprinting.wifi.WifiNode;
 
 public class FingerprintingFragment extends Fragment {
 
-    private final String[] devices = new String[]{"wifi", "beacons"};
-    private boolean[] devicesChecked = new boolean[]{false, false};
-
     private SpeedDialView mSpeedDialView;
     private TextView mDirection;
-
-    private RecyclerView mRecyclerView;
     private NodeListAdapter mAdapter;
-    private NodeViewModel mViewModel;
     private AppCompatCheckBox wifiCheckbox;
     private AppCompatCheckBox beaconCheckbox;
+
+    private NodeViewModel mViewModel;
+    private final Observer<MagneticVector> magneticVectorObserver =
+            magneticVector -> mAdapter.setMv(magneticVector);
+
+    private Handler mHandler;
+    private Runnable mRunnable;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,21 +68,20 @@ public class FingerprintingFragment extends Fragment {
         mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
         mAdapter = new NodeListAdapter(getContext());
 
-        mViewModel.getWifiList()
-                .observe(this, wifiNodes -> mAdapter.setWifiNodes(wifiNodes));
-
         mViewModel.getMv().observe(this, magneticVector ->
                 mDirection.setText(magneticVector != null ? magneticVector.toString() : "NORTH"));
 
-        /*mViewModel.getBeaconList()
-                .observe(this, beaconNodes -> mAdapter.setBeaconNodes(beaconNodes));*/
+        mViewModel.getWifiList()
+                .observe(this, wifiNodes -> mAdapter.setWifiNodes(wifiNodes));
 
-        mViewModel.getMv().observe(this, mv -> mAdapter.setMv(mv));
+        mViewModel.getBeaconList()
+                .observe(this, beaconNodes -> mAdapter.setBeaconNodes(beaconNodes));
+
+        /*mViewModel.getMv().observe(this, magneticVectorObserver);*/
 
         Context context = getContext();
         if (context != null && savedInstanceState == null) {
-            turnWifiOn(context);
-            turnBluetoothOn(context);
+            mHandler = new Handler();
             turnLocationOn(context);
         }
     }
@@ -84,31 +92,21 @@ public class FingerprintingFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_fingerprinting, container, false);
         mSpeedDialView = rootView.findViewById(R.id.start_stop_button);
         mDirection = rootView.findViewById(R.id.directionValue);
-        mRecyclerView = rootView.findViewById(R.id.nodesRecyclerView);
 
+        RecyclerView mRecyclerView = rootView.findViewById(R.id.nodesRecyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setAdapter(mAdapter);
+
         setupSpeedDial(savedInstanceState == null, container);
         return rootView;
     }
 
-    /*@Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        if (getUserVisibleHint()) {
-            mSpeedDialView = view.findViewById(R.id.start_stop_button);
-            setupSpeedDial(savedInstanceState == null);
-            mDirection = view.findViewById(R.id.directionValue);
-        }
-        else {
-            Log.e(getClass().getName(),"User visibility = " + getUserVisibleHint());
-        }
-    }*/
-
     private void setupSpeedDial(boolean addActionItems, ViewGroup viewGroup) {
-        if (addActionItems && getContext() != null) {
+        Context context = getContext();
+        assert context != null;
+
+        if (addActionItems) {
             Drawable drawable = AppCompatResources
                     .getDrawable(getContext(), R.drawable.ic_replay_white_24dp);
             mSpeedDialView.addActionItem(
@@ -137,26 +135,7 @@ public class FingerprintingFragment extends Fragment {
         mSpeedDialView.setOnChangeListener(new SpeedDialView.OnChangeListener() {
             @Override
             public boolean onMainActionSelected() {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Dispositivi");
-                View view = getLayoutInflater().inflate(R.layout.dialog_start_view, viewGroup);
-                builder.setView(view);
-                wifiCheckbox = view.findViewById(R.id.wifi);
-                wifiCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (isChecked) turnWifiOn(getContext());
-                });
-                beaconCheckbox = view.findViewById(R.id.beacons);
-                beaconCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (isChecked) turnBluetoothOn(getContext());
-                });
-
-                builder.setPositiveButton(android.R.string.ok, (dialog, id) -> {
-                    if (id == DialogInterface.BUTTON_POSITIVE) {
-                        // TODO: START COUNTDOWN
-                    }
-                });
-                builder.setNegativeButton(android.R.string.cancel, null);
-                builder.show();
+                showStartDialog(context, viewGroup);
                 return false; // True to keep the Speed Dial open
             }
 
@@ -165,9 +144,67 @@ public class FingerprintingFragment extends Fragment {
         });
 
         mSpeedDialView.setOnActionSelectedListener(actionItem -> {
-            Toast.makeText(getContext(), "DialAction", Toast.LENGTH_SHORT).show();
+            switch (actionItem.getId()) {
+                case R.id.fab_save:
+                    // TODO: SAVE TO DB
+                    break;
+                case R.id.fab_stop:
+                    mViewModel.stopWifiScanning();
+                    mViewModel.stopBeaconsScanning();
+                    mViewModel.getMv().removeObserver(magneticVectorObserver);
+                    break;
+            }
             return false; // True to keep the Speed Dial open
         });
+
+    }
+
+    private void showStartDialog(Context context, ViewGroup viewGroup) {
+        View view = getLayoutInflater().inflate(R.layout.dialog_start_view, viewGroup);
+        TextView errorTextView = view.findViewById(R.id.errorMessage);
+        TextInputEditText secondsEditText = view.findViewById(R.id.seconds);
+        TextInputLayout secondsInputLayout = view.findViewById(R.id.secondsInputLayout);
+        wifiCheckbox = view.findViewById(R.id.wifi);
+        beaconCheckbox = view.findViewById(R.id.beacons);
+        final AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(getString(R.string.devices))
+                .setView(view)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+
+        wifiCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) turnWifiOn(context);
+        });
+        beaconCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) turnBluetoothOn(context);
+        });
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button start = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_POSITIVE);
+
+            start.setOnClickListener(v -> {
+                if(secondsEditText.getText() != null
+                        && !secondsEditText.getText().toString().equals("")
+                        && (wifiCheckbox.isChecked() || beaconCheckbox.isChecked())) {
+
+                    startCountdown(Integer.valueOf(secondsEditText.getText().toString()));
+                    dialog.dismiss();
+                } else { // No such user input
+                    errorTextView.setVisibility(View.VISIBLE);
+                    secondsInputLayout.setError(getString(R.string.seconds_error));
+                }
+            });
+        });
+        dialog.show();
+    }
+
+    private void startCountdown(int duration) {
+        mViewModel.getMv().observe(this, magneticVectorObserver);
+        if (wifiCheckbox.isChecked()) mViewModel.startWifiScanning();
+        if (beaconCheckbox.isChecked()) mViewModel.startBeaconsScanning();
+
+        // TODO: TIMER
 
     }
 

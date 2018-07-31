@@ -19,16 +19,22 @@ public class WifiListLiveData extends LiveData<List<Node>> implements Observer{
          mWifiManager.registerObserver(this);
     }
 
-    @Override
-    protected void onActive() {
+    @Override protected void onActive() {
         super.onActive();
         mWifiManager.bind();
     }
 
-    @Override
-    protected void onInactive() {
+    @Override protected void onInactive() {
         mWifiManager.unbind();
         super.onInactive();
+    }
+
+    @Override public void startScanning() {
+        mWifiManager.start();
+    }
+
+    @Override public void stopScanning() {
+        mWifiManager.stop();
     }
 
     @Override

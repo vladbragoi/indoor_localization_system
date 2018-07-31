@@ -16,4 +16,7 @@ public interface Observer {
      * @param mv magnetic vector
      */
     void update(MagneticVector mv);
+
+    void startScanning();
+    void stopScanning();
 }

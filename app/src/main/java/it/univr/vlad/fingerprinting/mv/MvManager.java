@@ -8,24 +8,28 @@ import it.univr.vlad.fingerprinting.Manager;
 import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.Observer;
 
-public class MvManager extends Manager {
+public class MvManager extends Manager implements Direction.DirectionListener {
 
     private Direction direction;
-    private float[] mGeomagneticField;
 
     public MvManager(Context context) {
         direction = Direction.getInstance(context);
     }
 
     @Override public void bind() {
-        direction.startListening();
-        direction.setDirectionListener((float[] geomagneticField, float azimut) -> {
-            this.mGeomagneticField = geomagneticField;
-            notifyObservers(mGeomagneticField, azimut);
-        });
+        start();
+        direction.setDirectionListener(this);
     }
 
     @Override public void unbind() {
+        stop();
+    }
+
+    @Override public void start() {
+        direction.startListening();
+    }
+
+    @Override public void stop() {
         direction.stopListening();
     }
 
@@ -44,5 +48,10 @@ public class MvManager extends Manager {
     public void notifyObservers(float[] geomagneticField, float azimut) {
         for (Observer o: super.mObservers)
             o.update(new MagneticVector(geomagneticField, azimut));
+    }
+
+    @Override
+    public void onDirectionUpdated(float[] geomagneticField, float azimut) {
+        notifyObservers(geomagneticField, azimut);
     }
 }

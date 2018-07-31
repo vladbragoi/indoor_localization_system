@@ -94,6 +94,16 @@ public class Fingerprinting implements Observer {
         // System.out.println(mv[0] + " " + mv[1] + " " + mv[2]);
     }
 
+    @Override
+    public void startScanning() {
+
+    }
+
+    @Override
+    public void stopScanning() {
+
+    }
+
     private boolean isLocationEnabled() {
         boolean gps_enabled;
         boolean network_enabled;

@@ -2,12 +2,12 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingStart="?attr/dialogPreferredPadding"
     android:paddingEnd="?attr/dialogPreferredPadding"
     android:paddingTop="?attr/dialogPreferredPadding"
-    android:paddingBottom="8dp"
     android:focusable="true"
     android:focusableInTouchMode="true">
 
@@ -30,20 +30,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/wifi" />
 
-    <android.support.design.widget.TextInputLayout
+    <TextView
+        android:id="@+id/errorMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:text="@string/checkbox_error"
+        android:textColor="@color/colorError"
+        android:textSize="12sp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/secondsInputLayout"
+        app:layout_constraintTop_toBottomOf="@+id/beacons" />
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/secondsInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/beacons">
+        app:layout_constraintTop_toBottomOf="@id/errorMessage">
 
         <android.support.design.widget.TextInputEditText
+            android:id="@+id/seconds"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="@string/seconds" />
+            android:hint="@string/seconds"
+            android:inputType="number" />
 
     </android.support.design.widget.TextInputLayout>
 

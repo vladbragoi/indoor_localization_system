@@ -13,8 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -55,9 +53,9 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (position == 0 && holder instanceof MvViewHolder && mv != null) {
             MvViewHolder mvHolder = (MvViewHolder) holder;
 
-            mvHolder.x.setText(String.format(Locale.ITALY, "%.1f", mv.getValues()[0]));
-            mvHolder.y.setText(String.format(Locale.ITALY, "%.1f", mv.getValues()[1]));
-            mvHolder.z.setText(String.format(Locale.ITALY, "%.1f", mv.getValues()[2]));
+            mvHolder.x.setText(String.format(Locale.getDefault(), "%.1f", mv.getValues()[0]));
+            mvHolder.y.setText(String.format(Locale.getDefault(), "%.1f", mv.getValues()[1]));
+            mvHolder.z.setText(String.format(Locale.getDefault(), "%.1f", mv.getValues()[2]));
             mvHolder.cardView.setCardBackgroundColor(mvCardBackground);
         }
         else if (holder.getItemViewType() == R.layout.single_node && nodes != null) {

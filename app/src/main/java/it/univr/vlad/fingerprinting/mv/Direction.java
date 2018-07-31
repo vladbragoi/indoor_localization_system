@@ -93,6 +93,6 @@ public class Direction implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int i) {}
 
     public interface DirectionListener {
-        void onDirectionUpdated(float[] mGeomagneticField, float azimut);
+        void onDirectionUpdated(float[] geomagneticField, float azimut);
     }
 }

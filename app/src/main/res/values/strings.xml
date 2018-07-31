@@ -47,4 +47,7 @@
     <string name="remaining">Remaining time</string>
     <string name="wifi">wifi</string>
     <string name="beacons">beacons</string>
+    <string name="devices">Devices</string>
+    <string name="seconds_error">Should not be empty</string>
+    <string name="checkbox_error">At least one of these above should be checked</string>
 </resources>

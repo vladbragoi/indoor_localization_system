@@ -11,6 +11,8 @@ public abstract class Manager implements ScanResults {
         mObservers = new HashSet<>();
     }
 
+    public abstract void start();
+    public abstract void stop();
     protected abstract void bind();
     protected abstract void unbind();
 

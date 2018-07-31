@@ -28,6 +28,14 @@ public class BleManager extends Manager {
         mBeaconScanner.setBeaconListerner(this::notifyObservers);
     }
 
+    @Override public void start() {
+        mBeaconScanner.start();
+    }
+
+    @Override public void stop() {
+        mBeaconScanner.stop();
+    }
+
     /**
      * binds the scanner if bluetooth is enabled
      * If bluetooth is enabled calls bind() method of BeaconScanner's instance, otherwise calls enableDevice()
@@ -40,6 +48,7 @@ public class BleManager extends Manager {
 
     @Override
     public void unbind() {
+        mBeaconScanner.stop();
         mBeaconScanner.unbind();
     }
 
@@ -93,7 +102,7 @@ public class BleManager extends Manager {
                         mContext.getString(R.string.bluetooth_enabled),
                         Toast.LENGTH_SHORT).show();
             });
-            dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> dialog2.dismiss());
+            dialog.setNegativeButton(android.R.string.cancel, (dialog2, which) -> dialog2.dismiss());
             dialog.setOnCancelListener(diag -> mContext
                     .startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
             );
