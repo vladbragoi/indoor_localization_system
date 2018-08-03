@@ -4,18 +4,15 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -24,12 +21,10 @@ import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,12 +63,11 @@ public class FingerprintingFragment extends Fragment {
         mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
         mAdapter = new NodeListAdapter(getContext());
 
+        // Prepare observing data
         mViewModel.getMv().observe(this, magneticVector ->
                 mDirection.setText(magneticVector != null ? magneticVector.toString() : "NORTH"));
-
         mViewModel.getWifiList()
                 .observe(this, wifiNodes -> mAdapter.setWifiNodes(wifiNodes));
-
         mViewModel.getBeaconList()
                 .observe(this, beaconNodes -> mAdapter.setBeaconNodes(beaconNodes));
 
@@ -106,6 +100,7 @@ public class FingerprintingFragment extends Fragment {
         Context context = getContext();
         assert context != null;
 
+        // Setup mini speed-dial buttons
         if (addActionItems) {
             Drawable drawable = AppCompatResources
                     .getDrawable(getContext(), R.drawable.ic_replay_white_24dp);
@@ -132,6 +127,7 @@ public class FingerprintingFragment extends Fragment {
                             .create());
         }
 
+        // Start button listener
         mSpeedDialView.setOnChangeListener(new SpeedDialView.OnChangeListener() {
             @Override
             public boolean onMainActionSelected() {
@@ -143,10 +139,13 @@ public class FingerprintingFragment extends Fragment {
             public void onToggleChanged(boolean isOpen) {}
         });
 
+        // Save, Stop and Restart buttons listener
         mSpeedDialView.setOnActionSelectedListener(actionItem -> {
             switch (actionItem.getId()) {
                 case R.id.fab_save:
+
                     // TODO: SAVE TO DB
+
                     break;
                 case R.id.fab_stop:
                     mViewModel.stopWifiScanning();
@@ -159,6 +158,12 @@ public class FingerprintingFragment extends Fragment {
 
     }
 
+    /**
+     * A dialog to ask user which device(s) should be used for "fingerprinting"
+     * and how many seconds to scan values
+     * @param context context
+     * @param viewGroup root viewGroup to proper inflate dialog layout
+     */
     private void showStartDialog(Context context, ViewGroup viewGroup) {
         View view = getLayoutInflater().inflate(R.layout.dialog_start_view, viewGroup);
         TextView errorTextView = view.findViewById(R.id.errorMessage);
@@ -166,6 +171,7 @@ public class FingerprintingFragment extends Fragment {
         TextInputLayout secondsInputLayout = view.findViewById(R.id.secondsInputLayout);
         wifiCheckbox = view.findViewById(R.id.wifi);
         beaconCheckbox = view.findViewById(R.id.beacons);
+
         final AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(getString(R.string.devices))
                 .setView(view)
@@ -180,6 +186,7 @@ public class FingerprintingFragment extends Fragment {
             if (isChecked) turnBluetoothOn(context);
         });
 
+        // Check for correct input
         dialog.setOnShowListener(dialogInterface -> {
             Button start = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_POSITIVE);
 
@@ -200,6 +207,7 @@ public class FingerprintingFragment extends Fragment {
     }
 
     private void startCountdown(int duration) {
+        // Start scanning data
         mViewModel.getMv().observe(this, magneticVectorObserver);
         if (wifiCheckbox.isChecked()) mViewModel.startWifiScanning();
         if (beaconCheckbox.isChecked()) mViewModel.startBeaconsScanning();
