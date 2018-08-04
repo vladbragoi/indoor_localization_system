@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
@@ -21,6 +20,7 @@ import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,34 +33,32 @@ import com.leinardi.android.speeddial.SpeedDialView;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.R;
-import it.univr.vlad.fingerprinting.exceptions.DeviceUnknownException;
+import it.univr.vlad.fingerprinting.TimerViewModel;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
-import it.univr.vlad.fingerprinting.wifi.WifiNode;
 
 public class FingerprintingFragment extends Fragment {
 
     private SpeedDialView mSpeedDialView;
     private TextView mDirection;
+    private TextView mSeconds;
+    private TextView mMinutes;
     private NodeListAdapter mAdapter;
     private AppCompatCheckBox wifiCheckbox;
     private AppCompatCheckBox beaconCheckbox;
 
     private NodeViewModel mViewModel;
+    private TimerViewModel mTimerViewModel;
+
     private final Observer<MagneticVector> magneticVectorObserver =
             magneticVector -> mAdapter.setMv(magneticVector);
-
-    private Handler mHandler;
-    private Runnable mRunnable;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
+        mTimerViewModel = ViewModelProviders.of(this).get(TimerViewModel.class);
         mAdapter = new NodeListAdapter(getContext());
 
         // Prepare observing data
@@ -71,11 +69,18 @@ public class FingerprintingFragment extends Fragment {
         mViewModel.getBeaconList()
                 .observe(this, beaconNodes -> mAdapter.setBeaconNodes(beaconNodes));
 
+        mTimerViewModel.getTime()
+                .observe(this, t -> mMinutes.setText(mTimerViewModel.getMinutes()));
+        mTimerViewModel.getTime()
+                .observe(this, t -> mSeconds.setText(mTimerViewModel.getSeconds()));
+
+        mTimerViewModel.onStop().observe(this, timerStopped -> {
+            if (timerStopped != null && timerStopped) stop();
+        });
         /*mViewModel.getMv().observe(this, magneticVectorObserver);*/
 
         Context context = getContext();
         if (context != null && savedInstanceState == null) {
-            mHandler = new Handler();
             turnLocationOn(context);
         }
     }
@@ -86,6 +91,8 @@ public class FingerprintingFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_fingerprinting, container, false);
         mSpeedDialView = rootView.findViewById(R.id.start_stop_button);
         mDirection = rootView.findViewById(R.id.directionValue);
+        mSeconds = rootView.findViewById(R.id.secondsValue);
+        mMinutes = rootView.findViewById(R.id.minutesValue);
 
         RecyclerView mRecyclerView = rootView.findViewById(R.id.nodesRecyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -148,9 +155,7 @@ public class FingerprintingFragment extends Fragment {
 
                     break;
                 case R.id.fab_stop:
-                    mViewModel.stopWifiScanning();
-                    mViewModel.stopBeaconsScanning();
-                    mViewModel.getMv().removeObserver(magneticVectorObserver);
+                    stop();
                     break;
             }
             return false; // True to keep the Speed Dial open
@@ -213,7 +218,7 @@ public class FingerprintingFragment extends Fragment {
         if (beaconCheckbox.isChecked()) mViewModel.startBeaconsScanning();
 
         // TODO: TIMER
-
+        mTimerViewModel.startCountFrom(duration);
     }
 
     public boolean closeSpeedDial() {
@@ -308,5 +313,17 @@ public class FingerprintingFragment extends Fragment {
             );
             dialog.show();
         }
+    }
+
+    private void stop() {
+        if (wifiCheckbox.isChecked()) mViewModel.stopWifiScanning();
+        if (beaconCheckbox.isChecked()) mViewModel.stopBeaconsScanning();
+        mViewModel.getMv().removeObserver(magneticVectorObserver);
+        if (!mTimerViewModel.isStopped()) mTimerViewModel.stop();
+    }
+
+    @Override public void onStop() {
+        stop();
+        super.onStop();
     }
 }
