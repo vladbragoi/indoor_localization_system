@@ -20,7 +20,6 @@ import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,11 +33,11 @@ import com.leinardi.android.speeddial.SpeedDialView;
 import org.jetbrains.annotations.NotNull;
 
 import it.univr.vlad.fingerprinting.R;
-import it.univr.vlad.fingerprinting.TimerViewModel;
+import it.univr.vlad.fingerprinting.Timer;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
 
-public class FingerprintingFragment extends Fragment {
+public class FingerprintingFragment extends Fragment implements Timer.TimerListener{
 
     private SpeedDialView mSpeedDialView;
     private TextView mDirection;
@@ -49,7 +48,7 @@ public class FingerprintingFragment extends Fragment {
     private AppCompatCheckBox beaconCheckbox;
 
     private NodeViewModel mViewModel;
-    private TimerViewModel mTimerViewModel;
+    private Timer mTimer;
 
     private final Observer<MagneticVector> magneticVectorObserver =
             magneticVector -> mAdapter.setMv(magneticVector);
@@ -58,8 +57,9 @@ public class FingerprintingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
-        mTimerViewModel = ViewModelProviders.of(this).get(TimerViewModel.class);
         mAdapter = new NodeListAdapter(getContext());
+        mTimer = new Timer();
+        mTimer.setTimerListener(this);
 
         // Prepare observing data
         mViewModel.getMv().observe(this, magneticVector ->
@@ -68,16 +68,6 @@ public class FingerprintingFragment extends Fragment {
                 .observe(this, wifiNodes -> mAdapter.setWifiNodes(wifiNodes));
         mViewModel.getBeaconList()
                 .observe(this, beaconNodes -> mAdapter.setBeaconNodes(beaconNodes));
-
-        mTimerViewModel.getTime()
-                .observe(this, t -> mMinutes.setText(mTimerViewModel.getMinutes()));
-        mTimerViewModel.getTime()
-                .observe(this, t -> mSeconds.setText(mTimerViewModel.getSeconds()));
-
-        mTimerViewModel.onStop().observe(this, timerStopped -> {
-            if (timerStopped != null && timerStopped) stop();
-        });
-        /*mViewModel.getMv().observe(this, magneticVectorObserver);*/
 
         Context context = getContext();
         if (context != null && savedInstanceState == null) {
@@ -218,7 +208,7 @@ public class FingerprintingFragment extends Fragment {
         if (beaconCheckbox.isChecked()) mViewModel.startBeaconsScanning();
 
         // TODO: TIMER
-        mTimerViewModel.startCountFrom(duration);
+        mTimer.startCountFrom(duration);
     }
 
     public boolean closeSpeedDial() {
@@ -319,11 +309,31 @@ public class FingerprintingFragment extends Fragment {
         if (wifiCheckbox.isChecked()) mViewModel.stopWifiScanning();
         if (beaconCheckbox.isChecked()) mViewModel.stopBeaconsScanning();
         mViewModel.getMv().removeObserver(magneticVectorObserver);
-        if (!mTimerViewModel.isStopped()) mTimerViewModel.stop();
+        if (mTimer.isRunning()) mTimer.stop();
     }
 
     @Override public void onStop() {
         stop();
         super.onStop();
+    }
+
+    @Override public void onDestroy() {
+        mTimer.destroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onSecondsChanged(String seconds) {
+        mSeconds.setText(seconds);
+    }
+
+    @Override
+    public void onMinutesChanged(String minutes) {
+        mMinutes.setText(minutes);
+    }
+
+    @Override
+    public void onTimerStopped(Timer.TimerStatus status) {
+        if (status.equals(Timer.TimerStatus.STOPPED)) stop();
     }
 }
