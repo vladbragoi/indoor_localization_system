@@ -372,6 +372,12 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         }
     }
 
+    private void disableBluetooth() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled())
+            bluetoothAdapter.disable();
+    }
+
     private void stop() {
         if (wifiCheckbox.isChecked()) mViewModel.stopWifiScanning();
         if (beaconCheckbox.isChecked()) mViewModel.stopBeaconsScanning();
@@ -386,6 +392,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     @Override public void onDestroy() {
         mTimer.destroy();
+        disableBluetooth();
         super.onDestroy();
     }
 
