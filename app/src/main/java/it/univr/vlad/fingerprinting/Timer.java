@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Timer {
     private final static int NUMBER_OF_THREADS = 1;
+    private final static String ONE_DIGIT = "%d";
     private final static String TWO_DIGITS = "%02d";
     private final static long PERIOD_UNIT = 1L; // unit in seconds
 
@@ -61,8 +62,7 @@ public class Timer {
 
     private void onTimeChanged() {
         if (listener != null) {
-            listener.onMinutesChanged(getMinutes());
-            listener.onSecondsChanged(getSeconds());
+            listener.onTimeChanged(getHours(), getMinutes(), getSeconds());
             listener.onTimerStopped(statusResult);
         }
     }
@@ -72,22 +72,19 @@ public class Timer {
         task.cancel(true);
     }
 
+    public String getHours() {
+        long time = startTime - elapsedTime;
+        return String.format(Locale.getDefault(), ONE_DIGIT, time / 3600);
+    }
+
     public String getSeconds() {
         long time = startTime - elapsedTime;
-        if (time > 0 && time >= 60)
-            return String.format(Locale.getDefault(), TWO_DIGITS, time - 60);
-        else if (time > 0)
-            return String.format(Locale.getDefault(), TWO_DIGITS, time);
-        else
-            return "00";
+        return String.format(Locale.getDefault(), TWO_DIGITS, time % 60);
     }
 
     public String getMinutes() {
         long time = startTime - elapsedTime;
-        if (time >= 60)
-            return String.format(Locale.getDefault(), TWO_DIGITS, time / 60);
-        else
-            return "00";
+        return String.format(Locale.getDefault(), TWO_DIGITS, (time % 3600) / 60);
     }
 
     public boolean isRunning() {
@@ -103,8 +100,7 @@ public class Timer {
     }
 
     public interface TimerListener {
-        void onSecondsChanged(String seconds);
-        void onMinutesChanged(String minutes);
+        void onTimeChanged(String hours, String minutes, String seconds);
         void onTimerStopped(TimerStatus status);
     }
 }

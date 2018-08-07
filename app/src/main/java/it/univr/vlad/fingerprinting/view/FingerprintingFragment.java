@@ -30,25 +30,18 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.Executor;
-
-import it.univr.vlad.fingerprinting.MainActivity;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.Timer;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
@@ -397,13 +390,15 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     }
 
     @Override
-    public void onSecondsChanged(String seconds) {
-        mSeconds.setText(seconds);
-    }
-
-    @Override
-    public void onMinutesChanged(String minutes) {
+    public void onTimeChanged(String hours, String minutes, String seconds) {
+        if (!hours.equals("0")) {
+            Toast.makeText(getContext(),
+                    "hours: " + hours,
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
         mMinutes.setText(minutes);
+        mSeconds.setText(seconds);
     }
 
     @Override
