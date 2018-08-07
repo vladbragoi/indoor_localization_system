@@ -4,17 +4,11 @@ package it.univr.vlad.fingerprinting.viewmodel;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MediatorLiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.List;
 
-import it.univr.vlad.fingerprinting.MainActivity;
 import it.univr.vlad.fingerprinting.Node;
-import it.univr.vlad.fingerprinting.Observer;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 
 public class NodeViewModel extends AndroidViewModel {
