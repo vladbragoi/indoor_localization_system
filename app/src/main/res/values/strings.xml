@@ -50,4 +50,6 @@
     <string name="devices">Devices</string>
     <string name="seconds_error">Should not be empty</string>
     <string name="checkbox_error">At least one of these above should be checked</string>
+    <string name="start_timer">Timer is just running. Stop it to restart.</string>
+    <string name="location_not_enabled">The application will not run as you expect. Please enable location</string>
 </resources>

@@ -1,10 +1,12 @@
 package it.univr.vlad.fingerprinting.view;
 
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -20,6 +22,7 @@ import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,17 +30,33 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.Executor;
+
+import it.univr.vlad.fingerprinting.MainActivity;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.Timer;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
 
 public class FingerprintingFragment extends Fragment implements Timer.TimerListener{
+
+    private final static int LOCATION_RESULT_CODE = 4295;
 
     private SpeedDialView mSpeedDialView;
     private TextView mDirection;
@@ -202,13 +221,18 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     }
 
     private void startCountdown(int duration) {
-        // Start scanning data
-        mViewModel.getMv().observe(this, magneticVectorObserver);
-        if (wifiCheckbox.isChecked()) mViewModel.startWifiScanning();
-        if (beaconCheckbox.isChecked()) mViewModel.startBeaconsScanning();
+        if (mTimer.isRunning()) {
+            Toast toast = Toast.makeText(getContext(), getString(R.string.start_timer), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+        }
+        else { // Start scanning data
+            mViewModel.getMv().observe(this, magneticVectorObserver);
+            if (wifiCheckbox.isChecked()) mViewModel.startWifiScanning();
+            if (beaconCheckbox.isChecked()) mViewModel.startBeaconsScanning();
 
-        // TODO: TIMER
-        mTimer.startCountFrom(duration);
+            mTimer.startCountFrom(duration);
+        }
     }
 
     public boolean closeSpeedDial() {
@@ -221,20 +245,70 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     }
 
     private void turnLocationOn(@NotNull Context context) {
-        LocationManager locationManager = (LocationManager) context
-                .getSystemService(Context.LOCATION_SERVICE);
+        // ENABLE LOCATION WITH GOOGLE-API
+        LocationRequest locationRequest= new LocationRequest();
+
+        // Low-Precision Location (low power)
+        locationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(locationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(context);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        // Request to enable location
+        task.addOnFailureListener((Activity) context, e -> {
+            if (e instanceof ResolvableApiException) {
+                try {
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(getActivity(),
+                            LOCATION_RESULT_CODE);
+                } catch (IntentSender.SendIntentException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        /* ENABLE LOCATION THROUGH SYSTEM SETTINGS
+        LocationManager locationManager = (LocationManager)
+                context.getSystemService(Context.LOCATION_SERVICE);
         assert locationManager != null;
+
         if (!isLocationEnabled(locationManager)) {
             final AlertDialog.Builder dialog = new AlertDialog.Builder(context);
             dialog.setTitle(context.getString(R.string.location_title));
             dialog.setMessage(context.getString(R.string.location_message));
-            dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> context
-                    .startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
-            dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> dialog2.dismiss());
+            dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
+                *//*Activity activity = getActivity();
+                if (activity != null)
+                    activity.startActivityForResult(
+                            new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),
+                            LOCATION_RESULT_CODE);*//*
+            });
+            dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> {
+                    dialog2.dismiss();
+                    locationNotEnabled();
+            });
             dialog.show();
-        }
+        }*/
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == LOCATION_RESULT_CODE) {
+            if (resultCode != Activity.RESULT_OK) locationNotEnabled();
+        } else
+            super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void locationNotEnabled() {
+        Toast.makeText(getContext(),
+                getString(R.string.location_not_enabled),
+                Toast.LENGTH_SHORT).show();
+        mSpeedDialView.hide();
+    }
+
+    @Deprecated
     private boolean isLocationEnabled(@NotNull LocationManager locationManager) {
         boolean gps_enabled;
         boolean network_enabled;
@@ -271,8 +345,8 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
                     if (beaconCheckbox != null) beaconCheckbox.setChecked(false);
                     dialog2.dismiss();
                 });
-                dialog.setOnCancelListener(diag -> context
-                        .startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+                dialog.setOnCancelListener(diag ->
+                        context.startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
                 );
                 dialog.show();
             }
@@ -298,8 +372,8 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
                 if (wifiCheckbox != null) wifiCheckbox.setChecked(false);
                 dialog2.dismiss();
             });
-            dialog.setOnCancelListener(diag -> context
-                    .startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS))
+            dialog.setOnCancelListener(diag ->
+                    context.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS))
             );
             dialog.show();
         }
