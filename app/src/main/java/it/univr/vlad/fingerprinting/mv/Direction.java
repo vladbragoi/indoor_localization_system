@@ -98,7 +98,7 @@ public class Direction implements SensorEventListener {
 
                     int inclination = (int) Math.round(Math.toDegrees(Math.acos(g[2])));
 
-                    if (inclination > 25 && inclination < 155) toast.show(); // Device is not flat
+                    if (inclination > 60 && inclination < 145) toast.show(); // Device is not flat
                 }
             }
         }

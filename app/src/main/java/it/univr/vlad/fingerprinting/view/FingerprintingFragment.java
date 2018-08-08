@@ -386,10 +386,10 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     }
 
     private void stop() {
-        if (wifiCheckbox.isChecked()) mViewModel.stopWifiScanning();
-        if (beaconCheckbox.isChecked()) mViewModel.stopBeaconsScanning();
+        if (wifiCheckbox != null && wifiCheckbox.isChecked()) mViewModel.stopWifiScanning();
+        if (beaconCheckbox != null && beaconCheckbox.isChecked()) mViewModel.stopBeaconsScanning();
         mViewModel.getMv().removeObserver(magneticVectorObserver);
-        if (mTimer.isRunning()) mTimer.stop();
+        if (mTimer != null && mTimer.isRunning()) mTimer.stop();
     }
 
     @Override public void onStop() {

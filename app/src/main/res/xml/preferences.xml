@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Database">
+
+        <EditTextPreference
+            android:defaultValue="database"
+            android:icon="@drawable/ic_storage_black_24dp"
+            android:key="db_name"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="The name of your database"
+            android:title="Name" />
+        <EditTextPreference
+            android:defaultValue="http://192.168.1.1:5984/"
+            android:icon="@drawable/ic_insert_link_black_24dp"
+            android:key="url_db"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="Your database (or hosted database) url"
+            android:title="URL" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
