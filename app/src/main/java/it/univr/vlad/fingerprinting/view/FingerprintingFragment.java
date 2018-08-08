@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -42,6 +43,7 @@ import com.leinardi.android.speeddial.SpeedDialView;
 
 import org.jetbrains.annotations.NotNull;
 
+import es.dmoral.toasty.Toasty;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.Timer;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
@@ -214,8 +216,11 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     }
 
     private void startCountdown(int duration) {
-        if (mTimer.isRunning()) {
-            Toast toast = Toast.makeText(getContext(), getString(R.string.start_timer), Toast.LENGTH_SHORT);
+        if (mTimer.isRunning() && getContext() != null) {
+            Toast toast = Toasty.error(getContext(),
+                    getString(R.string.start_timer),
+                    Toast.LENGTH_SHORT,
+                    true);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
         }
@@ -295,9 +300,11 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     }
 
     private void locationNotEnabled() {
-        Toast.makeText(getContext(),
+        assert getContext() != null;
+        Toasty.warning(getContext(),
                 getString(R.string.location_not_enabled),
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_LONG,
+                true).show();
         mSpeedDialView.hide();
     }
 
@@ -315,24 +322,24 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
             if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-                Toast.makeText(context,
-                        R.string.ble_not_supported,
-                        Toast.LENGTH_SHORT).show();
+                Toasty.warning(context,
+                        getString(R.string.ble_not_supported),
+                        Toast.LENGTH_SHORT, true).show();
             }
             else {
                 /*
                  * Should use this method, but just to uniform the requests
                  * mContext.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
                  */
-                final android.app.AlertDialog.Builder dialog =
-                        new android.app.AlertDialog.Builder(context);
+                final AlertDialog.Builder dialog =
+                        new AlertDialog.Builder(context);
                 dialog.setTitle(context.getString(R.string.bluetooth_title));
                 dialog.setMessage(context.getString(R.string.bluetooth_message));
                 dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
                     bluetoothAdapter.enable();
-                    Toast.makeText(context,
+                    Toasty.success(context,
                             context.getString(R.string.bluetooth_enabled),
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT, true).show();
                 });
                 dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> {
                     if (beaconCheckbox != null) beaconCheckbox.setChecked(false);
@@ -357,9 +364,9 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             dialog.setMessage(context.getString(R.string.wifi_message));
             dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
                 wifiManager.setWifiEnabled(true);
-                Toast.makeText(context,
+                Toasty.success(context,
                         context.getString(R.string.wifi_enabled),
-                        Toast.LENGTH_SHORT).show();
+                        Toast.LENGTH_SHORT, true).show();
             });
             dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> {
                 if (wifiCheckbox != null) wifiCheckbox.setChecked(false);
@@ -398,10 +405,12 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     @Override
     public void onTimeChanged(String hours, String minutes, String seconds) {
-        if (!hours.equals("0")) {
-            Toast.makeText(getContext(),
+        Context context = getContext();
+        if (!hours.equals("0") && context != null) {
+            Toasty.normal(context,
                     "hours: " + hours,
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
+                    ContextCompat.getDrawable(context, R.drawable.ic_access_time_white_24dp)
             ).show();
         }
         mMinutes.setText(minutes);

@@ -5,11 +5,23 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.text.Layout;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.AlignmentSpan;
+import android.view.Gravity;
+import android.widget.Toast;
+
+import es.dmoral.toasty.Toasty;
+import it.univr.vlad.fingerprinting.R;
 
 public class Direction implements SensorEventListener {
 
     private static Direction direction;
     private DirectionListener listener;
+
+    private Toast toast;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -25,6 +37,20 @@ public class Direction implements SensorEventListener {
     }
 
     private Direction(Context context) {
+        // Centered text
+        SpannableString string = new SpannableString(context.getString(R.string.tilt_mode));
+        string.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
+                0,
+                string.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+        // Custom toast for no flat device
+        toast = Toasty.warning(context,
+                string,
+                Toast.LENGTH_SHORT,
+                true);
+        toast.setGravity(Gravity.CENTER, 0 , 0);
+
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         assert sensorManager != null;
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -62,6 +88,18 @@ public class Direction implements SensorEventListener {
                 azimut = (float) Math.toDegrees(orientation[0]);
 
                 if (listener != null) listener.onDirectionUpdated(mGeomagneticField, azimut);
+
+                { // Check if device is flat or not
+                    float[] g = mGravity.clone();
+                    double normOfG= Math.sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
+                    g[0] = (float) (g[0] / normOfG);
+                    g[1] = (float) (g[1] / normOfG);
+                    g[2] = (float) (g[2] / normOfG);
+
+                    int inclination = (int) Math.round(Math.toDegrees(Math.acos(g[2])));
+
+                    if (inclination > 25 && inclination < 155) toast.show(); // Device is not flat
+                }
             }
         }
     }

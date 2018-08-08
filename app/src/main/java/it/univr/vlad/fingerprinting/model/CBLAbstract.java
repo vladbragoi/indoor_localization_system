@@ -1,7 +1,23 @@
 package it.univr.vlad.fingerprinting.model;
 
+import android.content.Context;
+import android.util.Log;
 
-public abstract class CBLAbstract { /*implements Replication.ChangeListener{
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Manager;
+import com.couchbase.lite.android.AndroidContext;
+import com.couchbase.lite.replicator.RemoteRequestResponseException;
+import com.couchbase.lite.replicator.Replication;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+
+import it.univr.vlad.fingerprinting.exceptions.UrlDocumentNotFoundException;
+
+// TODO
+public abstract class CBLAbstract {/*implements Replication.ChangeListener{
     private AndroidContext context;
     private Manager manager;
     private com.couchbase.lite.Database database;
@@ -11,9 +27,9 @@ public abstract class CBLAbstract { /*implements Replication.ChangeListener{
 
     private String dbName;
     private String dbUrl;
-    private static boolean shown = false;*/
-/*
-    CouchbaseAbstract(Context context, String dbName, String dbUrl) {
+    private static boolean shown = false;
+
+    CBLAbstract(Context context, String dbName, String dbUrl) {
         this.context = new AndroidContext(context);
         this.manager = getManager();
         this.dbName = dbName;
@@ -26,12 +42,12 @@ public abstract class CBLAbstract { /*implements Replication.ChangeListener{
         if (dbUrl != null)
             updateUrl(dbUrl);
 
-        database.addChangeListener(new Database.ChangeListener() {
+        *//*database.addChangeListener(new Database.ChangeListener() {
             @Override
             public void changed(Database.ChangeEvent event) {
                 Log.v(dbName, event.getChanges().toString());
             }
-        });
+        });*//*
         // CouchbaseLiteHttpClientFactory clientFactory = new CouchbaseLiteHttpClientFactory(database.getPersistentCookieStore());
         // clientFactory.allowSelfSignedSSLCertificates();
         // manager.setDefaultHttpClientFactory(clientFactory);
