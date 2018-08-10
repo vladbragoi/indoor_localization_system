@@ -75,7 +75,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
-        mAdapter = new NodeListAdapter(getContext());
+        mAdapter = new NodeListAdapter();
         mTimer = new Timer();
         mTimer.setTimerListener(this);
 

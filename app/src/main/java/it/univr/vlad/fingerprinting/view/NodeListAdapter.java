@@ -23,18 +23,11 @@ import it.univr.vlad.fingerprinting.mv.MagneticVector;
 
 public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final int wifiCardBackground;
-    private final int beaconCardBackground;
-    private final int mvCardBackground;
+    private enum NodeType {WIFI, BEACON}
 
     private MagneticVector mv;
-    private List<Node> nodes = new ArrayList<>();
-
-    NodeListAdapter(Context context) {
-        wifiCardBackground = ContextCompat.getColor(context, R.color.cardWifiBackground);
-        beaconCardBackground = ContextCompat.getColor(context, R.color.cardBeaconBackground);
-        mvCardBackground = ContextCompat.getColor(context, R.color.cardMvBackground);
-    }
+    private List<Node> wifiNodes = new ArrayList<>();
+    private List<Node> beaconNodes = new ArrayList<>();
 
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -43,64 +36,60 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         if (viewType == R.layout.magnetic_vector)
             return new MvViewHolder(view);
+        else if (viewType == R.layout.wifi_node)
+            return new NodesViewHolder(view, NodeType.WIFI);
         else
-            return new NodesViewHolder(view);
+            return new NodesViewHolder(view, NodeType.BEACON);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (position == 0 && holder instanceof MvViewHolder && mv != null) {
+        Node node = null;
+        if (position == 0 && holder.getItemViewType() == R.layout.magnetic_vector && mv != null) {
             MvViewHolder mvHolder = (MvViewHolder) holder;
+            float[] values = mv.getValues();
 
-            mvHolder.x.setText(String.format(Locale.getDefault(), "%.1f", mv.getValues()[0]));
-            mvHolder.y.setText(String.format(Locale.getDefault(), "%.1f", mv.getValues()[1]));
-            mvHolder.z.setText(String.format(Locale.getDefault(), "%.1f", mv.getValues()[2]));
-            mvHolder.cardView.setCardBackgroundColor(mvCardBackground);
+            mvHolder.x.setText(String.format(Locale.getDefault(), "%.1f", values[0]));
+            mvHolder.y.setText(String.format(Locale.getDefault(), "%.1f", values[1]));
+            mvHolder.z.setText(String.format(Locale.getDefault(), "%.1f", values[2]));
+            return;
         }
-        else if (holder.getItemViewType() == R.layout.single_node && nodes != null) {
-            if (position != 1 && position < nodes.size()) {
-                Node node = nodes.get(position);
-                NodesViewHolder nodeHolder = (NodesViewHolder) holder;
-
-                nodeHolder.type.setText(node.getType());
-                nodeHolder.bssid.setText(node.getId());
-                nodeHolder.value.setText(String.valueOf(node.getValue()));
-
-                switch (node.getType()) {
-                    case "WIFI":
-                        nodeHolder.cardView.setCardBackgroundColor(wifiCardBackground);
-                        break;
-                    case "BLE":
-                        nodeHolder.cardView.setCardBackgroundColor(beaconCardBackground);
-                        break;
-                    default:
-                        break;
-                }
-            }
+        else if (holder.getItemViewType() == R.layout.beacon_node) {
+            node = beaconNodes.get(position - 1);
         }
-    }
-
-   /* @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
-        if (payloads.isEmpty()) {
-            super.onBindViewHolder(holder, position, payloads);
+        else if (holder.getItemViewType() == R.layout.wifi_node) {
+            node = wifiNodes.get(position - beaconNodes.size() - 1);
         }
-        else if (holder instanceof NodesViewHolder){
-            Bundle o = (Bundle) payloads.get(0);
+
+        if (node != null) {
             NodesViewHolder nodeHolder = (NodesViewHolder) holder;
-            for (String key : o.keySet()) {
-                if (key.equals("value")) {
-                    nodeHolder.value.setText(String.valueOf(o.getInt("value")));
-                }
-            }
+            nodeHolder.type.setText(node.getType());
+            nodeHolder.bssid.setText(node.getId());
+            nodeHolder.value.setText(String.valueOf(node.getValue()));
         }
     }
-*/
+
+    /* @Override
+     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+         if (payloads.isEmpty()) {
+             super.onBindViewHolder(holder, position, payloads);
+         }
+         else if (holder instanceof NodesViewHolder){
+             Bundle o = (Bundle) payloads.get(0);
+             NodesViewHolder nodeHolder = (NodesViewHolder) holder;
+             for (String key : o.keySet()) {
+                 if (key.equals("value")) {
+                     nodeHolder.value.setText(String.valueOf(o.getInt("value")));
+                 }
+             }
+         }
+     }
+ */
     public void addWifiNodes(List<Node> newNodes) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new NodesDiffCallback(this.nodes, newNodes), true);
-        this.nodes.clear();
-        this.nodes.addAll(newNodes);
+                new NodesDiffCallback(this.wifiNodes, newNodes), true);
+        wifiNodes.clear();
+        wifiNodes.addAll(newNodes);
         diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
             @Override
             public void onInserted(int position, int count) {
@@ -126,9 +115,9 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void addBeaconNodes(List<Node> newNodes) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new NodesDiffCallback(this.nodes, newNodes), true);
-        /*this.nodes.clear();*/
-        this.nodes.addAll(newNodes);
+                new NodesDiffCallback(beaconNodes, newNodes), true);
+        beaconNodes.clear();
+        beaconNodes.addAll(newNodes);
         diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
             @Override
             public void onInserted(int position, int count) {
@@ -161,28 +150,32 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public int getItemViewType(int position) {
         if (position == 0)
             return R.layout.magnetic_vector;
+        else if (position > 0 && position <= beaconNodes.size())
+            return R.layout.beacon_node;
         else
-            return R.layout.single_node;
+            return R.layout.wifi_node;
     }
 
     @Override
     public int getItemCount() {
-        return nodes.size() + 2;
+        return wifiNodes.size() + beaconNodes.size() + 1;
     }
 
     public static class NodesViewHolder extends RecyclerView.ViewHolder {
 
+        NodeType nodeType;
         CardView cardView;
         TextView bssid;
         TextView value;
         TextView type;
 
-        NodesViewHolder(View itemView) {
+        NodesViewHolder(View itemView, NodeType type) {
             super(itemView);
-            cardView = itemView.findViewById(R.id.cardView);
-            bssid = itemView.findViewById(R.id.bssid);
-            value = itemView.findViewById(R.id.value);
-            type = itemView.findViewById(R.id.type);
+            this.nodeType = type;
+            this.cardView = itemView.findViewById(R.id.cardView);
+            this.bssid = itemView.findViewById(R.id.bssid);
+            this.value = itemView.findViewById(R.id.value);
+            this.type = itemView.findViewById(R.id.type);
         }
     }
 

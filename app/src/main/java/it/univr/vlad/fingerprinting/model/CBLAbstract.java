@@ -91,12 +91,10 @@ public abstract class CBLAbstract implements Replication.ChangeListener,
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
             case DB_NAME_KEY:
-                // TODO: Close/Restart
                 String name = sharedPreferences.getString(key, "");
                 restart(name, dbUrl);
                 break;
             case DB_URL_KEY:
-                // TODO: Close/Restart
                 String url = sharedPreferences.getString(key, "");
                 restart(dbName, url);
                 break;
