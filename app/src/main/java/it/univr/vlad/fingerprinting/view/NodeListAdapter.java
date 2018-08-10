@@ -1,7 +1,6 @@
 package it.univr.vlad.fingerprinting.view;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
@@ -97,7 +96,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 */
-    public void setWifiNodes(List<Node> newNodes) {
+    public void addWifiNodes(List<Node> newNodes) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
                 new NodesDiffCallback(this.nodes, newNodes), true);
         this.nodes.clear();
@@ -125,7 +124,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         });
     }
 
-    public void setBeaconNodes(List<Node> newNodes) {
+    public void addBeaconNodes(List<Node> newNodes) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
                 new NodesDiffCallback(this.nodes, newNodes), true);
         /*this.nodes.clear();*/

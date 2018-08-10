@@ -24,10 +24,10 @@ public class Timer {
     private long elapsedTime = 0L;
     private long startTime = 0L;
 
-    private ScheduledExecutorService service;
+    private final ScheduledExecutorService service;
     private ScheduledFuture<?> task;
 
-    private Handler handler;
+    private final Handler handler;
 
     private Runnable mRunnable = new Runnable() {
         @Override
@@ -46,11 +46,12 @@ public class Timer {
 
     public Timer() {
         service = Executors.newScheduledThreadPool(NUMBER_OF_THREADS);
+        // Used to post values to main thread
         handler = new Handler(Looper.getMainLooper());
     }
 
     /**
-     *
+     * Starts the timer and count down from "time" seconds.
      * @param time time in seconds
      */
     public void startCountFrom(long time) {
@@ -60,6 +61,9 @@ public class Timer {
         task = service.scheduleAtFixedRate(mRunnable, 0, PERIOD_UNIT, TimeUnit.SECONDS);
     }
 
+    /**
+     * Notify listeners when time changed.
+     */
     private void onTimeChanged() {
         if (listener != null) {
             listener.onTimeChanged(getHours(), getMinutes(), getSeconds());
@@ -67,30 +71,52 @@ public class Timer {
         }
     }
 
+    /**
+     * Stops the timer
+     */
     public void stop() {
         statusResult = TimerStatus.STOPPED;
         task.cancel(true);
     }
 
-    public String getHours() {
+    /**
+     * Return a String of two digits representing remaining hours.
+     * @return a String of two digits
+     */
+    private String getHours() {
         long time = startTime - elapsedTime;
         return String.format(Locale.getDefault(), ONE_DIGIT, time / 3600);
     }
 
-    public String getSeconds() {
+    /**
+     * Return a String of two digits representing remaining seconds.
+     * @return a String of two digits
+     */
+    private String getSeconds() {
         long time = startTime - elapsedTime;
         return String.format(Locale.getDefault(), TWO_DIGITS, time % 60);
     }
 
-    public String getMinutes() {
+    /**
+     * Return a String of two digits representing remaining minutes.
+     * @return a String of two digits
+     */
+    private String getMinutes() {
         long time = startTime - elapsedTime;
         return String.format(Locale.getDefault(), TWO_DIGITS, (time % 3600) / 60);
     }
 
+    /**
+     * This should be used to verify if timer is running
+     * @return true if timer is running.
+     */
     public boolean isRunning() {
         return statusResult.equals(TimerStatus.RUNNING);
     }
 
+    /**
+     * Destroy the timer
+     */
     public void destroy() {
         service.shutdown();
     }
@@ -99,6 +125,9 @@ public class Timer {
         this.listener = listener;
     }
 
+    /**
+     * This interface should be used to be notified of time changed
+     */
     public interface TimerListener {
         void onTimeChanged(String hours, String minutes, String seconds);
         void onTimerStopped(TimerStatus status);

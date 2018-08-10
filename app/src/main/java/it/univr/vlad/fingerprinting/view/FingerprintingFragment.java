@@ -14,6 +14,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -46,6 +47,8 @@ import org.jetbrains.annotations.NotNull;
 import es.dmoral.toasty.Toasty;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.Timer;
+import it.univr.vlad.fingerprinting.model.CBLAbstract;
+import it.univr.vlad.fingerprinting.model.CBLDatabase;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
 
@@ -61,6 +64,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     private AppCompatCheckBox wifiCheckbox;
     private AppCompatCheckBox beaconCheckbox;
 
+    private CBLAbstract database;
     private NodeViewModel mViewModel;
     private Timer mTimer;
 
@@ -79,9 +83,9 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mViewModel.getMv().observe(this, magneticVector ->
                 mDirection.setText(magneticVector != null ? magneticVector.toString() : "NORTH"));
         mViewModel.getWifiList()
-                .observe(this, wifiNodes -> mAdapter.setWifiNodes(wifiNodes));
+                .observe(this, wifiNodes -> mAdapter.addWifiNodes(wifiNodes));
         mViewModel.getBeaconList()
-                .observe(this, beaconNodes -> mAdapter.setBeaconNodes(beaconNodes));
+                .observe(this, beaconNodes -> mAdapter.addBeaconNodes(beaconNodes));
 
         Context context = getContext();
         if (context != null && savedInstanceState == null) {
@@ -159,12 +163,37 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
                     break;
                 case R.id.fab_stop:
-                    stop();
+                    stopTimer();
                     break;
             }
             return false; // True to keep the Speed Dial open
         });
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        database = new CBLDatabase(getContext(), CBLAbstract.DB_NAME_KEY, CBLAbstract.DB_URL_KEY);
+        ((CBLDatabase)database).setPushReplication(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        database.start();
+    }
+
+    @Override public void onStop() {
+        database.stop();
+        stopTimer();
+        super.onStop();
+    }
+
+    @Override public void onDestroy() {
+        database.close();
+        mTimer.destroy();
+        disableBluetooth();
+        super.onDestroy();
     }
 
     /**
@@ -308,6 +337,11 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mSpeedDialView.hide();
     }
 
+    /**
+     * Check whether location is enabled or not.
+     * @param locationManager Location manager
+     * @return true if location is enabled, false otherwise
+     */
     @Deprecated
     private boolean isLocationEnabled(@NotNull LocationManager locationManager) {
         boolean gps_enabled;
@@ -385,22 +419,11 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             bluetoothAdapter.disable();
     }
 
-    private void stop() {
+    private void stopTimer() {
         if (wifiCheckbox != null && wifiCheckbox.isChecked()) mViewModel.stopWifiScanning();
         if (beaconCheckbox != null && beaconCheckbox.isChecked()) mViewModel.stopBeaconsScanning();
         mViewModel.getMv().removeObserver(magneticVectorObserver);
         if (mTimer != null && mTimer.isRunning()) mTimer.stop();
-    }
-
-    @Override public void onStop() {
-        stop();
-        super.onStop();
-    }
-
-    @Override public void onDestroy() {
-        mTimer.destroy();
-        disableBluetooth();
-        super.onDestroy();
     }
 
     @Override
@@ -419,6 +442,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     @Override
     public void onTimerStopped(Timer.TimerStatus status) {
-        if (status.equals(Timer.TimerStatus.STOPPED)) stop();
+        if (status.equals(Timer.TimerStatus.STOPPED)) stopTimer();
     }
 }

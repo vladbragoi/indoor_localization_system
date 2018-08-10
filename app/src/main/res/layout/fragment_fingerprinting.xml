@@ -10,7 +10,7 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/header_height"
+        android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -22,7 +22,7 @@
 
             <include layout="@layout/header_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/header_height" />
+                android:layout_height="wrap_content" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
