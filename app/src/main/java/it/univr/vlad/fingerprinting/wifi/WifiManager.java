@@ -6,6 +6,7 @@ import java.util.List;
 
 import it.univr.vlad.fingerprinting.Manager;
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.NodeType;
 import it.univr.vlad.fingerprinting.Observer;
 
 public class WifiManager extends Manager {
@@ -38,7 +39,7 @@ public class WifiManager extends Manager {
 
     @Override public void notifyObservers(List<Node> results) {
         for (Observer observer : super.mObservers) {
-            observer.update(0, results);
+            observer.update(NodeType.WIFI, results);
         }
     }
 

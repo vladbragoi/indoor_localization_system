@@ -1,8 +1,8 @@
 package it.univr.vlad.fingerprinting.view;
 
-import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.CardView;
@@ -12,22 +12,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.NodeType;
 import it.univr.vlad.fingerprinting.diffutil.NodesDiffCallback;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 
 public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private enum NodeType {WIFI, BEACON}
-
     private MagneticVector mv;
     private List<Node> wifiNodes = new ArrayList<>();
     private List<Node> beaconNodes = new ArrayList<>();
+    private Queue<List<Node>> pendingUpdates = new ArrayDeque<>();
 
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -64,12 +66,12 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (node != null) {
             NodesViewHolder nodeHolder = (NodesViewHolder) holder;
             nodeHolder.type.setText(node.getType());
-            nodeHolder.bssid.setText(node.getId());
+            nodeHolder.bssid.setText(node.getId().toUpperCase());
             nodeHolder.value.setText(String.valueOf(node.getValue()));
         }
     }
 
-    /* @Override
+     @Override
      public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
          if (payloads.isEmpty()) {
              super.onBindViewHolder(holder, position, payloads);
@@ -84,35 +86,74 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
              }
          }
      }
- */
+
     public void addWifiNodes(List<Node> newNodes) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new NodesDiffCallback(this.wifiNodes, newNodes), true);
-        wifiNodes.clear();
-        wifiNodes.addAll(newNodes);
+        pendingUpdates.add(newNodes);
+        if (pendingUpdates.size() > 1) return;
+        updateNodesInternal(NodeType.WIFI, newNodes);
+    }
+
+    public void addBeaconNodes(List<Node> newNodes) {
+        pendingUpdates.add(newNodes);
+        if (pendingUpdates.size() > 1) return;
+        updateNodesInternal(NodeType.BEACON, newNodes);
+    }
+
+    private void updateNodesInternal(NodeType nodeType, List<Node> newNodes) {
+        final List<Node> oldNodes = new ArrayList<>();
+        if (nodeType == NodeType.WIFI) oldNodes.addAll(wifiNodes);
+        else oldNodes.addAll(beaconNodes);
+
+        final Handler handler = new Handler();
+        new Thread(() -> {
+            final DiffUtil.DiffResult diffResult =
+                    DiffUtil.calculateDiff(new NodesDiffCallback(newNodes, oldNodes), true);
+            handler.post(() -> applyDiffResult(nodeType, newNodes, diffResult));
+        }).start();
+    }
+
+    private void applyDiffResult(NodeType nodeType, List<Node> newNodes, DiffUtil.DiffResult diffResult) {
+        pendingUpdates.remove();
+        dispatchUpdates(nodeType, newNodes, diffResult);
+        if (pendingUpdates.size() > 0)
+            updateNodesInternal(nodeType, pendingUpdates.peek());
+    }
+
+    // TODO: fix items position in recycler view
+    private void dispatchUpdates(NodeType nodeType, List<Node> newNodes, DiffUtil.DiffResult diffResult) {
+        diffResult.dispatchUpdatesTo(this);
+        if (nodeType == NodeType.WIFI) {
+            wifiNodes.clear();
+            wifiNodes.addAll(newNodes);
+        } else {
+            beaconNodes.clear();
+            beaconNodes.addAll(newNodes);
+        }
+
         diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
             @Override
             public void onInserted(int position, int count) {
-                notifyItemRangeInserted(position + 1, count);
+                notifyItemRangeInserted(position, count);
             }
 
             @Override
             public void onRemoved(int position, int count) {
-                notifyItemRangeRemoved(position + 1, count + 1);
+                notifyItemRangeRemoved(position, count);
             }
 
             @Override
             public void onMoved(int fromPosition, int toPosition) {
-                notifyItemMoved(fromPosition + 1, toPosition + 1);
+                notifyItemMoved(fromPosition, toPosition);
             }
 
             @Override
             public void onChanged(int position, int count, Object payload) {
-                notifyItemRangeChanged(position + 1, count, payload);
+                notifyItemRangeChanged(position, count, payload);
             }
         });
     }
 
+    /* OLD METHOD
     public void addBeaconNodes(List<Node> newNodes) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
                 new NodesDiffCallback(beaconNodes, newNodes), true);
@@ -139,11 +180,12 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 notifyItemRangeChanged(position + 1, count, payload);
             }
         });
-    }
+    }*/
 
     public void setMv(MagneticVector mv) {
         this.mv = mv;
-        notifyItemChanged(0);
+        final Handler handler = new Handler();
+        handler.post(() -> notifyItemChanged(0));
     }
 
     @Override

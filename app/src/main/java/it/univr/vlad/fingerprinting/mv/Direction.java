@@ -22,6 +22,7 @@ public class Direction implements SensorEventListener {
     private DirectionListener listener;
 
     private Toast toast;
+    private boolean shown = false;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -89,7 +90,7 @@ public class Direction implements SensorEventListener {
 
                 if (listener != null) listener.onDirectionUpdated(mGeomagneticField, azimut);
 
-                { // Check if device is flat or not
+                if (!shown) { // Check if device is flat or not
                     float[] g = mGravity.clone();
                     double normOfG= Math.sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
                     g[0] = (float) (g[0] / normOfG);
@@ -98,7 +99,10 @@ public class Direction implements SensorEventListener {
 
                     int inclination = (int) Math.round(Math.toDegrees(Math.acos(g[2])));
 
-                    if (inclination > 60 && inclination < 145) toast.show(); // Device is not flat
+                    if (inclination > 60 && inclination < 145) {
+                        toast.show(); // Device is not flat
+                        shown = true;
+                    }
                 }
             }
         }

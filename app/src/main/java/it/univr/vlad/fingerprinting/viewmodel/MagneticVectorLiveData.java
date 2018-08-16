@@ -3,10 +3,10 @@ package it.univr.vlad.fingerprinting.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
 
-import java.sql.Time;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.NodeType;
 import it.univr.vlad.fingerprinting.Observer;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.mv.MvManager;
@@ -39,10 +39,10 @@ class MagneticVectorLiveData extends LiveData<MagneticVector> implements Observe
     }
 
     @Override
-    public void update(int type, List<Node> results) {}
+    public void update(NodeType type, List<Node> results) {}
 
     @Override
     public void update(MagneticVector mv) {
-        setValue(mv);
+        postValue(mv);
     }
 }

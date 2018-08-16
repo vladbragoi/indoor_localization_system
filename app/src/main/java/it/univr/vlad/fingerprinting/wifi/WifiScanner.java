@@ -75,7 +75,7 @@ public class WifiScanner extends BroadcastReceiver {
             //}
         }
 
-        Collections.sort(mResults, (o1, o2) -> o1.getId().compareTo(o2.getId()));
+        Collections.sort(mResults, (o1, o2) -> o2.getId().compareTo(o1.getId()));
 
         if (mResults != null && !mResults.isEmpty()) mListener.onResultsChanged(mResults);
 

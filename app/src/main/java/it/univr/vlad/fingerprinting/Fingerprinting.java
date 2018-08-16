@@ -81,11 +81,11 @@ public class Fingerprinting implements Observer {
      * @param type 0 for WifiManager, 1 for BleManager
      * @param results list of beacons or wifi nodes
      */
-    @Override public void update(int type, List<Node> results) {
-        if (type == 0) {
+    @Override public void update(NodeType type, List<Node> results) {
+        if (type == NodeType.WIFI) {
             System.out.println("Wifi nodes: " + results);
         }
-        if (type == 1) {
+        if (type == NodeType.BEACON) {
             System.out.println("Beacons: " + results);
         }
     }

@@ -6,6 +6,7 @@ import android.content.Context;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.NodeType;
 import it.univr.vlad.fingerprinting.Observer;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
 import it.univr.vlad.fingerprinting.wifi.WifiManager;
@@ -38,8 +39,8 @@ public class WifiListLiveData extends LiveData<List<Node>> implements Observer{
     }
 
     @Override
-    public void update(int type, List<Node> results) {
-        if (type == 0) setValue(results);
+    public void update(NodeType type, List<Node> results) {
+        if (type == NodeType.WIFI) postValue(results);
     }
 
     @Override

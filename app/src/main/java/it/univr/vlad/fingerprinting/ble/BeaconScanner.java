@@ -3,7 +3,9 @@ package it.univr.vlad.fingerprinting.ble;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
+import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -12,9 +14,13 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Region;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.R;
 
 public class BeaconScanner implements BeaconConsumer {
 
@@ -63,7 +69,10 @@ public class BeaconScanner implements BeaconConsumer {
                             b.getRssi(),
                             b.getId1().toString()));
 
-                mListener.onResultsChanged(updatingList);
+                Collections.sort(updatingList, (o1, o2) -> o2.getId().compareTo(o1.getId()));
+
+                if (updatingList != null && !updatingList.isEmpty())
+                    mListener.onResultsChanged(updatingList);
             }
         });
     }
@@ -85,14 +94,21 @@ public class BeaconScanner implements BeaconConsumer {
      * bind the BleManager with the scanner
      */
     protected void bind() {
-        mBeaconManager.bind(this);
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            mBeaconManager.bind(this);
+        } else {
+            Toasty.warning(mContext,
+                    mContext.getString(R.string.ble_not_supported),
+                    Toast.LENGTH_SHORT,
+                    true).show();
+        }
     }
 
     /**
      * unbind the BleManager with the scanner and stop ranging beacons in region
      */
     protected void unbind() {
-        mBeaconManager.unbind(this);
+        if (mBeaconManager.isBound(this)) mBeaconManager.unbind(this);
         /*try {
             mBeaconManager.unbind(this);
             mBeaconManager.stopRangingBeaconsInRegion(
@@ -106,26 +122,30 @@ public class BeaconScanner implements BeaconConsumer {
     }
 
     public void start() {
-        try {
-            mBeaconManager.startRangingBeaconsInRegion(
-                    new Region("myRangingUniqueId",
-                            null,
-                            null,
-                            null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        if (mBeaconManager.isBound(this)) {
+            try {
+                mBeaconManager.startRangingBeaconsInRegion(
+                        new Region("myRangingUniqueId",
+                                null,
+                                null,
+                                null));
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void stop() {
-        try {
-            mBeaconManager.stopRangingBeaconsInRegion(
-                    new Region("myRangingUniqueId",
-                            null,
-                            null,
-                            null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        if (mBeaconManager.isBound(this)) {
+            try {
+                mBeaconManager.stopRangingBeaconsInRegion(
+                        new Region("myRangingUniqueId",
+                                null,
+                                null,
+                                null));
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 

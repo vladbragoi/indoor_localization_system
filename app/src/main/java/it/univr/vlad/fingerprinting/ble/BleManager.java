@@ -12,6 +12,7 @@ import java.util.List;
 
 import it.univr.vlad.fingerprinting.Manager;
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.NodeType;
 import it.univr.vlad.fingerprinting.Observer;
 import it.univr.vlad.fingerprinting.R;
 
@@ -61,7 +62,7 @@ public class BleManager extends Manager {
     @Override
     public void notifyObservers(List<Node> results) {
         for (Observer observer : super.mObservers) {
-            observer.update(1, results);
+            observer.update(NodeType.BEACON, results);
         }
     }
 

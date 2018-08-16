@@ -6,6 +6,7 @@ import android.content.Context;
 import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.NodeType;
 import it.univr.vlad.fingerprinting.Observer;
 import it.univr.vlad.fingerprinting.ble.BleManager;
 import it.univr.vlad.fingerprinting.mv.MagneticVector;
@@ -40,8 +41,8 @@ public class BeaconListLiveData extends LiveData<List<Node>> implements Observer
     }
 
     @Override
-    public void update(int type, List<Node> results) {
-        if (type == 1) setValue(results);
+    public void update(NodeType type, List<Node> results) {
+        if (type == NodeType.BEACON) postValue(results);
     }
 
     @Override

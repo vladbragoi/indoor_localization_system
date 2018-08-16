@@ -8,6 +8,7 @@ import java.util.List;
 
 import it.univr.vlad.fingerprinting.Node;
 
+// TODO: fix items position in recycler view
 public class NodesDiffCallback extends DiffUtil.Callback{
 
     private List<Node> oldNodes;
@@ -39,24 +40,21 @@ public class NodesDiffCallback extends DiffUtil.Callback{
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        return oldNodes.get(oldItemPosition).equals(newNodes.get(newItemPosition));
+        return oldNodes.get(oldItemPosition).getValue() == newNodes.get(newItemPosition).getValue();
     }
 
     @Nullable
     @Override
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
-        /*Node newNode = newNodes.get(newItemPosition);
-        Node oldNode = oldNodes.get(oldItemPosition);
+        Node newNode = newNodes.get(newItemPosition);
 
         Bundle diff = new Bundle();
+        diff.putInt("value", newNode.getValue());
 
-        if (newNode.getValue() != (oldNode.getValue())) {
-            diff.putInt("value", newNode.getValue());
-        }
         if (diff.size() == 0) {
             return null;
         }
-        return diff;*/
-        return super.getChangePayload(oldItemPosition, newItemPosition);
+        return diff;
+        //return super.getChangePayload(oldItemPosition, newItemPosition);
     }
 }

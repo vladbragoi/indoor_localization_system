@@ -10,7 +10,7 @@ public interface Observer {
      * @param type 0 for WifiManager, 1 for BleManager
      * @param results list of beacons or wifi nodes
      */
-    void update(int type, List<Node> results);
+    void update(NodeType type, List<Node> results);
 
     /**
      * @param mv magnetic vector
