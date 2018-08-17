@@ -10,6 +10,11 @@ public class MagneticVector {
         this.azimut = azimut;
     }
 
+    public MagneticVector(MagneticVector mv) {
+        this.values = mv.getValues().clone();
+        this.azimut = mv.azimut;
+    }
+
     public float[] getValues() {
         return values;
     }

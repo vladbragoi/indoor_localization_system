@@ -24,7 +24,6 @@ import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,9 +33,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.couchbase.lite.CouchbaseLiteException;
-import com.couchbase.lite.Document;
-import com.couchbase.lite.UnsavedRevision;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -51,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import es.dmoral.toasty.Toasty;
@@ -95,8 +92,10 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mAdapter.addWifiNodes(nodes);
     };
 
-    private final Observer<MagneticVector> magneticVectorObserver =
-            magneticVector -> mAdapter.setMv(magneticVector);
+    private final Observer<MagneticVector> magneticVectorObserver = mv -> {
+        mCurrentFingerprint.addMagneticVector(mv);
+        mAdapter.setMv(mv);
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -192,44 +191,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mTimer.destroy();
         disableBluetooth();
         super.onDestroy();
-    }
-
-    private void showStartDialog() {
-        Activity activity = getActivity();
-        assert activity != null;
-
-        Dialog.showStartDialog(activity, dialog -> {
-            Button start = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-            TextView errorTextView = ((AlertDialog) dialog).findViewById(R.id.errorMessage);
-            TextInputEditText secondsEditText = ((AlertDialog) dialog).findViewById(R.id.seconds);
-            TextInputLayout secondsInputLayout = ((AlertDialog)dialog).findViewById(R.id.secondsInputLayout);
-
-            mWifiCheckbox = ((AlertDialog)dialog).findViewById(R.id.wifi);
-            mBeaconCheckbox = ((AlertDialog)dialog).findViewById(R.id.beacons);
-
-            mWifiCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) turnWifiOn(activity);
-            });
-            mBeaconCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) turnBluetoothOn(activity);
-            });
-
-            start.setOnClickListener(v -> {
-                // Check user data input
-                if (secondsEditText != null && !TextUtils.isEmpty(secondsEditText.getText())
-                        && (mWifiCheckbox.isChecked() || mBeaconCheckbox.isChecked())) {
-
-                    seconds = Integer.parseInt(secondsEditText.getText().toString());
-                    showSetFingerprintDialog();
-
-                    dialog.dismiss();
-                } else if (errorTextView != null && secondsInputLayout != null) {
-                    // No such user input
-                    errorTextView.setVisibility(View.VISIBLE);
-                    secondsInputLayout.setError(getString(R.string.empty_error));
-                }
-            });
-        });
     }
 
     public boolean closeSpeedDial() {
@@ -424,28 +385,28 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         switch (actionItem.getId()) {
             case R.id.fab_save:
                 // TODO: SAVE TO DB
-                if (mCurrentFingerprint != null)
-                    mCurrentFingerprint.saveIn(database.unwrapDatabase());
-
+                if (mCurrentFingerprint != null) {
+                    mCurrentFingerprint.saveInto(database.unwrapDatabase());
+                }
                 break;
             case R.id.fab_stop:
                 stopTimer();
-                assert getContext() != null;
-                Drawable drawable = AppCompatResources
-                        .getDrawable(getContext(), R.drawable.ic_add_white_24dp);
-                mSpeedDialView.setMainFabOpenedDrawable(drawable);
                 break;
         }
+
+        if (mCurrentFingerprint != null) {
+            mCurrentFingerprint.stopMeasuring();
+        }
+
+        Drawable drawable = AppCompatResources.getDrawable(
+                Objects.requireNonNull(getContext()),
+                R.drawable.ic_play_arrow_white_24dp);
+        mSpeedDialView.setMainFabOpenedDrawable(drawable);
         return false; // True to keep the Speed Dial open
     }
 
     @Override
     public boolean onMainActionSelected() {
-        if (getContext() != null) {
-            Drawable drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_fast_forward_white_24dp);
-            mSpeedDialView.setMainFabOpenedDrawable(drawable);
-        }
 
         showStartDialog();
 
@@ -457,11 +418,59 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     }
 
-    private void showSetFingerprintDialog() {
+    private void showStartDialog() {
         Activity activity = getActivity();
         assert activity != null;
 
-        Dialog.showSetFingerprintDialog(getActivity(), dialog -> {
+        Dialog.showStartDialog(activity, dialog -> { // On Show Listener
+            Button start = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+            TextView errorTextView = ((AlertDialog) dialog).findViewById(R.id.errorMessage);
+            TextInputEditText secondsEditText = ((AlertDialog) dialog).findViewById(R.id.seconds);
+            TextInputLayout secondsInputLayout = ((AlertDialog) dialog).findViewById(R.id.secondsInputLayout);
+
+            mWifiCheckbox = ((AlertDialog) dialog).findViewById(R.id.wifi);
+            mBeaconCheckbox = ((AlertDialog) dialog).findViewById(R.id.beacons);
+
+            mWifiCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) turnWifiOn(activity);
+            });
+            mBeaconCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) turnBluetoothOn(activity);
+            });
+
+            start.setOnClickListener(v -> {
+                // Check user data input
+                if (secondsEditText != null && !TextUtils.isEmpty(secondsEditText.getText())
+                        && (mWifiCheckbox.isChecked() || mBeaconCheckbox.isChecked())) {
+
+                    seconds = Integer.parseInt(secondsEditText.getText().toString());
+
+                    if (mCurrentFingerprint == null) {
+                        mCurrentFingerprint = new Fingerprint();
+                    }
+
+                    if (mCurrentFingerprint.isRunning()) {
+                        mCurrentFingerprint.newMeasuration(mDirection.getText().toString());
+                        startCountdown(seconds);
+                    }else {
+                        showSetupFingerprintDialog();
+                    }
+
+                    dialog.dismiss();
+                } else if (errorTextView != null && secondsInputLayout != null) {
+                    // No such user input
+                    errorTextView.setVisibility(View.VISIBLE);
+                    secondsInputLayout.setError(getString(R.string.empty_error));
+                }
+            });
+        }, null);
+    }
+
+    private void showSetupFingerprintDialog() {
+        Activity activity = getActivity();
+        assert activity != null;
+
+        Dialog.showSetFingerprintDialog(getActivity(), dialog -> { // On Show Listener
             Button start = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
             AtomicBoolean noErrors = new AtomicBoolean();
             TextInputEditText bordersEditText = ((AlertDialog) dialog).findViewById(R.id.borders);
@@ -477,7 +486,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
             start.setOnClickListener(v -> {
                 noErrors.set(true);
-                for (Pair<TextInputLayout, TextInputEditText> pair: inputs) {
+                for (Pair<TextInputLayout, TextInputEditText> pair : inputs) {
                     if (TextUtils.isEmpty(pair.second.getText())) {
                         pair.first.setError(getString(R.string.empty_error));
                         noErrors.set(false);
@@ -486,7 +495,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
                 if (noErrors.get()) {
                     String number = inputs.get(0).second.getText().toString();
-                    mCurrentFingerprint = new Fingerprint(number);
+                    mCurrentFingerprint.setNumber(number);
 
                     String x = inputs.get(1).second.getText().toString();
                     mCurrentFingerprint.setX(x);
@@ -498,15 +507,21 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
                     if (bordersEditText != null) {
                         borders = bordersEditText.getText().toString();
                     }
-
                     mCurrentFingerprint.setBorders(borders);
 
+                    mCurrentFingerprint.startMeasuring(mDirection.getText().toString());
+
                     startCountdown(seconds);
+
+                    Drawable drawable = AppCompatResources.getDrawable(
+                            Objects.requireNonNull(getContext()),
+                            R.drawable.ic_fast_forward_white_24dp);
+                    mSpeedDialView.setMainFabOpenedDrawable(drawable);
 
                     dialog.dismiss();
                 }
             });
-        });
+        }, null);
     }
 
     private void startCountdown(int duration) {

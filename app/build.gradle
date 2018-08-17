@@ -43,4 +43,6 @@ dependencies {
 
     implementation 'org.altbeacon:android-beacon-library:2.14'
     implementation 'com.couchbase.lite:couchbase-lite-android:1.4.1'
+
+    //implementation 'org.apache.commons:commons-lang3:3.7' // For "Triple" class
 }
