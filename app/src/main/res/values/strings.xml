@@ -27,7 +27,7 @@
     <string name="fingerprint">Fingerprint</string>
     <string name="duration">Duration</string>
     <string name="fingerprint_number">number</string>
-    <string name="borders">borders</string>
+    <string name="borders">borders [1 North, 2 South, 3 East, 4 West]</string>
     <string name="start">Start</string>
     <string name="nullValue">0</string>
     <string name="direction">Direction</string>

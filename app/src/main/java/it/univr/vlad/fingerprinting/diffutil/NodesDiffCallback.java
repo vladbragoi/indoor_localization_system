@@ -51,9 +51,6 @@ public class NodesDiffCallback extends DiffUtil.Callback{
         Bundle diff = new Bundle();
         diff.putInt("value", newNode.getValue());
 
-        if (diff.size() == 0) {
-            return null;
-        }
         return diff;
         //return super.getChangePayload(oldItemPosition, newItemPosition);
     }

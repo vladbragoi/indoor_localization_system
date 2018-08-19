@@ -36,56 +36,67 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(viewType, parent, false);
 
-        if (viewType == R.layout.magnetic_vector)
-            return new MvViewHolder(view);
-        else if (viewType == R.layout.wifi_node)
-            return new NodesViewHolder(view, NodeType.WIFI);
-        else
-            return new NodesViewHolder(view, NodeType.BEACON);
+        switch (viewType) {
+            case R.layout.magnetic_vector:
+                return new MvViewHolder(view);
+            case R.layout.wifi_node:
+                return new NodesViewHolder(view, NodeType.WIFI);
+            default:
+                return new NodesViewHolder(view, NodeType.BEACON);
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Node node = null;
-        if (position == 0 && holder.getItemViewType() == R.layout.magnetic_vector && mv != null) {
-            MvViewHolder mvHolder = (MvViewHolder) holder;
-            float[] values = mv.getValues();
+        Node node = null; // just a node
 
-            mvHolder.x.setText(String.format(Locale.getDefault(), "%.1f", values[0]));
-            mvHolder.y.setText(String.format(Locale.getDefault(), "%.1f", values[1]));
-            mvHolder.z.setText(String.format(Locale.getDefault(), "%.1f", values[2]));
-            return;
-        }
-        else if (holder.getItemViewType() == R.layout.beacon_node) {
-            node = beaconNodes.get(position - 1);
-        }
-        else if (holder.getItemViewType() == R.layout.wifi_node) {
-            node = wifiNodes.get(position - beaconNodes.size() - 1);
+        switch (holder.getItemViewType()) {
+            case R.layout.magnetic_vector:
+                if (mv != null) {
+                    MvViewHolder mvHolder = (MvViewHolder) holder;
+                    float[] values = mv.getValues();
+
+                    mvHolder.x.setText(String.format(Locale.getDefault(), "%.1f", values[0]));
+                    mvHolder.y.setText(String.format(Locale.getDefault(), "%.1f", values[1]));
+                    mvHolder.z.setText(String.format(Locale.getDefault(), "%.1f", values[2]));
+                    return;
+                }
+                break;
+
+            case R.layout.beacon_node:
+                if (beaconNodes != null) node = beaconNodes.get(position - 1);
+                break;
+
+            case R.layout.wifi_node:
+                if (wifiNodes != null) node = wifiNodes.get(position - beaconNodes.size() - 1);
+                break;
         }
 
         if (node != null) {
-            NodesViewHolder nodeHolder = (NodesViewHolder) holder;
-            nodeHolder.type.setText(node.getType());
-            nodeHolder.bssid.setText(node.getId().toUpperCase());
-            nodeHolder.value.setText(String.valueOf(node.getValue()));
+            NodesViewHolder nodesHolder = (NodesViewHolder) holder;
+            nodesHolder.type.setText(node.getType());
+            nodesHolder.bssid.setText(node.getId().toUpperCase());
+            nodesHolder.value.setText(String.valueOf(node.getValue()));
         }
     }
 
-     @Override
-     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
-         if (payloads.isEmpty()) {
-             super.onBindViewHolder(holder, position, payloads);
-         }
-         else if (holder instanceof NodesViewHolder){
-             Bundle o = (Bundle) payloads.get(0);
-             NodesViewHolder nodeHolder = (NodesViewHolder) holder;
-             for (String key : o.keySet()) {
-                 if (key.equals("value")) {
-                     nodeHolder.value.setText(String.valueOf(o.getInt("value")));
-                 }
-             }
-         }
-     }
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position,
+                                 @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads);
+        }
+        else if (holder instanceof NodesViewHolder){
+            Bundle o = (Bundle) payloads.get(0);
+            System.out.println(payloads);
+            NodesViewHolder nodeHolder = (NodesViewHolder) holder;
+            for (String key : o.keySet()) {
+                if (key.equals("value")) {
+                    nodeHolder.value.setText(String.valueOf(o.getInt("value")));
+                }
+            }
+        }
+    }
 
     public void addWifiNodes(List<Node> newNodes) {
         pendingUpdates.add(newNodes);

@@ -76,7 +76,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     private Timer mTimer;
     private int seconds = 0;
 
-    private Application application;
     private CBLDatabase database;
     private NodeViewModel mViewModel;
 
@@ -89,7 +88,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     private final Observer<List<Node>> beaconNodesObserver = nodes -> {
         mCurrentFingerprint.addBeaconNodes(nodes);
-        mAdapter.addWifiNodes(nodes);
+        mAdapter.addBeaconNodes(nodes);
     };
 
     private final Observer<MagneticVector> magneticVectorObserver = mv -> {
@@ -114,7 +113,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         }
 
         if (getActivity() != null) {
-            application = (Application) getActivity().getApplication();
+            Application application = (Application) getActivity().getApplication();
             database = application.getDatabase();
         }
     }
