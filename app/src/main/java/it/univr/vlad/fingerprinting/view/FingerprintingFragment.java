@@ -72,26 +72,27 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     private NodeListAdapter mAdapter;
     private AppCompatCheckBox mWifiCheckbox;
     private AppCompatCheckBox mBeaconCheckbox;
+    private AppCompatCheckBox mMagneticVectorCheckbox;
 
     private Timer mTimer;
     private int seconds = 0;
 
-    private CBLDatabase database;
+    private CBLDatabase mDatabase;
     private NodeViewModel mViewModel;
 
     private Fingerprint mCurrentFingerprint;
 
-    private final Observer<List<Node>> wifiNodesObserver = nodes -> {
+    private final Observer<List<Node>> mWifiNodesObserver = nodes -> {
         mCurrentFingerprint.addWifiNodes(nodes);
         mAdapter.addWifiNodes(nodes);
     };
 
-    private final Observer<List<Node>> beaconNodesObserver = nodes -> {
+    private final Observer<List<Node>> mBeaconNodesObserver = nodes -> {
         mCurrentFingerprint.addBeaconNodes(nodes);
         mAdapter.addBeaconNodes(nodes);
     };
 
-    private final Observer<MagneticVector> magneticVectorObserver = mv -> {
+    private final Observer<MagneticVector> mMagneticVectorObserver = mv -> {
         mCurrentFingerprint.addMagneticVector(mv);
         mAdapter.setMv(mv);
     };
@@ -114,7 +115,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
         if (getActivity() != null) {
             Application application = (Application) getActivity().getApplication();
-            database = application.getDatabase();
+            mDatabase = application.getDatabase();
         }
     }
 
@@ -129,7 +130,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
         RecyclerView mRecyclerView = rootView.findViewById(R.id.nodesRecyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setItemAnimator(null);
+        //mRecyclerView.setItemAnimator(null);
         mRecyclerView.setAdapter(mAdapter);
 
         setupSpeedDial(savedInstanceState == null);
@@ -175,14 +176,15 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     @Override public void onResume() {
         super.onResume();
-        mViewModel.getWifiList().observe(this, wifiNodesObserver);
-        mViewModel.getBeaconList().observe(this, beaconNodesObserver);
+        mViewModel.getWifiList().observe(this, mWifiNodesObserver);
+        mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
     }
 
     @Override public void onStop() {
         stopTimer();
-        mViewModel.getWifiList().removeObserver(wifiNodesObserver);
-        mViewModel.getBeaconList().removeObserver(beaconNodesObserver);
+        mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
+        mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
+        mViewModel.getMv().removeObserver(mMagneticVectorObserver);
         super.onStop();
     }
 
@@ -356,7 +358,8 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             mViewModel.stopWifiScanning();
         if (mBeaconCheckbox != null && mBeaconCheckbox.isChecked())
             mViewModel.stopBeaconsScanning();
-        mViewModel.getMv().removeObserver(magneticVectorObserver);
+        if (mMagneticVectorCheckbox != null && mMagneticVectorCheckbox.isChecked())
+            mViewModel.getMv().removeObserver(mMagneticVectorObserver);
         if (mTimer != null && mTimer.isRunning()) mTimer.stop();
     }
 
@@ -385,7 +388,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             case R.id.fab_save:
                 // TODO: SAVE TO DB
                 if (mCurrentFingerprint != null) {
-                    mCurrentFingerprint.saveInto(database.unwrapDatabase());
+                    mCurrentFingerprint.saveInto(mDatabase.unwrapDatabase());
                 }
                 break;
             case R.id.fab_stop:
@@ -429,6 +432,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
             mWifiCheckbox = ((AlertDialog) dialog).findViewById(R.id.wifi);
             mBeaconCheckbox = ((AlertDialog) dialog).findViewById(R.id.beacons);
+            mMagneticVectorCheckbox = ((AlertDialog) dialog).findViewById(R.id.magneticVector);
 
             mWifiCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) turnWifiOn(activity);
@@ -525,12 +529,13 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     private void startCountdown(int duration) {
         if (!mTimer.isRunning()) { // Start scanning data
-            mViewModel.getMv().observe(this, magneticVectorObserver);
 
             if (mWifiCheckbox != null && mWifiCheckbox.isChecked())
                 mViewModel.startWifiScanning();
             if (mBeaconCheckbox != null && mBeaconCheckbox.isChecked())
                 mViewModel.startBeaconsScanning();
+            if (mMagneticVectorCheckbox != null && mMagneticVectorCheckbox.isChecked())
+                mViewModel.getMv().observe(this, mMagneticVectorObserver);
 
             mTimer.startCountFrom(duration);
         }

@@ -32,6 +32,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wifi" />
 
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/magneticVector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/magneticVector"
+            android:checked="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/beacons" />
+
         <TextView
             android:id="@+id/errorMessage"
             android:layout_width="match_parent"
@@ -44,7 +55,7 @@
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/secondsInputLayout"
-            app:layout_constraintTop_toBottomOf="@+id/beacons" />
+            app:layout_constraintTop_toBottomOf="@+id/magneticVector" />
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/secondsInputLayout"

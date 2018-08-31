@@ -48,10 +48,8 @@ public class NodesDiffCallback extends DiffUtil.Callback{
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
         Node newNode = newNodes.get(newItemPosition);
 
-        Bundle diff = new Bundle();
-        diff.putInt("value", newNode.getValue());
+        return newNode.getValue();
 
-        return diff;
         //return super.getChangePayload(oldItemPosition, newItemPosition);
     }
 }

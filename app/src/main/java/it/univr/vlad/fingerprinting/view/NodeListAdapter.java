@@ -1,5 +1,6 @@
 package it.univr.vlad.fingerprinting.view;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -53,12 +54,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         switch (holder.getItemViewType()) {
             case R.layout.magnetic_vector:
                 if (mv != null) {
-                    MvViewHolder mvHolder = (MvViewHolder) holder;
-                    float[] values = mv.getValues();
-
-                    mvHolder.x.setText(String.format(Locale.getDefault(), "%.1f", values[0]));
-                    mvHolder.y.setText(String.format(Locale.getDefault(), "%.1f", values[1]));
-                    mvHolder.z.setText(String.format(Locale.getDefault(), "%.1f", values[2]));
+                    ((MvViewHolder) holder).bindView(mv.getValues());
                     return;
                 }
                 break;
@@ -72,29 +68,32 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 break;
         }
 
-        if (node != null) {
-            NodesViewHolder nodesHolder = (NodesViewHolder) holder;
-            nodesHolder.type.setText(node.getType());
-            nodesHolder.bssid.setText(node.getId().toUpperCase());
-            nodesHolder.value.setText(String.valueOf(node.getValue()));
-        }
+        if (node != null) ((NodesViewHolder) holder).bindView(node);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position,
                                  @NonNull List<Object> payloads) {
+
         if (payloads.isEmpty()) {
             super.onBindViewHolder(holder, position, payloads);
+            return;
         }
-        else if (holder instanceof NodesViewHolder){
-            Bundle o = (Bundle) payloads.get(0);
-            System.out.println(payloads);
-            NodesViewHolder nodeHolder = (NodesViewHolder) holder;
-            for (String key : o.keySet()) {
-                if (key.equals("value")) {
-                    nodeHolder.value.setText(String.valueOf(o.getInt("value")));
+
+        switch (holder.getItemViewType()) {
+            case R.layout.magnetic_vector:
+                if (payloads.get(0) instanceof float[]){
+                    float[] values = (float[]) payloads.get(0);
+                    ((MvViewHolder) holder).bindView(values);
                 }
-            }
+                break;
+            case R.layout.beacon_node:
+            case R.layout.wifi_node:
+                if (payloads.get(0) instanceof Integer) {
+                    int values = (int) payloads.get(0);
+                    ((NodesViewHolder) holder).updateView(values);
+                }
+                break;
         }
     }
 
@@ -112,8 +111,12 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private void updateNodesInternal(NodeType nodeType, List<Node> newNodes) {
         final List<Node> oldNodes = new ArrayList<>();
-        if (nodeType == NodeType.WIFI) oldNodes.addAll(wifiNodes);
-        else oldNodes.addAll(beaconNodes);
+        if (nodeType == NodeType.WIFI) {
+            oldNodes.addAll(wifiNodes);
+        }
+        else {
+            oldNodes.addAll(beaconNodes);
+        }
 
         final Handler handler = new Handler();
         new Thread(() -> {
@@ -130,9 +133,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             updateNodesInternal(nodeType, pendingUpdates.peek());
     }
 
-    // TODO: fix items position in recycler view
     private void dispatchUpdates(NodeType nodeType, List<Node> newNodes, DiffUtil.DiffResult diffResult) {
-        diffResult.dispatchUpdatesTo(this);
         if (nodeType == NodeType.WIFI) {
             wifiNodes.clear();
             wifiNodes.addAll(newNodes);
@@ -141,27 +142,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             beaconNodes.addAll(newNodes);
         }
 
-        diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
-            @Override
-            public void onInserted(int position, int count) {
-                notifyItemRangeInserted(position, count);
-            }
-
-            @Override
-            public void onRemoved(int position, int count) {
-                notifyItemRangeRemoved(position, count);
-            }
-
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                notifyItemMoved(fromPosition, toPosition);
-            }
-
-            @Override
-            public void onChanged(int position, int count, Object payload) {
-                notifyItemRangeChanged(position, count, payload);
-            }
-        });
+        diffResult.dispatchUpdatesTo(this);
     }
 
     /* OLD METHOD
@@ -196,9 +177,10 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void setMv(MagneticVector mv) {
         this.mv = mv;
         final Handler handler = new Handler();
-        handler.post(() -> notifyItemChanged(0));
+        handler.post(() -> notifyItemChanged(0, mv.getValues()));
     }
 
+    // TODO: fix item's type
     @Override
     public int getItemViewType(int position) {
         if (position == 0)
@@ -230,6 +212,16 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             this.value = itemView.findViewById(R.id.value);
             this.type = itemView.findViewById(R.id.type);
         }
+
+        void updateView(int values) {
+            value.setText(String.valueOf(values));
+        }
+
+        void bindView(Node node) {
+            type.setText(node.getType());
+            bssid.setText(node.getId().toUpperCase());
+            value.setText(String.valueOf(node.getValue()));
+        }
     }
 
     public static class MvViewHolder extends RecyclerView.ViewHolder {
@@ -245,6 +237,12 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             x = itemView.findViewById(R.id.xValue);
             y = itemView.findViewById(R.id.yValue);
             z = itemView.findViewById(R.id.zValue);
+        }
+
+        void bindView(float[] values) {
+            x.setText(String.format(Locale.getDefault(), "%.1f", values[0]));
+            y.setText(String.format(Locale.getDefault(), "%.1f", values[1]));
+            z.setText(String.format(Locale.getDefault(), "%.1f", values[2]));
         }
     }
 }

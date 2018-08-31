@@ -60,4 +60,5 @@
     <string name="timer_seconds">Too many seconds</string>
     <string name="tilt_mode">Tilt your device for correct orientation compass ▼</string>
     <string name="fingerprinting">Fingerprinting</string>
+    <string name="magneticVector">magnetic vector</string>
 </resources>
