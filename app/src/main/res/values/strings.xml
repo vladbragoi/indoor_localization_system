@@ -61,4 +61,6 @@
     <string name="tilt_mode">Tilt your device for correct orientation compass ▼</string>
     <string name="fingerprinting">Fingerprinting</string>
     <string name="magneticVector">magnetic vector</string>
+    <string name="location">Location</string>
+    <string name="localization">Localization</string>
 </resources>

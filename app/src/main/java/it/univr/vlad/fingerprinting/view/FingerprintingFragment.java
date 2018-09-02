@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import es.dmoral.toasty.Toasty;
 import it.univr.vlad.fingerprinting.Application;
 import it.univr.vlad.fingerprinting.Fingerprint;
+import it.univr.vlad.fingerprinting.MainActivity;
 import it.univr.vlad.fingerprinting.Node;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.Timer;
@@ -63,16 +64,14 @@ import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
 public class FingerprintingFragment extends Fragment implements Timer.TimerListener,
         SpeedDialView.OnActionSelectedListener, SpeedDialView.OnChangeListener {
 
-    private final static int LOCATION_RESULT_CODE = 4295;
-
     private SpeedDialView mSpeedDialView;
     private TextView mDirection;
     private TextView mTimerSeconds;
     private TextView mTimerMinutes;
     private NodeListAdapter mAdapter;
-    private AppCompatCheckBox mWifiCheckbox;
-    private AppCompatCheckBox mBeaconCheckbox;
-    private AppCompatCheckBox mMagneticVectorCheckbox;
+    public AppCompatCheckBox mWifiCheckbox;
+    public AppCompatCheckBox mBeaconCheckbox;
+    public AppCompatCheckBox mMagneticVectorCheckbox;
 
     private Timer mTimer;
     private int seconds = 0;
@@ -108,14 +107,14 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mViewModel.getMv().observe(this, magneticVector ->
                 mDirection.setText(magneticVector != null ? magneticVector.toString() : "NORTH"));
 
-        Context context = getContext();
-        if (context != null && savedInstanceState == null) {
-            turnLocationOn(context);
-        }
-
-        if (getActivity() != null) {
-            Application application = (Application) getActivity().getApplication();
+        Activity activity = getActivity();
+        if (activity != null) {
+            Application application = (Application) activity.getApplication();
             mDatabase = application.getDatabase();
+
+            if (savedInstanceState == null && activity instanceof MainActivity) {
+                ((MainActivity) activity).turnLocationOn();
+            }
         }
     }
 
@@ -190,7 +189,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     @Override public void onDestroy() {
         mTimer.destroy();
-        disableBluetooth();
         super.onDestroy();
     }
 
@@ -201,72 +199,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             return true;
         }
         return false;
-    }
-
-    private void turnLocationOn(@NotNull Context context) {
-        // ENABLE LOCATION WITH GOOGLE-API
-        LocationRequest locationRequest= new LocationRequest();
-
-        // Low-Precision Location (low power)
-        locationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(locationRequest);
-        SettingsClient client = LocationServices.getSettingsClient(context);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-
-        // Request to enable location
-        task.addOnFailureListener((Activity) context, e -> {
-            if (e instanceof ResolvableApiException) {
-                try {
-                    ResolvableApiException resolvable = (ResolvableApiException) e;
-                    resolvable.startResolutionForResult(getActivity(),
-                            LOCATION_RESULT_CODE);
-                } catch (IntentSender.SendIntentException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
-
-        /* ENABLE LOCATION THROUGH SYSTEM SETTINGS
-        LocationManager locationManager = (LocationManager)
-                context.getSystemService(Context.LOCATION_SERVICE);
-        assert locationManager != null;
-
-        if (!isLocationEnabled(locationManager)) {
-            final AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-            dialog.setTitle(context.getString(R.string.location_title));
-            dialog.setMessage(context.getString(R.string.location_message));
-            dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
-                *//*Activity activity = getActivity();
-                if (activity != null)
-                    activity.startActivityForResult(
-                            new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),
-                            LOCATION_RESULT_CODE);*//*
-            });
-            dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> {
-                    dialog2.dismiss();
-                    locationNotEnabled();
-            });
-            dialog.show();
-        }*/
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == LOCATION_RESULT_CODE) {
-            if (resultCode != Activity.RESULT_OK) locationNotEnabled();
-        } else
-            super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void locationNotEnabled() {
-        assert getContext() != null;
-        Toasty.warning(getContext(),
-                getString(R.string.location_not_enabled),
-                Toast.LENGTH_LONG,
-                true).show();
-        mSpeedDialView.hide();
     }
 
     /**
@@ -282,75 +214,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         return gps_enabled || network_enabled;
-    }
-
-    private void turnBluetoothOn(Context context) {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
-            if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-                Toasty.warning(context,
-                        getString(R.string.ble_not_supported),
-                        Toast.LENGTH_SHORT, true).show();
-            }
-            else {
-                /*
-                 * Should use this method, but just to uniform the requests
-                 * mContext.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
-                 */
-                final AlertDialog.Builder dialog =
-                        new AlertDialog.Builder(context);
-                dialog.setTitle(context.getString(R.string.bluetooth_title));
-                dialog.setMessage(context.getString(R.string.bluetooth_message));
-                dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
-                    if (!bluetoothAdapter.isEnabled()) {
-                        bluetoothAdapter.enable();
-                        Toasty.success(context,
-                                context.getString(R.string.bluetooth_enabled),
-                                Toast.LENGTH_SHORT, true).show();
-                    }
-                });
-                dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> {
-                    if (mBeaconCheckbox != null) mBeaconCheckbox.setChecked(false);
-                    dialog2.dismiss();
-                });
-                dialog.setOnCancelListener(diag ->
-                        context.startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
-                );
-                dialog.show();
-            }
-        }
-    }
-
-    private void turnWifiOn(@NotNull Context context) {
-        WifiManager wifiManager = (WifiManager) context
-                .getApplicationContext()
-                .getSystemService(Context.WIFI_SERVICE);
-
-        if (wifiManager != null && !wifiManager.isWifiEnabled()) {
-            final AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-            dialog.setTitle(context.getString(R.string.wifi_title));
-            dialog.setMessage(context.getString(R.string.wifi_message));
-            dialog.setPositiveButton(android.R.string.ok, (dialog1, which) -> {
-                wifiManager.setWifiEnabled(true);
-                Toasty.success(context,
-                        context.getString(R.string.wifi_enabled),
-                        Toast.LENGTH_SHORT, true).show();
-            });
-            dialog.setNegativeButton(android.R.string.no, (dialog2, which) -> {
-                if (mWifiCheckbox != null) mWifiCheckbox.setChecked(false);
-                dialog2.dismiss();
-            });
-            dialog.setOnCancelListener(diag ->
-                    context.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS))
-            );
-            dialog.show();
-        }
-    }
-
-    private void disableBluetooth() {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled())
-            bluetoothAdapter.disable();
     }
 
     private void stopTimer() {
@@ -386,7 +249,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     public boolean onActionSelected(SpeedDialActionItem actionItem) {
         switch (actionItem.getId()) {
             case R.id.fab_save:
-                // TODO: SAVE TO DB
                 if (mCurrentFingerprint != null) {
                     mCurrentFingerprint.saveInto(mDatabase.unwrapDatabase());
                 }
@@ -416,9 +278,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     }
 
     @Override
-    public void onToggleChanged(boolean isOpen) {
-
-    }
+    public void onToggleChanged(boolean isOpen) { }
 
     private void showStartDialog() {
         Activity activity = getActivity();
@@ -435,10 +295,14 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             mMagneticVectorCheckbox = ((AlertDialog) dialog).findViewById(R.id.magneticVector);
 
             mWifiCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) turnWifiOn(activity);
+                if (isChecked && activity instanceof MainActivity) {
+                    ((MainActivity) activity).turnWifiOn(this);
+                }
             });
             mBeaconCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) turnBluetoothOn(activity);
+                if (isChecked && activity instanceof MainActivity) {
+                    ((MainActivity) activity).turnBluetoothOn(this);
+                }
             });
 
             start.setOnClickListener(v -> {

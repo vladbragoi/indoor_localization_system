@@ -16,21 +16,22 @@ public class Application extends android.app.Application
 
     private static final String TAG = "Fingerprint";
 
-    private enum Session {OFFLINE, ONLINE}
+    public enum Session {OFFLINE, ONLINE}
 
-    public static final String OFF_DB_NAME_KEY = "db_name";
-    public static final String OFF_DB_URL_KEY = "db_url";
-    public static final String OFF_DB_USER_KEY = "username";
-    public static final String OFF_DB_PASSWD_KEY = "password";
+    public static final String FING_DB_NAME_KEY = "db_name";
+    public static final String FING_DB_URL_KEY = "db_url";
+    public static final String FING_DB_USER_KEY = "username";
+    public static final String FING_DB_PASSWD_KEY = "password";
 
-    public static final String ON_DB_NAME_KEY = "db_name";
-    public static final String ON_DB_URL_KEY = "db_url";
-    public static final String ON_DB_USER_KEY = "username";
-    public static final String ON_DB_PASSWD_KEY = "password";
+    public static final String LOC_DB_NAME_KEY = "loc_db_name";
+    public static final String LOC_DB_URL_KEY = "loc_db_url";
+    public static final String LOC_DB_USER_KEY = "loc_username";
+    public static final String LOC_DB_PASSWD_KEY = "loc_password";
 
     protected SharedPreferences sharedPreferences;
     private Manager manager;
     private CBLDatabase database;
+
     private String mDatabaseName;
     private String mDatabaseUrl;
     private String mUsername;
@@ -57,19 +58,19 @@ public class Application extends android.app.Application
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         // TODO: pay attention here
         switch (key) {
-            case OFF_DB_NAME_KEY:
+            case FING_DB_NAME_KEY:
                 mDatabaseName = sharedPreferences.getString(key, "");
                 database.changeName(manager, mDatabaseName);
                 break;
-            case OFF_DB_URL_KEY:
+            case FING_DB_URL_KEY:
                 mDatabaseUrl = sharedPreferences.getString(key, "");
                 database.changeUrl(mDatabaseUrl);
                 break;
-            case OFF_DB_USER_KEY:
+            case FING_DB_USER_KEY:
                 mUsername = sharedPreferences.getString(key, "");
                 database.updateAuthentication(mUsername, mPassword);
                 break;
-            case OFF_DB_PASSWD_KEY:
+            case FING_DB_PASSWD_KEY:
                 mPassword = sharedPreferences.getString(key, "");
                 database.updateAuthentication(mUsername, mPassword);
                 break;
@@ -103,23 +104,23 @@ public class Application extends android.app.Application
                 .setPushReplication().setContinuous(true);
     }
 
-    private void changeSession(Session session) {
+    public void changeSession(Session session) {
         database.close();
         if (manager != null) startSession(session);
     }
 
     private void loadOnlineDatabasePreferences() {
-        this.mDatabaseName = sharedPreferences.getString(ON_DB_NAME_KEY, "");
-        this.mDatabaseUrl = sharedPreferences.getString(ON_DB_URL_KEY, "");
-        this.mUsername = sharedPreferences.getString(ON_DB_USER_KEY, "");
-        this.mPassword = sharedPreferences.getString(ON_DB_PASSWD_KEY, "");
+        this.mDatabaseName = sharedPreferences.getString(LOC_DB_NAME_KEY, "");
+        this.mDatabaseUrl = sharedPreferences.getString(LOC_DB_URL_KEY, "");
+        this.mUsername = sharedPreferences.getString(LOC_DB_USER_KEY, "");
+        this.mPassword = sharedPreferences.getString(LOC_DB_PASSWD_KEY, "");
     }
 
     private void loadFingerprintingDbPreferences() {
-        this.mDatabaseName = sharedPreferences.getString(OFF_DB_NAME_KEY, "");
-        this.mDatabaseUrl =  sharedPreferences.getString(OFF_DB_URL_KEY, "");
-        this.mUsername =  sharedPreferences.getString(OFF_DB_USER_KEY, "");
-        this.mPassword = sharedPreferences.getString(OFF_DB_PASSWD_KEY, "");
+        this.mDatabaseName = sharedPreferences.getString(FING_DB_NAME_KEY, "");
+        this.mDatabaseUrl =  sharedPreferences.getString(FING_DB_URL_KEY, "");
+        this.mUsername =  sharedPreferences.getString(FING_DB_USER_KEY, "");
+        this.mPassword = sharedPreferences.getString(FING_DB_PASSWD_KEY, "");
     }
 
     private void enableLogging() {

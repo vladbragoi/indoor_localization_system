@@ -12,14 +12,14 @@ import it.univr.vlad.fingerprinting.mv.MagneticVector;
 
 public class NodeViewModel extends AndroidViewModel {
 
-    private final WifiListLiveData wifiList;
-    private final BeaconListLiveData beaconList;
+    private final WifiLiveData wifiList;
+    private final BleLiveData beaconList;
     private final MagneticVectorLiveData mv;
 
     public NodeViewModel(@NonNull Application application) {
         super(application);
-        wifiList = new WifiListLiveData(application);
-        beaconList = new BeaconListLiveData(application);
+        wifiList = new WifiLiveData(application);
+        beaconList = new BleLiveData(application);
         mv = new MagneticVectorLiveData(application);
     }
 

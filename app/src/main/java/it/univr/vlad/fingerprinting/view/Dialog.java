@@ -8,7 +8,28 @@ import android.view.View;
 
 import it.univr.vlad.fingerprinting.R;
 
-public class Dialog {
+public final class Dialog {
+
+
+
+    /**
+     * A dialog to ask user which device(s) should be used for "localization"
+     * @param activity activity
+     * @param showListener Show Listener
+     * @param dismissListener Dismiss Listener
+     */
+    public static void showStartLocalizationDialog(Activity activity,
+                                                   DialogInterface.OnShowListener showListener,
+                                                   DialogInterface.OnDismissListener dismissListener) {
+        AlertDialog dialog = showDialog(
+                activity,
+                activity.getString(R.string.localization),
+                R.layout.dialog_localization_start);
+
+        dialog.setOnShowListener(showListener);
+        if (dismissListener != null) dialog.setOnDismissListener(dismissListener);
+        dialog.show();
+    }
 
     /**
      * A dialog to ask user which device(s) should be used for "fingerprinting"
