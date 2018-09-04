@@ -29,6 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/florenc"
         android:autoLink="email"
         app:layout_constraintEnd_toEndOf="parent"
