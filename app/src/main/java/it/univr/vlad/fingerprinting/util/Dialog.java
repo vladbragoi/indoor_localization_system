@@ -10,6 +10,16 @@ import it.univr.vlad.fingerprinting.R;
 
 public final class Dialog {
 
+    public static void showInfoDialog(Activity activity) {
+        View view = View.inflate(activity, R.layout.dialog_info, null);
+
+        new AlertDialog.Builder(activity)
+                .setTitle(activity.getString(R.string.fingerprinting))
+                .setView(view)
+                .create()
+                .show();
+    }
+
     /**
      * A dialog to ask user which device(s) should be used for "localization"
      * @param activity activity

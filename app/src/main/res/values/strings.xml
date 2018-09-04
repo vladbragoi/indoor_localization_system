@@ -63,4 +63,7 @@
     <string name="magneticVector">magnetic vector</string>
     <string name="location">Location</string>
     <string name="localization">Localization</string>
+    <string name="info">For any information please contact us at:</string>
+    <string name="vlad">vlad.bragoi@gmail.com</string>
+    <string name="florenc">florenc.demrozi@univr.it</string>
 </resources>
