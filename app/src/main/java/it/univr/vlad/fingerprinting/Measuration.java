@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import it.univr.vlad.fingerprinting.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.devices.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.templates.Node;
 
 public class Measuration {
 
@@ -39,5 +40,11 @@ public class Measuration {
 
     public List<MagneticVector> getMv() {
         return mv;
+    }
+
+    public void clear() {
+        wifi.clear();
+        ble.clear();
+        mv.clear();
     }
 }

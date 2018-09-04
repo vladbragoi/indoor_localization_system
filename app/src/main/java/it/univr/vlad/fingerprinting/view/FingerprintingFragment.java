@@ -3,16 +3,10 @@ package it.univr.vlad.fingerprinting.view;
 import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -33,13 +27,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.Task;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
 
@@ -53,12 +40,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import es.dmoral.toasty.Toasty;
 import it.univr.vlad.fingerprinting.Application;
 import it.univr.vlad.fingerprinting.Fingerprint;
-import it.univr.vlad.fingerprinting.MainActivity;
-import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.activity.MainActivity;
+import it.univr.vlad.fingerprinting.templates.Node;
 import it.univr.vlad.fingerprinting.R;
 import it.univr.vlad.fingerprinting.Timer;
 import it.univr.vlad.fingerprinting.model.CBLDatabase;
-import it.univr.vlad.fingerprinting.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.devices.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.util.Dialog;
 import it.univr.vlad.fingerprinting.viewmodel.NodeViewModel;
 
 public class FingerprintingFragment extends Fragment implements Timer.TimerListener,
@@ -110,7 +98,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         Activity activity = getActivity();
         if (activity != null) {
             Application application = (Application) activity.getApplication();
-            mDatabase = application.getDatabase();
+            mDatabase = application.getFingerprintingDatabase().startPushReplication(true);
 
             if (savedInstanceState == null && activity instanceof MainActivity) {
                 ((MainActivity) activity).turnLocationOn();
@@ -173,14 +161,16 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mSpeedDialView.setOnActionSelectedListener(this);
     }
 
-    @Override public void onResume() {
-        super.onResume();
+    @Override public void onStart() {
+        super.onStart();
+        if (!mDatabase.isRunning()) mDatabase.start();
         mViewModel.getWifiList().observe(this, mWifiNodesObserver);
         mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
     }
 
     @Override public void onStop() {
         stopTimer();
+        if (mDatabase.isRunning()) mDatabase.stop();
         mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
         mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
         mViewModel.getMv().removeObserver(mMagneticVectorObserver);

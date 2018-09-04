@@ -7,8 +7,8 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import it.univr.vlad.fingerprinting.Node;
-import it.univr.vlad.fingerprinting.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.templates.Node;
+import it.univr.vlad.fingerprinting.devices.mv.MagneticVector;
 
 public class NodeViewModel extends AndroidViewModel {
 

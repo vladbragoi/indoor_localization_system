@@ -15,6 +15,8 @@ import com.couchbase.lite.replicator.Replication;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CBLDatabase implements Replication.ChangeListener {
 
@@ -26,7 +28,8 @@ public class CBLDatabase implements Replication.ChangeListener {
     private Replication mPullReplication;
     private Authenticator mAuthenticator;
 
-    private boolean continuous = false;
+    private boolean continuousPullReplication = false;
+    private boolean continuousPushReplication = false;
     private boolean running = false;
     private boolean push = false;
     private boolean pull = false;
@@ -64,8 +67,8 @@ public class CBLDatabase implements Replication.ChangeListener {
     }
 
     public void start() {
-        if (push) startPushReplication(continuous, pushFilter);
-        if (pull) startPullReplication(continuous, pullFilter);
+        if (push) startPushReplication(continuousPushReplication, pushFilter);
+        if (pull) startPullReplication(continuousPullReplication, pullFilter);
         running = true;
         Log.d(mDatabaseName, "DB Started");
     }
@@ -77,18 +80,19 @@ public class CBLDatabase implements Replication.ChangeListener {
         Log.d(mDatabaseName, "DB Stopped");
     }
 
-    public CBLDatabase setContinuous(boolean continuous) {
-        this.continuous = continuous;
-        return this;
-    }
-
-    public CBLDatabase setPushReplication() {
+    public CBLDatabase startPushReplication(boolean continuous) {
         this.push = true;
+        this.continuousPushReplication = continuous;
+        startPushReplication(continuous, pushFilter);
+        running = true;
         return this;
     }
 
-    public CBLDatabase setPullReplication() {
+    public CBLDatabase startPullReplication(boolean continuous) {
         this.pull = true;
+        this.continuousPullReplication = continuous;
+        startPullReplication(continuous, pullFilter);
+        running = true;
         return this;
     }
 
@@ -260,5 +264,9 @@ public class CBLDatabase implements Replication.ChangeListener {
 
     public Database unwrapDatabase() {
         return mDatabase;
+    }
+
+    public boolean isOpen() {
+        return mDatabase.isOpen();
     }
 }

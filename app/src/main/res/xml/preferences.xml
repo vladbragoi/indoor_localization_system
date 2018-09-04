@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <EditTextPreference
+        android:defaultValue="admin"
+        android:icon="@drawable/ic_account_circle_black_24dp"
+        android:key="username"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="Your name"
+        android:title="Name" />
+
     <PreferenceCategory android:title="Fingerprinting Database">
 
         <EditTextPreference
             android:defaultValue="database"
             android:icon="@drawable/ic_storage_black_24dp"
-            android:key="db_name"
+            android:key="fing_name"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="The name of your database"
@@ -14,15 +23,15 @@
         <EditTextPreference
             android:defaultValue="http://192.168.1.1:5984/"
             android:icon="@drawable/ic_insert_link_black_24dp"
-            android:key="db_url"
+            android:key="fing_url"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="Your database (or hosted database) url"
             android:title="URL" />
         <EditTextPreference
             android:defaultValue="admin"
-            android:icon="@drawable/ic_account_circle_black_24dp"
-            android:key="username"
+            android:icon="@drawable/ic_supervisor_account_black_24dp"
+            android:key="fing_username"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="Your db usarname"
@@ -30,7 +39,7 @@
         <EditTextPreference
             android:defaultValue="admin"
             android:icon="@drawable/ic_vpn_key_black_24dp"
-            android:key="password"
+            android:key="fing_password"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="Your db password"
@@ -42,7 +51,7 @@
         <EditTextPreference
             android:defaultValue="database"
             android:icon="@drawable/ic_storage_black_24dp"
-            android:key="loc_db_name"
+            android:key="loc_name"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="The name of your database"
@@ -50,14 +59,14 @@
         <EditTextPreference
             android:defaultValue="http://192.168.1.1:5984/"
             android:icon="@drawable/ic_insert_link_black_24dp"
-            android:key="loc_db_url"
+            android:key="loc_url"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="Your database (or hosted database) url"
             android:title="URL" />
         <EditTextPreference
             android:defaultValue="admin"
-            android:icon="@drawable/ic_account_circle_black_24dp"
+            android:icon="@drawable/ic_supervisor_account_black_24dp"
             android:key="loc_username"
             android:selectAllOnFocus="true"
             android:singleLine="true"

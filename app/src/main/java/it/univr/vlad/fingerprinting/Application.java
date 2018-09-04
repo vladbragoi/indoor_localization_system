@@ -18,24 +18,30 @@ public class Application extends android.app.Application
 
     public enum Session {OFFLINE, ONLINE}
 
-    public static final String FING_DB_NAME_KEY = "db_name";
-    public static final String FING_DB_URL_KEY = "db_url";
-    public static final String FING_DB_USER_KEY = "username";
-    public static final String FING_DB_PASSWD_KEY = "password";
+    public static final String FING_DB_NAME_KEY = "fing_name";
+    public static final String FING_DB_URL_KEY = "fing_url";
+    public static final String FING_DB_USER_KEY = "fing_username";
+    public static final String FING_DB_PASSWD_KEY = "fing_password";
 
-    public static final String LOC_DB_NAME_KEY = "loc_db_name";
-    public static final String LOC_DB_URL_KEY = "loc_db_url";
+    public static final String LOC_DB_NAME_KEY = "loc_name";
+    public static final String LOC_DB_URL_KEY = "loc_url";
     public static final String LOC_DB_USER_KEY = "loc_username";
     public static final String LOC_DB_PASSWD_KEY = "loc_password";
 
     protected SharedPreferences sharedPreferences;
     private Manager manager;
-    private CBLDatabase database;
+    private CBLDatabase fingerprintingDatabase;
+    private CBLDatabase localizationDatabase;
 
-    private String mDatabaseName;
-    private String mDatabaseUrl;
-    private String mUsername;
-    private String mPassword;
+    private String mFingDbName;
+    private String mFingDbUrl;
+    private String mFingUsername;
+    private String mFingPassword;
+
+    private String mLocDbName;
+    private String mLocDbUrl;
+    private String mLocUsername;
+    private String mLocPassword;
 
     @Override
     public void onCreate() {
@@ -45,51 +51,99 @@ public class Application extends android.app.Application
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
+        loadPreferences();
+
+        fingerprintingDatabase = new CBLDatabase(
+                manager,
+                mFingDbName,
+                mFingDbUrl,
+                mFingUsername,
+                mFingPassword);
+
+        localizationDatabase = new CBLDatabase(
+                manager,
+                mLocDbName,
+                mLocDbUrl,
+                mLocUsername,
+                mLocPassword);
+
         // enableLogging();
-        if (manager != null) startSession(Session.OFFLINE);
+        // if (manager != null) startSession(Session.OFFLINE);
         Log.d(TAG, "APP Started");
+    }
+
+    private void loadPreferences() {
+        // Fingerprinting Database
+        this.mFingDbName = sharedPreferences.getString(FING_DB_NAME_KEY, "");
+        this.mFingDbUrl =  sharedPreferences.getString(FING_DB_URL_KEY, "");
+        this.mFingUsername =  sharedPreferences.getString(FING_DB_USER_KEY, "");
+        this.mFingPassword = sharedPreferences.getString(FING_DB_PASSWD_KEY, "");
+
+        // Localization Database
+        this.mLocDbName = sharedPreferences.getString(LOC_DB_NAME_KEY, "");
+        this.mLocDbUrl = sharedPreferences.getString(LOC_DB_URL_KEY, "");
+        this.mLocUsername = sharedPreferences.getString(LOC_DB_USER_KEY, "");
+        this.mLocPassword = sharedPreferences.getString(LOC_DB_PASSWD_KEY, "");
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        // TODO: pay attention here
         switch (key) {
             case FING_DB_NAME_KEY:
-                mDatabaseName = sharedPreferences.getString(key, "");
-                database.changeName(manager, mDatabaseName);
+                mFingDbName = sharedPreferences.getString(key, "");
+                fingerprintingDatabase.changeName(manager, mFingDbName);
                 break;
             case FING_DB_URL_KEY:
-                mDatabaseUrl = sharedPreferences.getString(key, "");
-                database.changeUrl(mDatabaseUrl);
+                mFingDbUrl= sharedPreferences.getString(key, "");
+                fingerprintingDatabase.changeUrl(mFingDbUrl);
                 break;
             case FING_DB_USER_KEY:
-                mUsername = sharedPreferences.getString(key, "");
-                database.updateAuthentication(mUsername, mPassword);
+                mFingUsername = sharedPreferences.getString(key, "");
+                fingerprintingDatabase.updateAuthentication(mFingUsername, mFingPassword);
                 break;
             case FING_DB_PASSWD_KEY:
-                mPassword = sharedPreferences.getString(key, "");
-                database.updateAuthentication(mUsername, mPassword);
+                mFingPassword = sharedPreferences.getString(key, "");
+                fingerprintingDatabase.updateAuthentication(mFingUsername, mFingPassword);
+                break;
+            case LOC_DB_NAME_KEY:
+                mLocDbName = sharedPreferences.getString(key, "");
+                localizationDatabase.changeName(manager, mLocDbName);
+                break;
+            case LOC_DB_URL_KEY:
+                mLocDbUrl= sharedPreferences.getString(key, "");
+                localizationDatabase.changeUrl(mLocDbUrl);
+                break;
+            case LOC_DB_USER_KEY:
+                mLocUsername = sharedPreferences.getString(key, "");
+                localizationDatabase.updateAuthentication(mLocUsername, mLocPassword);
+                break;
+            case LOC_DB_PASSWD_KEY:
+                mLocPassword = sharedPreferences.getString(key, "");
+                localizationDatabase.updateAuthentication(mLocUsername, mLocPassword);
                 break;
         }
-        // TODO: ONLINE db preferences change
     }
 
-    public CBLDatabase getDatabase() {
-        return database;
+    public CBLDatabase getFingerprintingDatabase() {
+        return fingerprintingDatabase;
+    }
+
+    public CBLDatabase getLocalizationDatabase() {
+        return localizationDatabase;
     }
 
     public void close() {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
-        if (database != null) database.stop();
+        if (localizationDatabase.isOpen()) localizationDatabase.close();
+        if (fingerprintingDatabase.isOpen()) fingerprintingDatabase.close();
         if (manager != null) manager.close();
         Log.d(TAG, "APP Stopped");
     }
 
-    private void startSession(Session session) {
+  /*  private void startSession(Session session) {
         switch (session) {
             case ONLINE:
                 loadOnlineDatabasePreferences(); break;
@@ -100,28 +154,14 @@ public class Application extends android.app.Application
     }
 
     private void openDatabase() {
-        this.database = new CBLDatabase(manager, mDatabaseName, mDatabaseUrl, mUsername, mPassword)
-                .setPushReplication().setContinuous(true);
-    }
+        this.fingerprintingDatabase = new CBLDatabase(manager, mDatabaseName, mDatabaseUrl, mUsername, mPassword)
+                .startPushReplication(true);
+    }*//*
 
     public void changeSession(Session session) {
-        database.close();
+        fingerprintingDatabase.close();
         if (manager != null) startSession(session);
-    }
-
-    private void loadOnlineDatabasePreferences() {
-        this.mDatabaseName = sharedPreferences.getString(LOC_DB_NAME_KEY, "");
-        this.mDatabaseUrl = sharedPreferences.getString(LOC_DB_URL_KEY, "");
-        this.mUsername = sharedPreferences.getString(LOC_DB_USER_KEY, "");
-        this.mPassword = sharedPreferences.getString(LOC_DB_PASSWD_KEY, "");
-    }
-
-    private void loadFingerprintingDbPreferences() {
-        this.mDatabaseName = sharedPreferences.getString(FING_DB_NAME_KEY, "");
-        this.mDatabaseUrl =  sharedPreferences.getString(FING_DB_URL_KEY, "");
-        this.mUsername =  sharedPreferences.getString(FING_DB_USER_KEY, "");
-        this.mPassword = sharedPreferences.getString(FING_DB_PASSWD_KEY, "");
-    }
+    }*/
 
     private void enableLogging() {
         com.couchbase.lite.Manager.enableLogging(TAG, Log.VERBOSE);

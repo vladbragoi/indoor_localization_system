@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.univr.vlad.fingerprinting.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.devices.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.templates.Node;
 
 public class Fingerprint {
 

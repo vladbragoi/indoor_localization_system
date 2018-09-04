@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-import it.univr.vlad.fingerprinting.Node;
-import it.univr.vlad.fingerprinting.NodeType;
+import it.univr.vlad.fingerprinting.templates.Node;
+import it.univr.vlad.fingerprinting.templates.NodeType;
 import it.univr.vlad.fingerprinting.diffutil.NodesDiffCallback;
 import it.univr.vlad.fingerprinting.R;
-import it.univr.vlad.fingerprinting.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.devices.mv.MagneticVector;
 
 public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 

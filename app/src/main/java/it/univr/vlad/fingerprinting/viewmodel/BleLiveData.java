@@ -5,11 +5,11 @@ import android.content.Context;
 
 import java.util.List;
 
-import it.univr.vlad.fingerprinting.Node;
-import it.univr.vlad.fingerprinting.NodeType;
-import it.univr.vlad.fingerprinting.Observer;
-import it.univr.vlad.fingerprinting.ble.BleManager;
-import it.univr.vlad.fingerprinting.mv.MagneticVector;
+import it.univr.vlad.fingerprinting.templates.Node;
+import it.univr.vlad.fingerprinting.templates.NodeType;
+import it.univr.vlad.fingerprinting.templates.Observer;
+import it.univr.vlad.fingerprinting.devices.ble.BleManager;
+import it.univr.vlad.fingerprinting.devices.mv.MagneticVector;
 
 public class BleLiveData extends LiveData<List<Node>> implements Observer{
 

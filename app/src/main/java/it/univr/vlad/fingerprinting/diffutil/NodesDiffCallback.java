@@ -1,12 +1,11 @@
 package it.univr.vlad.fingerprinting.diffutil;
 
-import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
 import java.util.List;
 
-import it.univr.vlad.fingerprinting.Node;
+import it.univr.vlad.fingerprinting.templates.Node;
 
 // TODO: fix items position in recycler view
 public class NodesDiffCallback extends DiffUtil.Callback{
