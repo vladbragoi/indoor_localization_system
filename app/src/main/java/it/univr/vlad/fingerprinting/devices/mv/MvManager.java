@@ -16,30 +16,26 @@ public class MvManager extends Manager implements Direction.DirectionListener {
         direction = Direction.getInstance(context);
     }
 
-    @Override public void bind() {
+    @Override
+    public void bind() {
         start();
         direction.setDirectionListener(this);
     }
 
-    @Override public void unbind() {
+    @Override
+    public void unbind() {
         stop();
     }
 
-    @Override public void start() {
+    @Override
+    public void start() {
         direction.startListening();
     }
 
-    @Override public void stop() {
+    @Override
+    public void stop() {
         direction.stopListening();
     }
-
-    @Override
-    public boolean isDeviceEnabled() {
-        return true;
-    }
-
-    @Override
-    public void enableDevice() {}
 
     @Override
     public void notifyObservers(List<Node> results) {}

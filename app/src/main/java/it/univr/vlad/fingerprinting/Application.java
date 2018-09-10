@@ -16,8 +16,6 @@ public class Application extends android.app.Application
 
     private static final String TAG = "Fingerprint";
 
-    public enum Session {OFFLINE, ONLINE}
-
     public static final String FING_DB_NAME_KEY = "fing_name";
     public static final String FING_DB_URL_KEY = "fing_url";
     public static final String FING_DB_USER_KEY = "fing_username";
@@ -42,6 +40,10 @@ public class Application extends android.app.Application
     private String mLocDbUrl;
     private String mLocUsername;
     private String mLocPassword;
+
+    ///////////////////////////////////////////////
+    //            PUBLIC METHODS
+    ///////////////////////////////////////////////
 
     @Override
     public void onCreate() {
@@ -71,22 +73,7 @@ public class Application extends android.app.Application
                 mLocPassword);
 
         // enableLogging();
-        // if (manager != null) startSession(Session.OFFLINE);
         Log.d(TAG, "APP Started");
-    }
-
-    private void loadPreferences() {
-        // Fingerprinting Database
-        this.mFingDbName = sharedPreferences.getString(FING_DB_NAME_KEY, "");
-        this.mFingDbUrl =  sharedPreferences.getString(FING_DB_URL_KEY, "");
-        this.mFingUsername =  sharedPreferences.getString(FING_DB_USER_KEY, "");
-        this.mFingPassword = sharedPreferences.getString(FING_DB_PASSWD_KEY, "");
-
-        // Localization Database
-        this.mLocDbName = sharedPreferences.getString(LOC_DB_NAME_KEY, "");
-        this.mLocDbUrl = sharedPreferences.getString(LOC_DB_URL_KEY, "");
-        this.mLocUsername = sharedPreferences.getString(LOC_DB_USER_KEY, "");
-        this.mLocPassword = sharedPreferences.getString(LOC_DB_PASSWD_KEY, "");
     }
 
     @Override
@@ -143,25 +130,23 @@ public class Application extends android.app.Application
         Log.d(TAG, "APP Stopped");
     }
 
-  /*  private void startSession(Session session) {
-        switch (session) {
-            case ONLINE:
-                loadOnlineDatabasePreferences(); break;
-            case OFFLINE:
-                loadFingerprintingDbPreferences(); break;
-        }
-        openDatabase();
+    ///////////////////////////////////////////////
+    //            PRIVATE METHODS
+    ///////////////////////////////////////////////
+
+    private void loadPreferences() {
+        // Fingerprinting Database
+        this.mFingDbName = sharedPreferences.getString(FING_DB_NAME_KEY, "");
+        this.mFingDbUrl =  sharedPreferences.getString(FING_DB_URL_KEY, "");
+        this.mFingUsername =  sharedPreferences.getString(FING_DB_USER_KEY, "");
+        this.mFingPassword = sharedPreferences.getString(FING_DB_PASSWD_KEY, "");
+
+        // Localization Database
+        this.mLocDbName = sharedPreferences.getString(LOC_DB_NAME_KEY, "");
+        this.mLocDbUrl = sharedPreferences.getString(LOC_DB_URL_KEY, "");
+        this.mLocUsername = sharedPreferences.getString(LOC_DB_USER_KEY, "");
+        this.mLocPassword = sharedPreferences.getString(LOC_DB_PASSWD_KEY, "");
     }
-
-    private void openDatabase() {
-        this.fingerprintingDatabase = new CBLDatabase(manager, mDatabaseName, mDatabaseUrl, mUsername, mPassword)
-                .startPushReplication(true);
-    }*//*
-
-    public void changeSession(Session session) {
-        fingerprintingDatabase.close();
-        if (manager != null) startSession(session);
-    }*/
 
     private void enableLogging() {
         com.couchbase.lite.Manager.enableLogging(TAG, Log.VERBOSE);

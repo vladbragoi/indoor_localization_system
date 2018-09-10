@@ -7,7 +7,7 @@ import it.univr.vlad.fingerprinting.devices.mv.MagneticVector;
 public interface Observer {
 
     /**
-     * @param type 0 for WifiManager, 1 for BleManager
+     * @param type {@link NodeType#WIFI} for WifiManager, {@link NodeType#BLE} for BleManager
      * @param results list of beacons or wifi nodes
      */
     void update(NodeType type, List<Node> results);

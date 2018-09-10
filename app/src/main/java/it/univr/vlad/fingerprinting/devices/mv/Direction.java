@@ -12,6 +12,8 @@ import android.text.style.AlignmentSpan;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
 import es.dmoral.toasty.Toasty;
 import it.univr.vlad.fingerprinting.R;
 
@@ -31,12 +33,17 @@ public class Direction implements SensorEventListener {
     private float[] mGravity;
     private float[] mGeomagneticField;
 
+    /**
+     * Singleton class.
+     * @param context context
+     * @return the instance of this singleton class
+     */
     public static Direction getInstance(Context context) {
         if (direction == null) direction = new Direction(context);
         return direction;
     }
 
-    private Direction(Context context) {
+    private Direction(@NotNull Context context) {
         // Centered text
         SpannableString string = new SpannableString(context.getString(R.string.tilt_mode));
         string.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
@@ -61,16 +68,25 @@ public class Direction implements SensorEventListener {
         this.listener = listener;
     }
 
+    /**
+     * Starts listening for accelerometer and magnetometer sensor data.
+     */
     public void startListening() {
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
+    /**
+     * Stops listening for sensor data.
+     */
     public void stopListening() {
         sensorManager.unregisterListener(this, magnetometer);
         sensorManager.unregisterListener(this, accelerometer);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
@@ -84,6 +100,7 @@ public class Direction implements SensorEventListener {
             if (success) {
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
+
                 // orientation contains: azimut, pitch and roll
                 azimut = (float) Math.toDegrees(orientation[0]);
 
@@ -98,8 +115,8 @@ public class Direction implements SensorEventListener {
 
                     int inclination = (int) Math.round(Math.toDegrees(Math.acos(g[2])));
 
-                    if (inclination > 60 && inclination < 145) {
-                        toast.show(); // Device is not flat
+                    if (inclination > 60 && inclination < 145) { // Device is not flat
+                        toast.show();
                         shown = true;
                     }
                 }
@@ -107,6 +124,10 @@ public class Direction implements SensorEventListener {
         }
     }
 
+    /**
+     * Gets the device orientation.
+     * @return a string containing the orientation (NORTH, SOUTH,...).
+     */
     public String getDirection() {
         String direction;
         if (azimut >= 22.5 && azimut < 67.5)
@@ -130,9 +151,15 @@ public class Direction implements SensorEventListener {
         return direction;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {}
 
+    /**
+     * Listener interface in order to be notified for changed values.
+     */
     public interface DirectionListener {
         void onDirectionUpdated(float[] geomagneticField, float azimut);
     }

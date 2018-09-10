@@ -4,9 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -28,6 +30,7 @@ import it.univr.vlad.fingerprinting.templates.Node;
 
 public class WifiScanner extends BroadcastReceiver {
 
+    private final static String DEBUG_KEY = "debug";
     private static Set<String> addresses;
 
     private WifiListener mListener;
@@ -48,25 +51,39 @@ public class WifiScanner extends BroadcastReceiver {
         if (addresses == null) new LoadDataAsyncTask(context).execute();
     }
 
+    /**
+     * Register for receiving wifi data.
+     */
     public void register() {
         mContext.registerReceiver(this,
                 new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
     }
 
+    /**
+     * Unregister the receiver.
+     */
     public void unregister() {
         mContext.unregisterReceiver(this);
     }
 
+    /**
+     * {@inheritDoc}
+     * @param context
+     * @param intent
+     */
     @Override
     public void onReceive(@NotNull Context context, Intent intent) {
         if (!isScanning) return;
-
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean debug = sharedPreferences.getBoolean(DEBUG_KEY, false);
         mResults.clear();
 
         for (ScanResult result : mWifiManager.getScanResults()) {
-            //if (addresses.contains(result.BSSID)) {
+            if (debug)
                 mResults.add(new WifiNode(result.BSSID, result.SSID, result.level));
-            //}
+            else if (addresses.contains(result.BSSID)) {
+                mResults.add(new WifiNode(result.BSSID, result.SSID, result.level));
+            }
         }
 
         Collections.sort(mResults, (o1, o2) -> o2.getId().compareTo(o1.getId()));
@@ -76,11 +93,17 @@ public class WifiScanner extends BroadcastReceiver {
         mWifiManager.startScan();
     }
 
+    /**
+     * Starts a new scan from the {@link WifiManager}.
+     */
     public void start() {
         mWifiManager.startScan();
         isScanning = true;
     }
 
+    /**
+     * Stops scanning data.
+     */
     public void stop() {
         isScanning = false;
     }
@@ -101,6 +124,9 @@ public class WifiScanner extends BroadcastReceiver {
         void onResultsChanged(List<Node> mResults);
     }
 
+    /**
+     * AsyncTask used to load data from app/src/main/assets/access_points.json file.
+     */
     private static class LoadDataAsyncTask extends AsyncTask<Void,Void,Set<String>> {
 
         private WeakReference<Context> context;
@@ -109,6 +135,7 @@ public class WifiScanner extends BroadcastReceiver {
             this.context = new WeakReference<>(context);
         }
 
+        @SuppressWarnings("ResultOfMethodCallIgnored")
         @Override
         protected Set<String> doInBackground(Void... voids) {
             String rawJson;

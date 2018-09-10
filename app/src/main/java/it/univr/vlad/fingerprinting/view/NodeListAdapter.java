@@ -40,7 +40,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case R.layout.wifi_node:
                 return new NodesViewHolder(view, NodeType.WIFI);
             default:
-                return new NodesViewHolder(view, NodeType.BEACON);
+                return new NodesViewHolder(view, NodeType.BLE);
         }
     }
 
@@ -103,7 +103,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void addBeaconNodes(List<Node> newNodes) {
         pendingUpdates.add(newNodes);
         if (pendingUpdates.size() > 1) return;
-        updateNodesInternal(NodeType.BEACON, newNodes);
+        updateNodesInternal(NodeType.BLE, newNodes);
     }
 
     private void updateNodesInternal(NodeType nodeType, List<Node> newNodes) {

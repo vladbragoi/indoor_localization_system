@@ -80,6 +80,11 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         if (mLocation != null) mLocation.addMagneticVector(mv);
     };
 
+
+    ///////////////////////////////////////////////
+    //            PUBLIC METHODS
+    ///////////////////////////////////////////////
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,22 +123,81 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         xTextView = view.findViewById(R.id.xValue);
         yTextView = view.findViewById(R.id.yValue);
         mSpeedDialView = view.findViewById(R.id.start_stop_button);
+
         // Start button listener
         mSpeedDialView.setOnChangeListener(this);
 
-        mViewModel.getMv().observe(this,
-                magneticVector -> directionTextView.setText(magneticVector != null ?
-                                magneticVector.toString() : "NORTH")
+        mViewModel.getMv().observe(this, magneticVector ->
+                directionTextView.setText(
+                        magneticVector != null ? magneticVector.toString() : "NORTH"
+                )
         );
     }
 
     @Override
     public boolean onMainActionSelected() {
+        // Click action on SpeedDial Button
         if (!running) showStartLocalizationDialog();
         else stop();
-
         return false; // True to keep the Speed Dial open
     }
+
+    @Override
+    public void onToggleChanged(boolean isOpen) { }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (!mDatabase.isRunning()) mDatabase.startPullReplication(true);
+        mResultDocument.addChangeListener(this);
+        mViewModel.getWifiList().observe(this, mWifiNodesObserver);
+        mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
+    }
+
+    @Override
+    public void onStop() {
+        stop();
+        if (mDatabase.isRunning()) mDatabase.stop();
+        mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
+        mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
+        mViewModel.getMv().removeObserver(mMagneticVectorObserver);
+        mResultDocument.removeChangeListener(this);
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        mSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(USERNAME_KEY)) {
+            user = sharedPreferences.getString(key, "");
+            mLocation = new Location(user);
+            mResultDocument = mDatabase.getDocument(user + "_result");
+        }
+    }
+
+    @Override
+    public void changed(Document.ChangeEvent event) {
+        if (this.isVisible() && getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                Document document = event.getSource();
+                Object property = document.getProperty(FINGERPRINT_KEY);
+                if (property != null) fingerprintTextView.setText(property.toString());
+                property = document.getProperty(X_KEY);
+                if (property != null) xTextView.setText(property.toString());
+                property = document.getProperty(Y_KEY);
+                if (property != null) yTextView.setText(property.toString());
+            });
+        }
+    }
+
+    ///////////////////////////////////////////////
+    //            PRIVATE METHODS
+    ///////////////////////////////////////////////
 
     private void start() {
         mLocation.setDirection(directionTextView.getText().toString());
@@ -206,55 +270,5 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
             cancel.setOnClickListener(v -> stop());
 
         }, null);
-    }
-
-    @Override public void onToggleChanged(boolean isOpen) { }
-
-    @Override public void onStart() {
-        super.onStart();
-        if (!mDatabase.isRunning()) mDatabase.startPullReplication(true);
-        mResultDocument.addChangeListener(this);
-        mViewModel.getWifiList().observe(this, mWifiNodesObserver);
-        mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
-    }
-
-    @Override public void onStop() {
-        stop();
-        if (mDatabase.isRunning()) mDatabase.stop();
-        mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
-        mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
-        mViewModel.getMv().removeObserver(mMagneticVectorObserver);
-        mResultDocument.removeChangeListener(this);
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        mSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
-        super.onDestroy();
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(USERNAME_KEY)) {
-            user = sharedPreferences.getString(key, "");
-            mLocation = new Location(user);
-            mResultDocument = mDatabase.getDocument(user + "_result");
-        }
-    }
-
-    @Override
-    public void changed(Document.ChangeEvent event) {
-        if (this.isVisible() && getActivity() != null) {
-            getActivity().runOnUiThread(() -> {
-                Document document = event.getSource();
-                Object property = document.getProperty(FINGERPRINT_KEY);
-                if (property != null) fingerprintTextView.setText(property.toString());
-                property = document.getProperty(X_KEY);
-                if (property != null) xTextView.setText(property.toString());
-                property = document.getProperty(Y_KEY);
-                if (property != null) yTextView.setText(property.toString());
-            });
-        }
     }
 }

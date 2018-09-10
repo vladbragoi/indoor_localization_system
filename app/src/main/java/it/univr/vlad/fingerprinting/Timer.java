@@ -62,7 +62,7 @@ public class Timer {
     }
 
     /**
-     * Notify listeners when time changed.
+     * Notifies listeners when time changed.
      */
     private void onTimeChanged() {
         if (listener != null) {

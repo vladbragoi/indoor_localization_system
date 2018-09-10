@@ -10,6 +10,12 @@
         android:summary="Your name"
         android:title="Name" />
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_bug_report_black_24dp"
+        android:key="debug"
+        android:title="Debug mode" />
+
     <PreferenceCategory android:title="Fingerprinting Database">
 
         <EditTextPreference

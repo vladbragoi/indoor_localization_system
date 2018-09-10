@@ -29,7 +29,7 @@ public class BeaconScanner implements BeaconConsumer {
     private BeaconManager mBeaconManager;
     private List<Node> updatingList;
 
-    public BeaconScanner(Context context){
+    BeaconScanner(Context context){
         updatingList = new ArrayList<>();
         mContext = context;
 
@@ -44,10 +44,10 @@ public class BeaconScanner implements BeaconConsumer {
     }
 
     /**
-     * set a range notifier: When a list of beacons is received, it parses each beacon and create a new BleNode
-     * with the needed parameters and finally adds it to updatingList. Then it notify the BleManager
-     * listener
-     * Then onBeaconServiceConnect starts ranging beacons in region
+     * Sets a range notifier: when a list of beacons is received, it parses each
+     * beacon and create a new BleNode with the needed parameters and finally adds
+     * it to the updatingList, then it notify the listener.
+     * Then onBeaconServiceConnect starts ranging beacons in region.
      */
     @Override
     public void onBeaconServiceConnect() {
@@ -76,21 +76,30 @@ public class BeaconScanner implements BeaconConsumer {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Context getApplicationContext() {
         return mContext;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void unbindService(ServiceConnection serviceConnection) {}
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean bindService(Intent intent, ServiceConnection serviceConnection, int i) {
         return false;
     }
 
     /**
-     * bind the BleManager with the scanner
+     * Binds the BleManager with the scanner.
      */
     protected void bind() {
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -104,22 +113,15 @@ public class BeaconScanner implements BeaconConsumer {
     }
 
     /**
-     * unbind the BleManager with the scanner and stop ranging beacons in region
+     * Unbinds the BleManager with the scanner.
      */
     protected void unbind() {
         if (mBeaconManager.isBound(this)) mBeaconManager.unbind(this);
-        /*try {
-            mBeaconManager.unbind(this);
-            mBeaconManager.stopRangingBeaconsInRegion(
-                    new Region("myRangingUniqueId",
-                            null,
-                            null,
-                            null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }*/
     }
 
+    /**
+     * Starts ranging beacons in region.
+     */
     public void start() {
         if (mBeaconManager.isBound(this)) {
             try {
@@ -134,6 +136,9 @@ public class BeaconScanner implements BeaconConsumer {
         }
     }
 
+    /**
+     * Stops ranging beacons in region.
+     */
     public void stop() {
         if (mBeaconManager.isBound(this)) {
             try {

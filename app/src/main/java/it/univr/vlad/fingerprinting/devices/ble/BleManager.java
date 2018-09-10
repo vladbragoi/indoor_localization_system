@@ -29,21 +29,18 @@ public class BleManager extends Manager {
         mBeaconScanner.setBeaconListerner(this::notifyObservers);
     }
 
-    @Override public void start() {
+    @Override
+    public void start() {
         mBeaconScanner.start();
     }
 
-    @Override public void stop() {
+    @Override
+    public void stop() {
         mBeaconScanner.stop();
     }
 
-    /**
-     * binds the scanner if bluetooth is enabled
-     * If bluetooth is enabled calls bind() method of BeaconScanner's instance, otherwise calls enableDevice()
-     */
     @Override
     public void bind() {
-        // if (!isDeviceEnabled()) enableDevice();
         mBeaconScanner.bind();
     }
 
@@ -54,15 +51,13 @@ public class BleManager extends Manager {
     }
 
     /**
-     * for each registered observer notify the update
-     * Calls the update() method of each observer, passing 1 that identify the type beacon,
-     * and results
+     * Notifies observers with the updated values.
      * @param results the list of beacons received by BeaconScanner
      */
     @Override
     public void notifyObservers(List<Node> results) {
         for (Observer observer : super.mObservers) {
-            observer.update(NodeType.BEACON, results);
+            observer.update(NodeType.BLE, results);
         }
     }
 
@@ -71,18 +66,16 @@ public class BleManager extends Manager {
     }
 
     /**
-     * return whether bluetooth is enabled or not
+     * Check whether if bluetooth is enabled.
      * @return true if enabled, false otheriwise
      */
-    @Override
     public boolean isDeviceEnabled() {
         return mBluetoothAdapter != null && mBluetoothAdapter.isEnabled();
     }
 
     /**
-     * Show a dialog asking for bluetooth to be enabled
+     * Show a dialog asking for bluetooth to be enabled.
      */
-    @Override
     public void enableDevice() {
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(mContext,

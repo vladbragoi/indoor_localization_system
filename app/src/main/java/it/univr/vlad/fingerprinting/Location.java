@@ -25,6 +25,10 @@ public class Location {
         this.user = user;
     }
 
+    /**
+     * Saves Location data on database.
+     * @param database CouchDB database
+     */
     public void saveInto(Database database) {
         boolean noErrors = true;
         Document document = database.getDocument(user);

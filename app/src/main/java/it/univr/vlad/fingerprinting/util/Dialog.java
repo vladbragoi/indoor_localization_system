@@ -10,6 +10,10 @@ import it.univr.vlad.fingerprinting.R;
 
 public final class Dialog {
 
+    /**
+     * A dialog for generic informations.
+     * @param activity activity
+     */
     public static void showInfoDialog(Activity activity) {
         View view = View.inflate(activity, R.layout.dialog_info, null);
 
@@ -21,7 +25,7 @@ public final class Dialog {
     }
 
     /**
-     * A dialog to ask user which device(s) should be used for "localization"
+     * Shows a dialog to ask user which device(s) should be used for "localization".
      * @param activity activity
      * @param showListener Show Listener
      * @param dismissListener Dismiss Listener
@@ -40,7 +44,7 @@ public final class Dialog {
     }
 
     /**
-     * A dialog to ask user which device(s) should be used for "fingerprinting"
+     * Shows a dialog to ask user which device(s) should be used for "fingerprinting".
      * and how many seconds to scan values
      * @param activity activity
      * @param showListener Show Listener
@@ -59,7 +63,7 @@ public final class Dialog {
     }
 
     /**
-     * A dialog for setting the fingerprint's property
+     * Shows a dialog for setting the fingerprint's property.
      * @param activity activity
      * @param showListener Show Listener
      * @param dismissListener Dismiss Listener

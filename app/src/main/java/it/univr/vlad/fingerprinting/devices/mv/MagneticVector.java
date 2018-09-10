@@ -1,5 +1,7 @@
 package it.univr.vlad.fingerprinting.devices.mv;
 
+import org.jetbrains.annotations.NotNull;
+
 public class MagneticVector {
 
     private float[] values;
@@ -10,7 +12,7 @@ public class MagneticVector {
         this.azimut = azimut;
     }
 
-    public MagneticVector(MagneticVector mv) {
+    public MagneticVector(@NotNull MagneticVector mv) {
         this.values = mv.getValues().clone();
         this.azimut = mv.azimut;
     }

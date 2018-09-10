@@ -84,6 +84,10 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mAdapter.setMv(mv);
     };
 
+    ///////////////////////////////////////////////
+    //            PUBLIC METHODS
+    ///////////////////////////////////////////////
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,51 +128,16 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         return rootView;
     }
 
-    private void setupSpeedDial(boolean addActionItems) {
-        Context context = getContext();
-        assert context != null;
-
-        // Setup mini speed-dial buttons
-        if (addActionItems) {
-            Drawable drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_replay_white_24dp);
-            mSpeedDialView.addActionItem(
-                    new SpeedDialActionItem.Builder(R.id.fab_replay, drawable)
-                            .setLabel(getString(R.string.dial_restart))
-                            .setTheme(R.style.AppTheme_Fab)
-                            .create());
-
-            drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_stop_white_24dp);
-            mSpeedDialView.addActionItem(
-                    new SpeedDialActionItem.Builder(R.id.fab_stop, drawable)
-                            .setLabel(getString(R.string.dial_stop))
-                            .setTheme(R.style.AppTheme_Fab)
-                            .create());
-
-            drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_save_white_24dp);
-            mSpeedDialView.addActionItem(
-                    new SpeedDialActionItem.Builder(R.id.fab_save, drawable)
-                            .setLabel(getString(R.string.dial_save))
-                            .setTheme(R.style.AppTheme_Fab)
-                            .create());
-        }
-
-        // Start button listener
-        mSpeedDialView.setOnChangeListener(this);
-        // Save, Stop and Restart buttons listener
-        mSpeedDialView.setOnActionSelectedListener(this);
-    }
-
-    @Override public void onStart() {
+    @Override
+    public void onStart() {
         super.onStart();
         if (!mDatabase.isRunning()) mDatabase.start();
         mViewModel.getWifiList().observe(this, mWifiNodesObserver);
         mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
     }
 
-    @Override public void onStop() {
+    @Override
+    public void onStop() {
         stopTimer();
         if (mDatabase.isRunning()) mDatabase.stop();
         mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
@@ -177,43 +146,22 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         super.onStop();
     }
 
-    @Override public void onDestroy() {
+    @Override
+    public void onDestroy() {
         mTimer.destroy();
         super.onDestroy();
     }
 
+    /**
+     * Closes SpeedDial menu if it's opened.
+     * @return true if SpeedDial menu is been closed.
+     */
     public boolean closeSpeedDial() {
-        //Closes menu if its opened.
         if (mSpeedDialView.isOpen()) {
             mSpeedDialView.close();
             return true;
         }
         return false;
-    }
-
-    /**
-     * Check whether location is enabled or not.
-     * @param locationManager Location manager
-     * @return true if location is enabled, false otherwise
-     */
-    @Deprecated
-    private boolean isLocationEnabled(@NotNull LocationManager locationManager) {
-        boolean gps_enabled;
-        boolean network_enabled;
-
-        gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        return gps_enabled || network_enabled;
-    }
-
-    private void stopTimer() {
-        if (mWifiCheckbox != null && mWifiCheckbox.isChecked())
-            mViewModel.stopWifiScanning();
-        if (mBeaconCheckbox != null && mBeaconCheckbox.isChecked())
-            mViewModel.stopBeaconsScanning();
-        if (mMagneticVectorCheckbox != null && mMagneticVectorCheckbox.isChecked())
-            mViewModel.getMv().removeObserver(mMagneticVectorObserver);
-        if (mTimer != null && mTimer.isRunning()) mTimer.stop();
     }
 
     @Override
@@ -241,6 +189,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             case R.id.fab_save:
                 if (mCurrentFingerprint != null) {
                     mCurrentFingerprint.saveInto(mDatabase.unwrapDatabase());
+                    mCurrentFingerprint = null;
                 }
                 break;
             case R.id.fab_stop:
@@ -261,14 +210,41 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     @Override
     public boolean onMainActionSelected() {
-
         showStartDialog();
-
         return false; // True to keep the Speed Dial open
     }
 
     @Override
     public void onToggleChanged(boolean isOpen) { }
+
+    ///////////////////////////////////////////////
+    //            PRIVATE METHODS
+    ///////////////////////////////////////////////
+
+    /**
+     * Check whether location is enabled or not.
+     * @param locationManager Location manager
+     * @return true if location is enabled, false otherwise
+     */
+    @Deprecated
+    private boolean isLocationEnabled(@NotNull LocationManager locationManager) {
+        boolean gps_enabled;
+        boolean network_enabled;
+
+        gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        return gps_enabled || network_enabled;
+    }
+
+    private void stopTimer() {
+        if (mWifiCheckbox != null && mWifiCheckbox.isChecked())
+            mViewModel.stopWifiScanning();
+        if (mBeaconCheckbox != null && mBeaconCheckbox.isChecked())
+            mViewModel.stopBeaconsScanning();
+        if (mMagneticVectorCheckbox != null && mMagneticVectorCheckbox.isChecked())
+            mViewModel.getMv().removeObserver(mMagneticVectorObserver);
+        if (mTimer != null && mTimer.isRunning()) mTimer.stop();
+    }
 
     private void showStartDialog() {
         Activity activity = getActivity();
@@ -302,14 +278,13 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
                     seconds = Integer.parseInt(secondsEditText.getText().toString());
 
-                    if (mCurrentFingerprint == null) {
+                    if (mCurrentFingerprint == null) { // New fingerprint
                         mCurrentFingerprint = new Fingerprint();
                     }
-
-                    if (mCurrentFingerprint.isRunning()) {
+                    if (mCurrentFingerprint.isRunning()) { // Next Measuration on same fingerprint
                         mCurrentFingerprint.newMeasuration(mDirection.getText().toString());
                         startCountdown(seconds);
-                    }else {
+                    }else { // Sets new fingerprint information data
                         showSetupFingerprintDialog();
                     }
 
@@ -323,6 +298,9 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         }, null);
     }
 
+    /**
+     * Sets information on the new fingerprint created such as x, y, borders, etc.
+     */
     private void showSetupFingerprintDialog() {
         Activity activity = getActivity();
         assert activity != null;
@@ -383,7 +361,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     private void startCountdown(int duration) {
         if (!mTimer.isRunning()) { // Start scanning data
-
             if (mWifiCheckbox != null && mWifiCheckbox.isChecked())
                 mViewModel.startWifiScanning();
             if (mBeaconCheckbox != null && mBeaconCheckbox.isChecked())
@@ -393,7 +370,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
             mTimer.startCountFrom(duration);
         }
-        else if (getContext() != null) {
+        else if (getContext() != null) { // Error message cause timer is just running
             Toast toast = Toasty.error(getContext(),
                     getString(R.string.start_timer),
                     Toast.LENGTH_SHORT,
@@ -401,5 +378,47 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
         }
+    }
+
+    /**
+     * Sets SpeedDial buttons: Stop and Save because Start button is the
+     * default, catched in @{@link FingerprintingFragment#onMainActionSelected()}
+     * @param addActionItems Used for savedInstanceState (in order not to create duplicate buttons).
+     */
+    private void setupSpeedDial(boolean addActionItems) {
+        Context context = getContext();
+        assert context != null;
+
+        // Setup mini speed-dial buttons
+        if (addActionItems) {
+            Drawable drawable = AppCompatResources
+                    .getDrawable(getContext(), R.drawable.ic_replay_white_24dp);
+            mSpeedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_replay, drawable)
+                            .setLabel(getString(R.string.dial_restart))
+                            .setTheme(R.style.AppTheme_Fab)
+                            .create());
+
+            drawable = AppCompatResources
+                    .getDrawable(getContext(), R.drawable.ic_stop_white_24dp);
+            mSpeedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_stop, drawable)
+                            .setLabel(getString(R.string.dial_stop))
+                            .setTheme(R.style.AppTheme_Fab)
+                            .create());
+
+            drawable = AppCompatResources
+                    .getDrawable(getContext(), R.drawable.ic_save_white_24dp);
+            mSpeedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_save, drawable)
+                            .setLabel(getString(R.string.dial_save))
+                            .setTheme(R.style.AppTheme_Fab)
+                            .create());
+        }
+
+        // Start button listener
+        mSpeedDialView.setOnChangeListener(this);
+        // Save, Stop and Restart buttons listener
+        mSpeedDialView.setOnActionSelectedListener(this);
     }
 }

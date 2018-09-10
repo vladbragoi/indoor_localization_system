@@ -18,38 +18,34 @@ public class WifiManager extends Manager {
         mWifiScanner.setWifiListerner(this::notifyObservers);
     }
 
-    @Override public void bind() {
-        //if (!isDeviceEnabled()) enableDevice();
+    @Override
+    public void bind() {
         mWifiScanner.register();
-        //mWifiScanner.start();
     }
 
-    @Override public void unbind() {
+    @Override
+    public void unbind() {
         mWifiScanner.stop();
         mWifiScanner.unregister();
     }
 
-    @Override public void start() {
+    @Override
+    public void start() {
         mWifiScanner.start();
     }
 
-    @Override public void stop() {
+    @Override
+    public void stop() {
         mWifiScanner.stop();
     }
 
-    @Override public void notifyObservers(List<Node> results) {
+    @Override
+    public void notifyObservers(List<Node> results) {
         for (Observer observer : super.mObservers) {
             observer.update(NodeType.WIFI, results);
         }
     }
 
-    @Override public void notifyObservers(float[] geomagneticField, float azimut) {}
-
-    @Override public boolean isDeviceEnabled() {
-        return mWifiScanner.isWifiEnabled();
-    }
-
-    @Override public void enableDevice() {
-        mWifiScanner.enableWifi();
-    }
+    @Override
+    public void notifyObservers(float[] geomagneticField, float azimut) {}
 }

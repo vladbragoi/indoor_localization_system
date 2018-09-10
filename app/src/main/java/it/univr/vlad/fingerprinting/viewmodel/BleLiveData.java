@@ -32,17 +32,19 @@ public class BleLiveData extends LiveData<List<Node>> implements Observer{
         super.onInactive();
     }
 
-    @Override public void startScanning() {
+    @Override
+    public void startScanning() {
         mBleManager.start();
     }
 
-    @Override public void stopScanning() {
+    @Override
+    public void stopScanning() {
         mBleManager.stop();
     }
 
     @Override
     public void update(NodeType type, List<Node> results) {
-        if (type == NodeType.BEACON) postValue(results);
+        if (type == NodeType.BLE) postValue(results);
     }
 
     @Override

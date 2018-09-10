@@ -4,8 +4,13 @@ import android.support.annotation.NonNull;
 
 public abstract class Node implements Comparable{
 
+    /**
+     * {@link NodeType
+     */
     private String type;
+
     private String id;      /// Mac Address
+
     private int value;      /// Rssi
 
     protected Node(String id, int value, String type) {
@@ -26,6 +31,9 @@ public abstract class Node implements Comparable{
         return type;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -38,6 +46,9 @@ public abstract class Node implements Comparable{
                 && this.value == node.value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int compareTo(@NonNull Object o) {
         Node tmp = (Node) o;
@@ -45,6 +56,9 @@ public abstract class Node implements Comparable{
         return  this.id.compareTo(tmp.id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         int result = value;
@@ -53,6 +67,9 @@ public abstract class Node implements Comparable{
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "id: " + id + " value: " + value;
