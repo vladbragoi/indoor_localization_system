@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,12 +120,14 @@ public class MainActivity extends AppCompatActivity
         database = application.getFingerprintingDatabase();*/
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         //database.start();
         super.onResume();
     }
 
-    @Override protected void onStop() {
+    @Override
+    protected void onStop() {
         super.onStop();
         //database.stop();
     }
@@ -138,6 +139,19 @@ public class MainActivity extends AppCompatActivity
         disableBluetooth();
         application.close();
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == LOCATION_RESULT_CODE) {
+            if (resultCode != Activity.RESULT_OK) locationNotEnabled();
+        } else
+            super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    ///////////////////////////////////////////////
+    //            PUBLIC METHODS
+    ///////////////////////////////////////////////
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -195,36 +209,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void startFingerprintingFragment() {
-        if (!fingerprintingFragment.isAdded()) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.popBackStack();
-            fragmentManager.beginTransaction().replace(
-                    R.id.fragment_container,
-                    fingerprintingFragment,
-                    FINGERPRINTING_FRAGMENT
-            ).commit();
-        }
-    }
-
-    private void startLocalizationFragment() {
-        if (!localizationFragment.isAdded()) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, localizationFragment, LOCALIZATION_FRAGMENT);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == LOCATION_RESULT_CODE) {
-            if (resultCode != Activity.RESULT_OK) locationNotEnabled();
-        } else
-            super.onActivityResult(requestCode, resultCode, data);
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -245,32 +229,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * asks for @{@link MainActivity#permissions} permissions if not granted
+     * Enables location using Google API
      */
-    private void checkForPermissions() {
-        if (!permissionsGranted()) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(this.getString(R.string.location_permissions_title));
-            builder.setMessage(this.getString(R.string.location_permissions_message));
-            builder.setPositiveButton(android.R.string.ok, null);
-            builder.setOnDismissListener(dialog -> ActivityCompat
-                    .requestPermissions(this, permissions, PERMISSIONS_REQUEST));
-            builder.show();
-        }
-    }
-
-    /**
-     * return whether permissions are granted or not
-     * @return true if all permissions are granted, false otherwise
-     */
-    private boolean permissionsGranted() {
-        for (String s: permissions) {
-            if (ContextCompat.checkSelfPermission(this, s) != PackageManager.PERMISSION_GRANTED)
-                return false;
-        }
-        return true;
-    }
-
     public void turnLocationOn() {
         // ENABLE LOCATION WITH GOOGLE-API
         LocationRequest locationRequest= new LocationRequest();
@@ -320,21 +280,10 @@ public class MainActivity extends AppCompatActivity
         }*/
     }
 
-    private void disableBluetooth() {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled())
-            bluetoothAdapter.disable();
-    }
-
-    private void locationNotEnabled() {
-        Toast toast = Toasty.warning(this,
-                getString(R.string.location_not_enabled),
-                Toast.LENGTH_LONG,
-                true);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
-    }
-
+    /**
+     * Enable bluetooth on device
+     * @param fragment Calling fragment to set bluetooth checkbox checked
+     */
     public void turnBluetoothOn(Fragment fragment) {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
@@ -378,6 +327,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Enable wifi on device
+     * @param fragment Calling fragment to set wifi checkbox checked
+     */
     public void turnWifiOn(Fragment fragment) {
         WifiManager wifiManager = (WifiManager) this
                 .getApplicationContext()
@@ -408,4 +361,79 @@ public class MainActivity extends AppCompatActivity
             dialog.show();
         }
     }
+
+    ///////////////////////////////////////////////
+    //            PRIVATE METHODS
+    ///////////////////////////////////////////////
+
+    private void startFingerprintingFragment() {
+        if (!fingerprintingFragment.isAdded()) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.popBackStack();
+            fragmentManager.beginTransaction().replace(
+                    R.id.fragment_container,
+                    fingerprintingFragment,
+                    FINGERPRINTING_FRAGMENT
+            ).commit();
+        }
+    }
+
+    private void startLocalizationFragment() {
+        if (!localizationFragment.isAdded()) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, localizationFragment, LOCALIZATION_FRAGMENT);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+    }
+
+    /**
+     * Asks for requested @{@link MainActivity#permissions} permissions
+     */
+    private void checkForPermissions() {
+        if (!permissionsGranted()) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(this.getString(R.string.location_permissions_title));
+            builder.setMessage(this.getString(R.string.location_permissions_message));
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.setOnDismissListener(dialog -> ActivityCompat
+                    .requestPermissions(this, permissions, PERMISSIONS_REQUEST));
+            builder.show();
+        }
+    }
+
+    /**
+     * return whether permissions are granted or not
+     * @return true if all permissions are granted, false otherwise
+     */
+    private boolean permissionsGranted() {
+        for (String s: permissions) {
+            if (ContextCompat.checkSelfPermission(this, s) != PackageManager.PERMISSION_GRANTED)
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Disables bluetooth on device
+     */
+    private void disableBluetooth() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled())
+            bluetoothAdapter.disable();
+    }
+
+    /**
+     * Displays a message in order to inform the user that location is disabled
+     */
+    private void locationNotEnabled() {
+        Toast toast = Toasty.warning(this,
+                getString(R.string.location_not_enabled),
+                Toast.LENGTH_LONG,
+                true);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+
 }
