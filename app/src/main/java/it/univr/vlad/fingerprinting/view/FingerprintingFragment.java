@@ -94,7 +94,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
         mAdapter = new NodeListAdapter();
         mTimer = new Timer();
 
@@ -109,6 +108,11 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
                 ((MainActivity) activity).turnLocationOn();
             }
         }
+
+        mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
+        mViewModel.getMv().observe(this, mDirectionObserver);
+        mViewModel.getWifiList().observe(this, mWifiNodesObserver);
+        mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
     }
 
     @Override
@@ -133,9 +137,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     public void onStart() {
         super.onStart();
         if (!mDatabase.isRunning()) mDatabase.start();
-        mViewModel.getMv().observe(this, mDirectionObserver);
-        mViewModel.getWifiList().observe(this, mWifiNodesObserver);
-        mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
         mViewModel.startMvScanning();
     }
 

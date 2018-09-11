@@ -108,6 +108,9 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         }
 
         mViewModel = ViewModelProviders.of(this).get(NodeViewModel.class);
+        mViewModel.getWifiList().observe(this, mWifiNodesObserver);
+        mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
+        mViewModel.getMv().observe(this, mDirectionObserver);
     }
 
     @Nullable
@@ -147,9 +150,6 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         super.onStart();
         if (!mDatabase.isRunning()) mDatabase.startPullReplication(true);
         mResultDocument.addChangeListener(this);
-        mViewModel.getWifiList().observe(this, mWifiNodesObserver);
-        mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
-        mViewModel.getMv().observe(this, mDirectionObserver);
         mViewModel.startMvScanning();
     }
 
