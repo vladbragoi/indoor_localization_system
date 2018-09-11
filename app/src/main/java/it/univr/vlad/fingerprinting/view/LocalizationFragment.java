@@ -267,7 +267,10 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
                 }
             });
 
-            cancel.setOnClickListener(v -> stopLocating());
+            cancel.setOnClickListener(v -> {
+                stopLocating();
+                dialog.dismiss();
+            });
 
         }, null);
     }
