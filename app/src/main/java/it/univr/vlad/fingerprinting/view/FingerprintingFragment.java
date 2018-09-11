@@ -70,17 +70,17 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     private Fingerprint mCurrentFingerprint;
 
     private final Observer<List<Node>> mWifiNodesObserver = nodes -> {
-        mCurrentFingerprint.addWifiNodes(nodes);
+        if (mCurrentFingerprint != null) mCurrentFingerprint.addWifiNodes(nodes);
         mAdapter.addWifiNodes(nodes);
     };
 
     private final Observer<List<Node>> mBeaconNodesObserver = nodes -> {
-        mCurrentFingerprint.addBeaconNodes(nodes);
+        if (mCurrentFingerprint != null) mCurrentFingerprint.addBeaconNodes(nodes);
         mAdapter.addBeaconNodes(nodes);
     };
 
     private final Observer<MagneticVector> mMagneticVectorObserver = mv -> {
-        mCurrentFingerprint.addMagneticVector(mv);
+        if (mCurrentFingerprint != null) mCurrentFingerprint.addMagneticVector(mv);
         mAdapter.setMv(mv);
     };
 
@@ -392,14 +392,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         // Setup mini speed-dial buttons
         if (addActionItems) {
             Drawable drawable = AppCompatResources
-                    .getDrawable(getContext(), R.drawable.ic_replay_white_24dp);
-            mSpeedDialView.addActionItem(
-                    new SpeedDialActionItem.Builder(R.id.fab_replay, drawable)
-                            .setLabel(getString(R.string.dial_restart))
-                            .setTheme(R.style.AppTheme_Fab)
-                            .create());
-
-            drawable = AppCompatResources
                     .getDrawable(getContext(), R.drawable.ic_stop_white_24dp);
             mSpeedDialView.addActionItem(
                     new SpeedDialActionItem.Builder(R.id.fab_stop, drawable)

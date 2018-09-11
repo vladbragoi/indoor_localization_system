@@ -28,6 +28,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragment {
+
         @Override
         public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -35,8 +36,6 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-
-        }
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) { }
     }
 }

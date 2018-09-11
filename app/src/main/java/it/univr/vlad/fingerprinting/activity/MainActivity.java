@@ -44,9 +44,7 @@ import com.google.android.gms.tasks.Task;
 import org.jetbrains.annotations.NotNull;
 
 import es.dmoral.toasty.Toasty;
-import it.univr.vlad.fingerprinting.Application;
 import it.univr.vlad.fingerprinting.R;
-import it.univr.vlad.fingerprinting.model.CBLDatabase;
 import it.univr.vlad.fingerprinting.util.Dialog;
 import it.univr.vlad.fingerprinting.view.FingerprintingFragment;
 import it.univr.vlad.fingerprinting.view.LocalizationFragment;
@@ -59,7 +57,8 @@ public class MainActivity extends AppCompatActivity
     private final static String FINGERPRINTING_FRAGMENT = "fing";
     private final static String LOCALIZATION_FRAGMENT = "loc";
 
-    private final static String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,
+    private final static String[] permissions = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.BLUETOOTH};
@@ -67,8 +66,8 @@ public class MainActivity extends AppCompatActivity
     private Fragment fingerprintingFragment;
     private Fragment localizationFragment;
 
-    private CBLDatabase database;
-    private Application application;
+    // private CBLDatabase database;
+    // private Application application;
 
     private TextView userTextView;
 
@@ -103,7 +102,7 @@ public class MainActivity extends AppCompatActivity
 
         View navigationHeaderView = navigationView.getHeaderView(0);
         userTextView = navigationHeaderView.findViewById(R.id.username);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(changeListener);
         userTextView.setText(sharedPreferences.getString("username", ""));
 
@@ -121,23 +120,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onResume() {
-        //database.start();
-        super.onResume();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        //database.stop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(changeListener);
         disableBluetooth();
-        application.close();
+        // application.close();
     }
 
     @Override

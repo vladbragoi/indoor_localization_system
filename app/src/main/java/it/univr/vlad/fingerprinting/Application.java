@@ -58,19 +58,8 @@ public class Application extends android.app.Application
 
         loadPreferences();
 
-        fingerprintingDatabase = new CBLDatabase(
-                manager,
-                mFingDbName,
-                mFingDbUrl,
-                mFingUsername,
-                mFingPassword);
-
-        localizationDatabase = new CBLDatabase(
-                manager,
-                mLocDbName,
-                mLocDbUrl,
-                mLocUsername,
-                mLocPassword);
+        initFingerprintingDatabase();
+        initLocalizationDatabase();
 
         // enableLogging();
         Log.d(TAG, "APP Started");
@@ -115,10 +104,12 @@ public class Application extends android.app.Application
     }
 
     public CBLDatabase getFingerprintingDatabase() {
+        if (!fingerprintingDatabase.isOpen()) initFingerprintingDatabase();
         return fingerprintingDatabase;
     }
 
     public CBLDatabase getLocalizationDatabase() {
+        if (!localizationDatabase.isOpen()) initLocalizationDatabase();
         return localizationDatabase;
     }
 
@@ -133,6 +124,24 @@ public class Application extends android.app.Application
     ///////////////////////////////////////////////
     //            PRIVATE METHODS
     ///////////////////////////////////////////////
+
+    private void initFingerprintingDatabase() {
+        fingerprintingDatabase = new CBLDatabase(
+                manager,
+                mFingDbName,
+                mFingDbUrl,
+                mFingUsername,
+                mFingPassword);
+    }
+
+    private void initLocalizationDatabase() {
+        localizationDatabase = new CBLDatabase(
+                manager,
+                mLocDbName,
+                mLocDbUrl,
+                mLocUsername,
+                mLocPassword);
+    }
 
     private void loadPreferences() {
         // Fingerprinting Database
