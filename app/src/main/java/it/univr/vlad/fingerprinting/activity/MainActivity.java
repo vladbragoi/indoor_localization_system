@@ -66,9 +66,6 @@ public class MainActivity extends AppCompatActivity
     private Fragment fingerprintingFragment;
     private Fragment localizationFragment;
 
-    // private CBLDatabase database;
-    // private Application application;
-
     private TextView userTextView;
 
     private SharedPreferences sharedPreferences;
@@ -114,9 +111,6 @@ public class MainActivity extends AppCompatActivity
                 fingerprintingFragment,
                 FINGERPRINTING_FRAGMENT
         ).commit();
-
-        /*application = (Application) getApplication();
-        database = application.getFingerprintingDatabase();*/
     }
 
     @Override
@@ -124,7 +118,6 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(changeListener);
         disableBluetooth();
-        // application.close();
     }
 
     @Override
