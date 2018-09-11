@@ -84,6 +84,9 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mAdapter.setMv(mv);
     };
 
+    private Observer<MagneticVector> mDirectionObserver = magneticVector ->
+            mDirection.setText(magneticVector != null ? magneticVector.toString() : "NORTH");
+
     ///////////////////////////////////////////////
     //            PUBLIC METHODS
     ///////////////////////////////////////////////
@@ -96,8 +99,6 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mTimer = new Timer();
 
         mTimer.setTimerListener(this);
-        mViewModel.getMv().observe(this, magneticVector ->
-                mDirection.setText(magneticVector != null ? magneticVector.toString() : "NORTH"));
 
         Activity activity = getActivity();
         if (activity != null) {
@@ -132,23 +133,26 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     public void onStart() {
         super.onStart();
         if (!mDatabase.isRunning()) mDatabase.start();
+        mViewModel.getMv().observe(this, mDirectionObserver);
         mViewModel.getWifiList().observe(this, mWifiNodesObserver);
         mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
+        mViewModel.startMvScanning();
     }
 
     @Override
     public void onStop() {
         stopTimer();
         if (mDatabase.isRunning()) mDatabase.stop();
-        mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
-        mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
-        mViewModel.getMv().removeObserver(mMagneticVectorObserver);
+        mViewModel.stopMvScanning();
         super.onStop();
     }
 
     @Override
     public void onDestroy() {
         mTimer.destroy();
+        mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
+        mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
+        mViewModel.getMv().removeObserver(mDirectionObserver);
         super.onDestroy();
     }
 
@@ -164,6 +168,12 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     * @param hours
+     * @param minutes
+     * @param seconds
+     */
     @Override
     public void onTimeChanged(String hours, String minutes, String seconds) {
         Context context = getContext();
@@ -178,6 +188,10 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         mTimerSeconds.setText(seconds);
     }
 
+    /**
+     * {@inheritDoc}
+     * @param status
+     */
     @Override
     public void onTimerStopped(Timer.TimerStatus status) {
         if (status.equals(Timer.TimerStatus.STOPPED)) stopTimer();

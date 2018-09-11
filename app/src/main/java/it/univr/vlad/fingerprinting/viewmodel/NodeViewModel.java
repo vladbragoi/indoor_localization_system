@@ -39,6 +39,14 @@ public class NodeViewModel extends AndroidViewModel {
         beaconList.stopScanning();
     }
 
+    public void startMvScanning() {
+        mv.startScanning();
+    }
+
+    public void stopMvScanning() {
+        mv.stopScanning();
+    }
+
     public LiveData<List<Node>> getWifiList() {
         return wifiList;
     }

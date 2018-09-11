@@ -43,8 +43,7 @@ class MagneticVectorLiveData extends LiveData<MagneticVector> implements Observe
      */
     @Override
     public void startScanning() {
-        // TODO
-        // mMvManager.start();
+        mMvManager.start();
     }
 
     /**
@@ -52,7 +51,7 @@ class MagneticVectorLiveData extends LiveData<MagneticVector> implements Observe
      */
     @Override
     public void stopScanning() {
-        // mMvManager.stop();
+        mMvManager.stop();
     }
 
     /**

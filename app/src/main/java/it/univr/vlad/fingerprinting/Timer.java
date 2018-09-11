@@ -72,7 +72,7 @@ public class Timer {
     }
 
     /**
-     * Stops the timer
+     * Stops the timer.
      */
     public void stop() {
         statusResult = TimerStatus.STOPPED;
@@ -107,7 +107,7 @@ public class Timer {
     }
 
     /**
-     * This should be used to verify if timer is running
+     * This should be used to verify if timer is running.
      * @return true if timer is running.
      */
     public boolean isRunning() {
@@ -115,7 +115,7 @@ public class Timer {
     }
 
     /**
-     * Destroy the timer
+     * Destroy the timer.
      */
     public void destroy() {
         service.shutdown();
@@ -126,10 +126,22 @@ public class Timer {
     }
 
     /**
-     * This interface should be used to be notified of time changed
+     * This interface should be used to be notified of time changed.
      */
     public interface TimerListener {
+
+        /**
+         * Notifies when timer is changed in hours, minutes and seconds.
+         * @param hours hours
+         * @param minutes minutes
+         * @param seconds seconds
+         */
         void onTimeChanged(String hours, String minutes, String seconds);
+
+        /**
+         * Notifies user of timer status changes.
+         * @param status the timer status: {@link TimerStatus}
+         */
         void onTimerStopped(TimerStatus status);
     }
 }

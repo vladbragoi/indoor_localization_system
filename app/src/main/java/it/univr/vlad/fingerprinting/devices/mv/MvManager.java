@@ -18,7 +18,6 @@ public class MvManager extends Manager implements Direction.DirectionListener {
 
     @Override
     public void bind() {
-        start();
         direction.setDirectionListener(this);
     }
 

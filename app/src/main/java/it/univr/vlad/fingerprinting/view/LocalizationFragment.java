@@ -80,6 +80,8 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         if (mLocation != null) mLocation.addMagneticVector(mv);
     };
 
+    private Observer<MagneticVector> mDirectionObserver = magneticVector ->
+            directionTextView.setText(magneticVector != null ? magneticVector.toString() : "NORTH");
 
     ///////////////////////////////////////////////
     //            PUBLIC METHODS
@@ -127,18 +129,13 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         // Start button listener
         mSpeedDialView.setOnChangeListener(this);
 
-        mViewModel.getMv().observe(this, magneticVector ->
-                directionTextView.setText(
-                        magneticVector != null ? magneticVector.toString() : "NORTH"
-                )
-        );
     }
 
     @Override
     public boolean onMainActionSelected() {
         // Click action on SpeedDial Button
         if (!running) showStartLocalizationDialog();
-        else stop();
+        else stopLocating();
         return false; // True to keep the Speed Dial open
     }
 
@@ -152,21 +149,24 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         mResultDocument.addChangeListener(this);
         mViewModel.getWifiList().observe(this, mWifiNodesObserver);
         mViewModel.getBeaconList().observe(this, mBeaconNodesObserver);
+        mViewModel.getMv().observe(this, mDirectionObserver);
+        mViewModel.startMvScanning();
     }
 
     @Override
     public void onStop() {
-        stop();
+        stopLocating();
         if (mDatabase.isRunning()) mDatabase.stop();
-        mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
-        mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
-        mViewModel.getMv().removeObserver(mMagneticVectorObserver);
-        mResultDocument.removeChangeListener(this);
+        mViewModel.stopMvScanning();
         super.onStop();
     }
 
     @Override
     public void onDestroy() {
+        mViewModel.getWifiList().removeObserver(mWifiNodesObserver);
+        mViewModel.getBeaconList().removeObserver(mBeaconNodesObserver);
+        mViewModel.getMv().removeObserver(mDirectionObserver);
+        mResultDocument.removeChangeListener(this);
         mSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
     }
@@ -199,7 +199,7 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
     //            PRIVATE METHODS
     ///////////////////////////////////////////////
 
-    private void start() {
+    private void startLocating() {
         mLocation.setDirection(directionTextView.getText().toString());
         if (mWifiCheckbox != null && mWifiCheckbox.isChecked())
             mViewModel.startWifiScanning();
@@ -212,7 +212,7 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
         running = true;
     }
 
-    private void stop() {
+    private void stopLocating() {
         if (mWifiCheckbox != null && mWifiCheckbox.isChecked())
             mViewModel.stopWifiScanning();
         if (mBeaconCheckbox != null && mBeaconCheckbox.isChecked())
@@ -258,7 +258,7 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
                 // Check user data input
                 if (mWifiCheckbox.isChecked() || mBeaconCheckbox.isChecked()) {
 
-                    start();
+                    startLocating();
 
                     dialog.dismiss();
                 } else if (errorTextView != null) {
@@ -267,7 +267,7 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
                 }
             });
 
-            cancel.setOnClickListener(v -> stop());
+            cancel.setOnClickListener(v -> stopLocating());
 
         }, null);
     }
