@@ -6,23 +6,28 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="location_title">Attivare la localizzazione</string>
-    <string name="location_message">Ho bisogno di attivare la Localizzazione del dispositivo.</string>
-    <string name="no_bluetooth_support">Il device non supporta il Bluetooth</string>
-    <string name="wifi_title">Attivare il wifi</string>
-    <string name="wifi_message">Ho bisogno di attivare il wifi.</string>
-    <string name="wifi_enabled">Wifi attivato</string>
-    <string name="bluetooth_enabled">Bluetooth attivato</string>
-    <string name="bluetooth_title">Attivare il Bluetooth</string>
-    <string name="bluetooth_message">Ho bisogno di attivare il Bluetooth.</string>
-    <string name="location_permissions_title">Ho bisogno dei permessi di localizzazione</string>
+    <string name="location_title">Turn localization on</string>
+    <string name="location_message">I need to turn localization of the device on
+        for getting available scan results.</string>
+    <string name="no_bluetooth_support">Your device does not support Bluetooth feature.</string>
+    <string name="wifi_title">Turn wifi on</string>
+    <string name="wifi_message">I need to turn wifi network on.</string>
+    <string name="wifi_enabled">Wifi enabled</string>
+    <string name="bluetooth_enabled">Bluetooth enabled</string>
+    <string name="bluetooth_title">Turn Bluetooth on</string>
+    <string name="bluetooth_message">I need to turn bluetooth on.</string>
+    <string name="location_permissions_title">I need location permissions.</string>
     <string name="location_permissions_message">
-        Quest\'app richiede i permessi di localizzazione per poter effettuare scansioni sui segnali
-        rilevati dai beacon (ble) e dagli access point (wifi).</string>
-
-    <string name="ble_not_supported">Bluetooth low energy non è supportato dal tuo dispositivo.</string>
+        This app require location permissions in order to scan RSSI signals
+        from beacon (ble) and access points (wifi).</string>
+    <string name="ble_not_supported">Bluetooth Low Energy feature is not supported by your device.</string>
     <string name="seconds">Seconds</string>
     <string name="minutes">Minutes</string>
+    <string name="devices">Devices</string>
+    <string name="fingerprint">Fingerprint</string>
+    <string name="duration">Duration</string>
+    <string name="fingerprint_number">number</string>
+    <string name="borders">borders [1 North, 2 South, 3 East, 4 West]</string>
     <string name="start">Start</string>
     <string name="nullValue">0</string>
     <string name="direction">Direction</string>
@@ -31,26 +36,34 @@
     <string name="dial_stop">Stop</string>
     <string name="dial_save">Save</string>
     <string name="type">Type</string>
-    <string name="ble">BLE</string>
+    <string name="ble_node">BLE</string>
+    <string name="wifi_node">WIFI</string>
     <string name="bssid">BSSID</string>
     <string name="bssid_example">00:00:00:00:00:00</string>
     <string name="value">Value</string>
     <string name="value_example">-89</string>
     <string name="mv">MV</string>
-    <string name="x">x:</string>
     <string name="uT">µT</string>
-    <string name="y">y:</string>
-    <string name="z">z:</string>
+    <string name="x">x</string>
+    <string name="y">y</string>
+    <string name="z">z</string>
     <string name="mag_value_example">-47.5</string>
     <string name="seconds_value">00</string>
     <string name="colon">:</string>
     <string name="remaining">Remaining time</string>
     <string name="wifi">wifi</string>
     <string name="beacons">beacons</string>
-    <string name="devices">Devices</string>
-    <string name="seconds_error">Should not be empty</string>
-    <string name="checkbox_error">At least one of these above should be checked</string>
-    <string name="start_timer">Timer is just running. Stop it to restart.</string>
-    <string name="location_not_enabled">The application will not run as you expect. Please enable location</string>
-    <string name="timer_seconds">Too many seconds</string>
+    <string name="empty_error">Should not be empty</string>
+    <string name="checkbox_error">At least one of these above should be checked.</string>
+    <string name="start_timer">Timer is just running. Stop it before.</string>
+    <string name="location_not_enabled">The application will not run as you expect. Please enable location.</string>
+    <string name="timer_seconds">Too many seconds.</string>
+    <string name="tilt_mode">Tilt your device for correct orientation compass ▼.</string>
+    <string name="fingerprinting">Fingerprinting</string>
+    <string name="magneticVector">magnetic vector</string>
+    <string name="location">Location</string>
+    <string name="localization">Localization</string>
+    <string name="info">For any information please contact us at:</string>
+    <string name="vlad">vlad.bragoi@gmail.com</string>
+    <string name="florenc">florenc.demrozi@univr.it</string>
 </resources>

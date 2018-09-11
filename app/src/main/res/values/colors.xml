@@ -8,4 +8,5 @@
     <color name="cardBeaconBackground">#8deaead1</color>
     <color name="cardMvBackground">#88d1ead4</color>
     <color name="colorError">#f44336</color>
+    <color name="colorRunning">#67AE82</color>
 </resources>

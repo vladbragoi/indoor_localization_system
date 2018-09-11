@@ -5,12 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.FingerprintingFragment"
-    tools:listItem="@layout/single_node">
+    tools:context=".view.FingerprintingFragment">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/header_height"
+        android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -22,7 +21,7 @@
 
             <include layout="@layout/header_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/header_height" />
+                android:layout_height="wrap_content" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
