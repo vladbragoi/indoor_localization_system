@@ -94,6 +94,7 @@ def main():
         del document
         gc.collect()
 
+
 if __name__ == '__main__':
     main()
     close()
