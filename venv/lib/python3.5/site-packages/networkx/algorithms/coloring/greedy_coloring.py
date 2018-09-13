@@ -11,10 +11,10 @@ Greedy graph coloring using various strategies.
 """
 from collections import defaultdict, deque
 import itertools
-import random
 
 import networkx as nx
 from networkx.utils import arbitrary_element
+from networkx.utils import py_random_state
 from . import greedy_coloring_with_interchange as _interchange
 
 __all__ = ['greedy_color', 'strategy_connected_sequential',
@@ -34,14 +34,18 @@ def strategy_largest_first(G, colors):
     return sorted(G, key=G.degree, reverse=True)
 
 
-def strategy_random_sequential(G, colors):
+@py_random_state(2)
+def strategy_random_sequential(G, colors, seed=None):
     """Returns a random permutation of the nodes of ``G`` as a list.
 
     ``G`` is a NetworkX graph. ``colors`` is ignored.
 
+    seed : integer, random_state, or None (default)
+        Indicator of random number generation state.
+        See :ref:`Randomness<randomness>`.
     """
     nodes = list(G)
-    random.shuffle(nodes)
+    seed.shuffle(nodes)
     return nodes
 
 
@@ -320,7 +324,7 @@ def greedy_color(G, strategy='largest_first', interchange=False):
        ISBN 0-8218-3458-4.
     .. [2] David W. Matula, and Leland L. Beck, "Smallest-last
        ordering and clustering and graph coloring algorithms." *J. ACM* 30,
-       3 (July 1983), 417–427. <http://dx.doi.org/10.1145/2402.322385>
+       3 (July 1983), 417–427. <https://doi.org/10.1145/2402.322385>
     .. [3] Maciej M. Sysło, Marsingh Deo, Janusz S. Kowalik,
        Discrete Optimization Algorithms with Pascal Programs, 415-424, 1983.
        ISBN 0-486-45353-7.

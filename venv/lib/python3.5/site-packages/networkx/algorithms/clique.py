@@ -21,7 +21,7 @@ try:
     from itertools import ifilter as filter
 except ImportError:
     pass
-import networkx
+import networkx as nx
 from networkx.utils import not_implemented_for
 __author__ = """Dan Schult (dschult@colgate.edu)"""
 __all__ = ['find_cliques', 'find_cliques_recursive', 'make_max_clique_graph',
@@ -74,7 +74,7 @@ def enumerate_all_cliques(G):
            Applications in Systems Biology".
            *Supercomputing*, 2005. Proceedings of the ACM/IEEE SC 2005
            Conference, pp. 12, 12--18 Nov. 2005.
-           <http://dx.doi.org/10.1109/SC.2005.29>.
+           <https://doi.org/10.1109/SC.2005.29>.
 
     """
     index = {}
@@ -160,13 +160,13 @@ def find_cliques(G):
        Computing and Combinatorics,
        10th Annual International Conference on
        Computing and Combinatorics (COCOON 2004), 25 October 2006, Pages 28--42
-       <http://dx.doi.org/10.1016/j.tcs.2006.06.015>
+       <https://doi.org/10.1016/j.tcs.2006.06.015>
 
     .. [3] F. Cazals, C. Karande,
        "A note on the problem of reporting maximal cliques",
        *Theoretical Computer Science*,
        Volume 407, Issues 1--3, 6 November 2008, Pages 564--568,
-       <http://dx.doi.org/10.1016/j.tcs.2008.05.010>
+       <https://doi.org/10.1016/j.tcs.2008.05.010>
 
     """
     if len(G) == 0:
@@ -265,13 +265,13 @@ def find_cliques_recursive(G):
        Computing and Combinatorics,
        10th Annual International Conference on
        Computing and Combinatorics (COCOON 2004), 25 October 2006, Pages 28--42
-       <http://dx.doi.org/10.1016/j.tcs.2006.06.015>
+       <https://doi.org/10.1016/j.tcs.2006.06.015>
 
     .. [3] F. Cazals, C. Karande,
        "A note on the problem of reporting maximal cliques",
        *Theoretical Computer Science*,
        Volume 407, Issues 1--3, 6 November 2008, Pages 564--568,
-       <http://dx.doi.org/10.1016/j.tcs.2008.05.010>
+       <https://doi.org/10.1016/j.tcs.2008.05.010>
 
     """
     if len(G) == 0:
@@ -309,9 +309,8 @@ def make_max_clique_graph(G, create_using=None):
     ----------
     G : NetworkX graph
 
-    create_using : NetworkX graph
-        If provided, this graph will be cleared and the nodes and edges
-        of the maximal clique graph will be added to this graph.
+    create_using : NetworkX graph constructor, optional (default=nx.Graph)
+       Graph type to create. If graph instance, then cleared before populated.
 
     Returns
     -------
@@ -333,8 +332,10 @@ def make_max_clique_graph(G, create_using=None):
     steps.
 
     """
-    B = create_using if create_using is not None else networkx.Graph()
-    B.clear()
+    if create_using is None:
+        B = G.__class__()
+    else:
+        B = nx.empty_graph(0, create_using)
     cliques = list(enumerate(set(c) for c in find_cliques(G)))
     # Add a numbered node for each clique.
     B.add_nodes_from(i for i, c in cliques)
@@ -362,9 +363,8 @@ def make_clique_bipartite(G, fpos=None, create_using=None, name=None):
         additional attribute, `pos`, a dictionary mapping node to
         position in the Euclidean plane.
 
-    create_using : NetworkX graph
-        If provided, this graph will be cleared and the nodes and edges
-        of the bipartite graph will be added to this graph.
+    create_using : NetworkX graph constructor, optional (default=nx.Graph)
+       Graph type to create. If graph instance, then cleared before populated.
 
     Returns
     -------
@@ -379,7 +379,7 @@ def make_clique_bipartite(G, fpos=None, create_using=None, name=None):
         convention for bipartite graphs in NetworkX.
 
     """
-    B = create_using if create_using is not None else networkx.Graph()
+    B = nx.empty_graph(0, create_using)
     B.clear()
     # The "bottom" nodes in the bipartite graph are the nodes of the
     # original graph, G.
@@ -423,7 +423,9 @@ def graph_clique_number(G, cliques=None):
     """
     if cliques is None:
         cliques = find_cliques(G)
-    return max([len(c) for c in cliques])
+    if len(G.nodes) < 1:
+        return 0
+    return max([len(c) for c in cliques] or [1])
 
 
 def graph_number_of_cliques(G, cliques=None):
@@ -469,10 +471,10 @@ def node_clique_number(G, nodes=None, cliques=None):
             if isinstance(nodes, list):
                 d = {}
                 for n in nodes:
-                    H = networkx.ego_graph(G, n)
+                    H = nx.ego_graph(G, n)
                     d[n] = max((len(c) for c in find_cliques(H)))
             else:
-                H = networkx.ego_graph(G, nodes)
+                H = nx.ego_graph(G, nodes)
                 d = max((len(c) for c in find_cliques(H)))
             return d
         # nodes is None--find all cliques
