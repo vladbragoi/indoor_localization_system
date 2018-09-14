@@ -1,11 +1,10 @@
 from queue import Queue
+from graph import Graph
 import matlab.engine
 import configparser
 import database
 import data
 
-database.config()
-database.connect()
 
 # config = configparser.ConfigParser(empty_lines_in_values=False)
 # config.read('setup.ini')
@@ -59,8 +58,21 @@ def spin(db, orig_graph, matlab_eng):
 
 
 def main():
+    global _max_width, _max_height
+    config = configparser.ConfigParser(empty_lines_in_values=False)
+    config.read('setup.ini')
+    _max_width = int(config['Graph']['max_width'])
+    _max_height = int(config['Graph']['max_height'])
+    fingerprint_size = int(config['Graph']['fingerprint_size'])
+    graph = Graph(width=_max_width, height=_max_height)
+    nodes = [[None for x in range(int(_max_height / fingerprint_size) + 1)]
+             for y in range(int(_max_width / fingerprint_size) + 1)]
+    nodes = database.get_nodes(nodes)
+    for node in nodes:
+        print(node)
     pass
 
 
 if __name__ == '__main__':
+    database.initialize()
     main()

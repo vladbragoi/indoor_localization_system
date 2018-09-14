@@ -8,11 +8,9 @@ class Graph:
     _max_width = 0
     _max_height = 0
 
-    def __init__(self):
-        config = configparser.ConfigParser(empty_lines_in_values=False)
-        config.read('setup.ini')
-        self._max_width = config['Graph']['max_width']
-        self._max_height = config['Graph']['max_height']
+    def __init__(self, width, height):
+        self._max_width = width
+        self._max_height = height
         self._graph = networkx.DiGraph()
 
     def add_nodes_to_graph(self, nodes):

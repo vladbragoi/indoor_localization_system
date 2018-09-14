@@ -1,70 +1,76 @@
 import configparser
 from cloudant.client import CouchDB, CouchDatabase
 from cloudant.design_document import DesignDocument
+from cloudant.query import Query
+from cloudant.result import Result
+from node import Node
 
 _client = None
 _loc_db_instance = None
+_fing_db_instance = None
 
 
-def config():
-    global _url, _username, _password, _loc_db_name, _fing_db_name
+def initialize():
+    global _client, _loc_db_name, _fing_db_name, _fingerprint_size
     config = configparser.ConfigParser()
     config.read('setup.ini')
-    _url = config['Database']['url']
-    _username = config['Database']['username']
-    _password = config['Database']['password']
+    url = config['Database']['url']
+    username = config['Database']['username']
+    password = config['Database']['password']
     _loc_db_name = config['Database']['localization_db']
     _fing_db_name = config['Database']['fingerprinting_db']
+    _fingerprint_size = int(config['Graph']['fingerprint_size'])
+    _client = CouchDB(username, password, url=url, connect=True)
 
 
-def connect():
-    global _client, _loc_db_instance
-    _client = CouchDB(_username, _password, url=_url, connect=True)
-    #_client.connect()
-    _loc_db_instance = CouchDatabase(_client, _loc_db_name)
+def _init_localization_db():
+    global _loc_db_instance
+    if _loc_db_instance is None:
+        _loc_db_instance = CouchDatabase(_client, _loc_db_name)
 
-    # Add filter function
-    ddoc = DesignDocument(_loc_db_instance, '_design/online')
-    if not ddoc.exists():
-        # ignore documents that are deleted or having type != `data_doc`
-        ddoc['filters'] = {
-            'dataDoc': 'function(doc) { '
-                          'if (doc._deleted) { return false; } '
-                          'if (doc.type == \'data_doc\') { return true; }'
-                          'return false; '
-                       '}'
-        }
-        ddoc.save()
-
-    _loc_db_instance.set_revision_limit(10)
+        # Add filter function
+        ddoc = DesignDocument(_loc_db_instance, '_design/online')
+        if not ddoc.exists():
+            # ignore documents that are deleted or having type != `data_doc`
+            ddoc['filters'] = {
+                'dataDoc': 'function(doc) { '
+                           'if (doc._deleted) { return false; } '
+                           'if (doc.type == \'data_doc\') { return true; }'
+                           'return false; '
+                           '}'
+            }
+            ddoc.save()
+        _loc_db_instance.set_revision_limit(10)
 
 
-def changes():
-    return _loc_db_instance.infinite_changes(
+def _init_fingerprinting_db():
+    global _fing_db_instance
+    if _fing_db_instance is None:
+        _fing_db_instance = CouchDatabase(_client, _fing_db_name)
+
+
+def close():
+    _client.disconnect()
+
+
+def changes(database):
+    return database.infinite_changes(
         feed='continuous',
         include_docs=True,
         filter="online/dataDoc",
         since='now')
 
 
-def get_all_nodes():
-    client = CouchDB(_username, _password, url=_url)
-    client.connect()
-    db = CouchDatabase(client, _fing_db_name)
-    print(db.keys(remote=True))
+def get_nodes(nodes):
+    _init_fingerprinting_db()
 
-        # # TODO
-        # print("Downloading...")
-        # rows = db.view('_all_docs', include_docs=True)
-        # rows = [row.doc for row in rows]
-        #
-        # for row in rows:
-        #     row = cdb.Document(row)
-        #     try:
-        #         node = Node(id=row['_id'], x=row['X position'], y=row['Y position'],
-        #                     borders=set_borders(row['Borders']))
-        #         nodes[node.y][node.x] = node
-        #     except KeyError:
-        #         pass
-    client.disconnect()
+    # TODO: not using a matrix, but querying instead
+    query = Query(_fing_db_instance, selector={'_id': {'$gte': 0}}, fields=['_id', 'x', 'y', 'borders'])
+    for doc in query.result:
+        x = int(doc['x']) / _fingerprint_size
+        y = int(doc['y']) / _fingerprint_size
+        node = Node(id=doc['_id'], x=doc['x'], y=doc['y'], borders=doc['borders'])
+        nodes[int(x)][int(y)] =  node
+
+    return nodes
 

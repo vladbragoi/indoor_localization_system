@@ -49,18 +49,22 @@ _source_db = None
 _target_db = None
 
 
-def load_source_db(db_name):
-    global _client, _source_db
+def initialize():
+    global _client
     config = configparser.ConfigParser()
     config.read('setup.ini')
     url = config['Database']['url']
     username = config['Database']['username']
     password = config['Database']['password']
     _client = CouchDB(username, password, url=url, connect=True)
+
+
+def _init_source_db(db_name):
+    global _source_db
     _source_db = CouchDatabase(_client, db_name)
 
 
-def load_target_db(db_name):
+def _init_target_db(db_name):
     global _target_db
     _target_db = CouchDatabase(_client, db_name)
 
@@ -121,9 +125,11 @@ def convert_and_save_to_target(document):
         del new_document
 
 
-def main():
-    load_source_db("fingerprints_backup")
-    load_target_db("fingerprints_converted")
+def start():
+    source_db_name = str(input("Insert name of source DB: "))
+    target_db_name = str(input("Insert name of target DB: "))
+    _init_source_db(source_db_name)
+    _init_target_db(target_db_name)
     result_collection = Result(_source_db.all_docs)
     doc_list = [doc['id'] for doc in result_collection]
 
@@ -134,6 +140,11 @@ def main():
         gc.collect()
 
 
+def main():
+    initialize()
+    start()
+    close()
+
+
 if __name__ == '__main__':
     main()
-    close()
