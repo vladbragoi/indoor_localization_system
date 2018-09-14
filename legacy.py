@@ -5,6 +5,45 @@ import configparser
 import gc
 
 
+# Some functions to convert old json document structure to the new one:
+# {
+#   "_id": "x",
+#   "_rev": "xxx",
+#   "borders": "0",
+#   "x": "1",
+#   "y": "3",
+#   "measurations": {
+#     "NORTH": {
+#       "wifi": [
+#         [
+#           {
+#             "id": "34:db:fd:a4:cd:0e",
+#             "value": -45,
+#             "type": "WIFI"
+#           },
+#           ...,
+#           {<->}
+#         ],
+#         [<->]
+#       ],
+#       "ble": [<->],
+#       "mv": [
+#         {
+#           "values": [
+#             -21.440125,
+#             0.29144287,
+#             -39.4516
+#           ]
+#         },
+#         {<->}
+#       ]
+#     },
+#     "SOUTH": {<->},
+#     "EAST": {<->},
+#     "WEST": {<->}
+#   }
+
+
 _client = None
 _source_db = None
 _target_db = None
