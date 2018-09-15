@@ -1,4 +1,3 @@
-import configparser
 import networkx
 
 
@@ -8,38 +7,32 @@ class Graph:
     _max_width = 0
     _max_height = 0
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, fingerprint_size):
         self._max_width = width
         self._max_height = height
+        self._fingerprint_size = fingerprint_size
         self._graph = networkx.DiGraph()
 
-    def add_nodes_to_graph(self, nodes):
-        for row in range(self._max_height):
-            for col in range(self._max_width):
-                node = nodes[row][col]
-                if node is not None:
-                    self._graph.add_node(node.id, x=node.x, y=node.y, borders=node.borders)
+    def add_nodes(self, nodes):
+        for node in nodes:
+            self._graph.add_node(node.id, x=node.x, y=node.y, borders=node.borders)
 
-    def _add_edge(self, nodes, source, i, j, borders=tuple()):
-        if source is not None and i in range(0, self._max_height) and j in range(0, self._max_width) \
-                and all(border not in source.borders for border in borders):
-            target = nodes[i][j]
-            if target is not None:
-                self._graph.add_edge(source.id, target.id, dir=borders)
+    def __iter__(self):
+        return self._graph.__iter__()
 
-    def add_edges_to_graph(self, nodes):
+    def edges(self):
+        return self._graph.edges
+
+    def nodes(self):
+        return self._graph.nodes(data=True)
+
+    def add_edges(self, nodes):
+        # x = filter(lambda node: node.x > 0, l)
         # individuo gli archi tra i nodi scorrendo la matrice (NOTA: 0=NORTH, 1=SOUTH, 2=EAST, 3=WEST)
-        for row in range(self._max_height):
-            for col in range(self._max_width):
-                node = nodes[row][col]
-                self._add_edge(nodes, node, row - 2, col - 2, ('3', '0'))
-                self._add_edge(nodes, node, row, col - 2, ('3',))
-                self._add_edge(nodes, node, row + 2, col - 2, ('1', '3'))
-                self._add_edge(nodes, node, row + 2, col, ('1',))
-                self._add_edge(nodes, node, row + 2, col + 2, ('1', '2'))
-                self._add_edge(nodes, node, row, col + 2, ('2',))
-                self._add_edge(nodes, node, row - 2, col + 2, ('2', '0'))
-                self._add_edge(nodes, node, row - 2, col, ('0',))
+        for node in nodes:
+            target_list = list(filter(lambda target: target.is_neighbor_of(node, self._fingerprint_size) , nodes))
+            list(map(lambda target: self._graph.add_edge(node.id, target.id), target_list))
+            # print("source = " , node.id, "targets = ", [x.id for x in target_list])
 
     def add_weights(self):
         """ ADD EDGES WEIGHTS

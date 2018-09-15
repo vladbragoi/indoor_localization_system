@@ -61,7 +61,14 @@ def changes(database):
         since='now')
 
 
-def get_nodes(nodes):
+def get_nodes():
+    _init_fingerprinting_db()
+    query = Query(_fing_db_instance, selector={'_id': {'$gte': 0}}, fields=['_id', 'x', 'y', 'borders'])
+    # return [doc for doc in query.result]  # return a list of dicts
+    return [Node(id=doc['_id'], x=doc['x'], y=doc['y'], borders=doc['borders']) for doc in query.result]
+
+
+def add_nodes_to(graph):
     _init_fingerprinting_db()
 
     # TODO: not using a matrix, but querying instead
@@ -70,7 +77,3 @@ def get_nodes(nodes):
         x = int(doc['x']) / _fingerprint_size
         y = int(doc['y']) / _fingerprint_size
         node = Node(id=doc['_id'], x=doc['x'], y=doc['y'], borders=doc['borders'])
-        nodes[int(x)][int(y)] =  node
-
-    return nodes
-

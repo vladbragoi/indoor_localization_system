@@ -21,3 +21,8 @@ class Node:
 
     def __str__(self):
         return "Node: " + str(self.id) + " X: " + str(self.x) + " Y: " + str(self.y) + " Borders: " + self.borders
+
+    def is_neighbor_of(self, source, distance):
+        return self.x in range(source.x - distance, source.x + distance + 1) \
+               and self.y in range(source.y - distance, source.y + distance + 1) \
+               and self != source
