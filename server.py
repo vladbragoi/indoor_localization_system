@@ -64,16 +64,17 @@ def main():
     _max_width = int(config['Graph']['max_width'])
     _max_height = int(config['Graph']['max_height'])
     fingerprint_size = int(config['Graph']['fingerprint_size'])
-    graph = Graph(width=_max_width, height=_max_height, fingerprint_size=fingerprint_size)
+    graph = Graph(distance=fingerprint_size)
     # nodes = [[None for x in range(int(_max_height / fingerprint_size) + 1)]
     #          for y in range(int(_max_width / fingerprint_size) + 1)]
     nodes = database.get_nodes()
     graph.add_nodes(nodes)
     graph.add_edges(nodes)
-
-    print(graph.edges())
+    for edge in graph.edges():
+        print(edge)
 
 
 if __name__ == '__main__':
     database.initialize()
     main()
+    database.close()

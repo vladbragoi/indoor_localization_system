@@ -4,34 +4,43 @@ import networkx
 class Graph:
 
     _graph = None   # Directed graph
-    _max_width = 0
-    _max_height = 0
 
-    def __init__(self, width, height, fingerprint_size):
-        self._max_width = width
-        self._max_height = height
-        self._fingerprint_size = fingerprint_size
+    def __init__(self, distance):
+        self._distance = distance
         self._graph = networkx.DiGraph()
-
-    def add_nodes(self, nodes):
-        for node in nodes:
-            self._graph.add_node(node.id, x=node.x, y=node.y, borders=node.borders)
 
     def __iter__(self):
         return self._graph.__iter__()
 
-    def edges(self):
-        return self._graph.edges
-
     def nodes(self):
+        """Gets all nodes in the graph with their specified attributes.
+        :return: a list of tuple with node-id and node attributes.
+        """
         return self._graph.nodes(data=True)
 
-    def add_edges(self, nodes):
-        # x = filter(lambda node: node.x > 0, l)
-        # individuo gli archi tra i nodi scorrendo la matrice (NOTA: 0=NORTH, 1=SOUTH, 2=EAST, 3=WEST)
+    def edges(self):
+        """Gets all edges in the graph with their specified attributes.
+        :return: a list of tuple with node-ids of the edge and the edge's attributes.
+        """
+        return self._graph.edges(data=True)
+
+    def add_nodes(self, nodes):
+        """Adds nodes from nodes list.
+        :param nodes: a list of nodes
+        """
         for node in nodes:
-            target_list = list(filter(lambda target: target.is_neighbor_of(node, self._fingerprint_size) , nodes))
-            list(map(lambda target: self._graph.add_edge(node.id, target.id), target_list))
+            self._graph.add_node(node.id, x=node.x, y=node.y, borders=node.borders)
+
+    def add_edges(self, nodes):
+        """Adds edges iterating the nodes list.
+        :param nodes: a list of nodes
+        """
+        for source in nodes:
+            # filter the list querying for neighbors
+            target_list = list(filter(lambda target: target.is_neighbor_of(source, self._distance), nodes))
+            list(map(lambda target: self._graph.add_edge(source.id,
+                                                         target.id,
+                                                         dir=self._calculate_direction(source, target)), target_list))
             # print("source = " , node.id, "targets = ", [x.id for x in target_list])
 
     def add_weights(self):
@@ -58,3 +67,28 @@ class Graph:
             for edge in adj_list:
                 if self._graph[edge[0]][edge[1]]["dir"] == direction:
                     self._graph[edge[0]][edge[1]]["weight"] = 0
+
+    @staticmethod
+    def _calculate_direction(source, target):
+        """ Direction could be one or more between [0..3]
+        and represents the direction of the edge between source and target.
+        [0..3] indices could be 0->NORTH, 1->SOUTH, 2->EAST and 3->WEST
+        and depends on the reference system specified in the 'setup.ini'
+        configuration file.
+        """
+        direction = []
+        x_direction = target.x - source.x
+        y_direction = target.y - source.y
+        # print("source:", source.id, "target:", target.id, "x", x_direction, "y", y_direction)
+
+        if x_direction < 0:
+            direction.append('3')
+        elif x_direction > 0:
+            direction.append('2')
+
+        if y_direction < 0:
+            direction.append('0')
+        elif y_direction > 0:
+            direction.append('1')
+
+        return tuple(direction)
