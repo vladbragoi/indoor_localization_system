@@ -1,19 +1,12 @@
 class Node:
-    id = int
-    x = int
-    y = int
-    borders = str
 
-    def __init__(self, id, x, y, borders):
-        self.id = int(id)
+    def __init__(self, node_id, x, y, borders):
+        self.id = int(node_id)
         self.x = int(x)
         self.y = int(y)
         self.borders = borders
 
     def __eq__(self, other):
-        return isinstance(other, Node) and self.id == other.id
-
-    def __cmp__(self, other):
         return isinstance(other, Node) and self.id == other.id
 
     def __hash__(self):

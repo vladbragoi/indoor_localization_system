@@ -5,22 +5,27 @@ import configparser
 import database
 
 
-def run():
+def loop():
     id = None
-    rps_queue = Queue()
+    queue = Queue()
 
-    changes = database.changes(database._loc_db_instance, filter_function="online/dataDoc")
+    changes = database.changes(database.localization_db(), filter_function="online/dataDoc")
     for change in changes:
         doc = change['doc']
 
-        H = _graph.copy(as_view=False)
-        data = _matlab_engine.double(data.get_list_from(doc))
-        data = data[1:]
-        result = _matlab_engine.findRP(data, 2, nargout=8)
+        mv = doc['measurations']['mv']
+        ble = doc['measurations']['ble']
+        wifi = doc['measurations']['wifi']
 
-        # update_weights(H, [result[1], result[2]], set_borders(doc['direction'][0]))
 
-        print(result)
+        # H = _graph.copy(as_view=False)
+        # data = _matlab_engine.double(data.get_list_from(doc))
+        # data = data[1:]
+        # result = _matlab_engine.findRP(data, 2, nargout=8)
+        #
+        # # update_weights(H, [result[1], result[2]], set_borders(doc['direction'][0]))
+        #
+        # print(result)
 
         """
         rps_fifo.append(result[1:])  # take 2nd and 3rd elements from result list
@@ -50,25 +55,28 @@ def run():
         """
 
 
-def main():
+def run(fingerprint_size):
     global _graph, _matlab_engine
-    config = configparser.ConfigParser()
-    config.read('setup.ini')
-    fingerprint_size = int(config['Graph']['fingerprint_size'])
-
     _graph = Graph(fingerprint_size)
     nodes = database.get_nodes()
     _graph.add_nodes(nodes)
     _graph.add_edges(nodes)
 
     print("Starting matlab...")
-    _matlab_engine = matlab.engine.start_matlab()
+    # _matlab_engine = matlab.engine.start_matlab()
     print("Matlab started")
 
-    run()
+    loop()
+
+
+def main():
+    config = configparser.ConfigParser()
+    config.read('setup.ini')
+    fingerprint_size = int(config['Graph']['fingerprint_size'])
+    database.initialize()
+    run(fingerprint_size)
+    database.close()
 
 
 if __name__ == '__main__':
-    database.initialize()
     main()
-    database.close()
