@@ -53,11 +53,11 @@ def close():
     _client.disconnect()
 
 
-def changes(database):
+def changes(database, filter_function):
     return database.infinite_changes(
         feed='continuous',
         include_docs=True,
-        filter="online/dataDoc",
+        filter=filter_function,
         since='now')
 
 

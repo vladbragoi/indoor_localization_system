@@ -3,27 +3,20 @@ from graph import Graph
 import matlab.engine
 import configparser
 import database
-import data
 
 
-# config = configparser.ConfigParser(empty_lines_in_values=False)
-# config.read('setup.ini')
-# print([str(ap).replace("\n", "") for ap in str(config['Access Points']['ap5ghz']).split(',')])
-
-
-# noinspection PyUnresolvedReferences
-def spin(db, orig_graph, matlab_eng):
+def run():
     id = None
-    rps_fifo = Queue()
+    rps_queue = Queue()
 
-    changes = db.infinite_changes(feed='continuous', include_docs=True, filter="online/onlineDocs", since='now')
+    changes = database.changes(database._loc_db_instance, filter_function="online/dataDoc")
     for change in changes:
         doc = change['doc']
 
-        H = orig_graph.copy(as_view=False)
-        data = matlab.double(data.get_list_from(doc))
+        H = _graph.copy(as_view=False)
+        data = _matlab_engine.double(data.get_list_from(doc))
         data = data[1:]
-        result = matlab_eng.findRP(data, 2, nargout=8)
+        result = _matlab_engine.findRP(data, 2, nargout=8)
 
         # update_weights(H, [result[1], result[2]], set_borders(doc['direction'][0]))
 
@@ -58,20 +51,21 @@ def spin(db, orig_graph, matlab_eng):
 
 
 def main():
-    global _max_width, _max_height
-    config = configparser.ConfigParser(empty_lines_in_values=False)
+    global _graph, _matlab_engine
+    config = configparser.ConfigParser()
     config.read('setup.ini')
-    _max_width = int(config['Graph']['max_width'])
-    _max_height = int(config['Graph']['max_height'])
     fingerprint_size = int(config['Graph']['fingerprint_size'])
-    graph = Graph(distance=fingerprint_size)
-    # nodes = [[None for x in range(int(_max_height / fingerprint_size) + 1)]
-    #          for y in range(int(_max_width / fingerprint_size) + 1)]
+
+    _graph = Graph(fingerprint_size)
     nodes = database.get_nodes()
-    graph.add_nodes(nodes)
-    graph.add_edges(nodes)
-    for edge in graph.edges():
-        print(edge)
+    _graph.add_nodes(nodes)
+    _graph.add_edges(nodes)
+
+    print("Starting matlab...")
+    _matlab_engine = matlab.engine.start_matlab()
+    print("Matlab started")
+
+    run()
 
 
 if __name__ == '__main__':

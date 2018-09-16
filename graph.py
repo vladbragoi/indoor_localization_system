@@ -1,72 +1,48 @@
 import networkx
 
 
-class Graph:
+class Graph(networkx.DiGraph):
 
-    _graph = None   # Directed graph
-
-    def __init__(self, distance):
-        self._distance = distance
-        self._graph = networkx.DiGraph()
-
-    def __iter__(self):
-        return self._graph.__iter__()
-
-    def nodes(self):
-        """Gets all nodes in the graph with their specified attributes.
-        :return: a list of tuple with node-id and node attributes.
+    def __init__(self, neighbor_distance, **attr):
+        """A directed graph object that extends a networkx DiGraph.
+        :param neighbor_distance: distance of neighborhood
         """
-        return self._graph.nodes(data=True)
-
-    def edges(self):
-        """Gets all edges in the graph with their specified attributes.
-        :return: a list of tuple with node-ids of the edge and the edge's attributes.
-        """
-        return self._graph.edges(data=True)
+        super().__init__(**attr)
+        self._distance = neighbor_distance
 
     def add_nodes(self, nodes):
         """Adds nodes from nodes list.
         :param nodes: a list of nodes
         """
         for node in nodes:
-            self._graph.add_node(node.id, x=node.x, y=node.y, borders=node.borders)
+            self.add_node(node.id, x=node.x, y=node.y, borders=node.borders)
 
     def add_edges(self, nodes):
-        """Adds edges iterating the nodes list.
+        """Adds edges iterating the nodes list and decorating each edge with direction (dir) and a
+        specific weight given by a static probability: 100 / node out-degree, where out-degree is
+        the length of the target node list.
         :param nodes: a list of nodes
         """
         for source in nodes:
             # filter the list querying for neighbors
             target_list = list(filter(lambda target: target.is_neighbor_of(source, self._distance), nodes))
-            list(map(lambda target: self._graph.add_edge(source.id,
-                                                         target.id,
-                                                         dir=self._calculate_direction(source, target)), target_list))
-            # print("source = " , node.id, "targets = ", [x.id for x in target_list])
+            weight = 100 / len(target_list)
+            list(map(lambda target: self.add_edge(source.id,
+                                                  target.id,
+                                                  dir=self._calculate_direction(source, target),
+                                                  weight=round(weight, 2)), target_list))
+            # print("source =", source.id, "targets =", [x.id for x in target_list])
 
-    def add_weights(self):
-        """ ADD EDGES WEIGHTS
-        @param graph the graph object
+    def update_weights(self, nodes, direction):
+        """ Updates weight of edges in nodes list.
+        @param nodes: a list of nodes
+        @param direction: a tuple of direction strings ('0', '1', ...)
         """
-        # probabilità statica: assegno un peso pari a 50 / grado del nodo a ciascun arco
-        for node in self._graph.nodes.keys():
-            degree = self._graph.out_degree(node)
-            # print("Nodo:" ,node, "grado", degree)
-            adj_list = self._graph.edges(node)
-            # print("Lista di adiacenza:", adj_list)
-            for nodes_of_an_edge in adj_list:
-                self._graph.add_edge(nodes_of_an_edge[0], nodes_of_an_edge[1], weight=round(100 / degree, 2))
-
-    def update_weights(self, rps, direction):
-        """ UPDATE EDGES WEIGHTS
-        @param graph the graph object
-        @param rps a list of nodes
-        @param direction a tuple of strings
-        """
-        for rp in rps:
-            adj_list = self._graph.edges(rp)
+        for node in nodes:
+            adj_list = self.edges(node)
             for edge in adj_list:
-                if self._graph[edge[0]][edge[1]]["dir"] == direction:
-                    self._graph[edge[0]][edge[1]]["weight"] = 0
+                if self[edge[0]][edge[1]]["dir"] == direction:
+                    self[edge[0]][edge[1]]["weight"] = 0
 
     @staticmethod
     def _calculate_direction(source, target):
