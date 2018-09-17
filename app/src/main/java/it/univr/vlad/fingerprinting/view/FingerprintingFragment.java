@@ -102,7 +102,8 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
         Activity activity = getActivity();
         if (activity != null) {
             Application application = (Application) activity.getApplication();
-            mDatabase = application.getFingerprintingDatabase().startPushReplication(true);
+            mDatabase = application.getFingerprintingDatabase();
+            if (mDatabase != null) mDatabase.startPushReplication(true);
 
             if (savedInstanceState == null && activity instanceof MainActivity) {
                 ((MainActivity) activity).turnLocationOn();
@@ -136,14 +137,14 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
     @Override
     public void onStart() {
         super.onStart();
-        if (!mDatabase.isRunning()) mDatabase.start();
+        if (mDatabase != null && !mDatabase.isRunning()) mDatabase.start();
         mViewModel.startMvScanning();
     }
 
     @Override
     public void onStop() {
         stopTimer();
-        if (mDatabase.isRunning()) mDatabase.stop();
+        if (mDatabase != null && mDatabase.isRunning()) mDatabase.stop();
         mViewModel.stopMvScanning();
         super.onStop();
     }
@@ -200,9 +201,16 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
 
     @Override
     public boolean onActionSelected(SpeedDialActionItem actionItem) {
+        Context context = getContext();
         switch (actionItem.getId()) {
             case R.id.fab_save:
-                if (mCurrentFingerprint != null) {
+                if (mDatabase == null && context != null) {
+                    Toasty.info(context,
+                            getString(R.string.sync_button_press),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+                else if (mCurrentFingerprint != null && mDatabase != null) {
                     mCurrentFingerprint.saveInto(mDatabase.unwrapDatabase());
                     mCurrentFingerprint = null;
                 }

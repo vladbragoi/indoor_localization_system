@@ -18,10 +18,10 @@ public class Fingerprint {
     private final static String X_KEY = "x";
     private final static String Y_KEY = "y";
     private final static String BORDERS_KEY = "borders";
-    private final static String MEASURE_KEY = "measurations";
+    private final static String MEASURE_KEY = "measures";
 
-    private Map<String, Measuration> measurations = new HashMap<>();
-    private Measuration measuration = new Measuration();
+    private Map<String, Measure> measures = new HashMap<>();
+    private Measure measure = new Measure();
     private String direction;
 
     private String number; // The document ID
@@ -39,14 +39,14 @@ public class Fingerprint {
     public void saveInto(Database database) {
         boolean noErrors = true;
         Document document = database.getDocument(number);
-        measurations.put(this.direction, measuration);
+        measures.put(this.direction, measure);
         try {
             document.update(newRevision -> {
                 Map<String, Object> properties = newRevision.getUserProperties();
                 properties.put(X_KEY, x);
                 properties.put(Y_KEY, y);
                 properties.put(BORDERS_KEY, borders);
-                properties.put(MEASURE_KEY, measurations);
+                properties.put(MEASURE_KEY, measures);
                 newRevision.setProperties(properties);
                 return true;
             });
@@ -59,21 +59,21 @@ public class Fingerprint {
     }
 
     public void newMeasuration(String direction) {
-        measurations.put(this.direction, measuration);
-        measuration = new Measuration();
+        measures.put(this.direction, measure);
+        measure = new Measure();
         this.direction = direction;
     }
 
     public void addWifiNodes(List<Node> nodes) {
-        measuration.addWifiNodes(nodes);
+        measure.addWifiNodes(nodes);
     }
 
     public void addBeaconNodes(List<Node> nodes) {
-        measuration.addBleNodes(nodes);
+        measure.addBleNodes(nodes);
     }
 
     public void addMagneticVector(MagneticVector mv) {
-        measuration.addMagneticVector(mv);
+        measure.addMagneticVector(mv);
     }
 
     public void setNumber(String number) {

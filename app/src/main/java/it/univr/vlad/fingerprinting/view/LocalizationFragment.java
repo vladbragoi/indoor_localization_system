@@ -73,7 +73,13 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
     };
 
     private final Observer<List<Node>> mBeaconNodesObserver = nodes -> {
-        if (mLocation != null) mLocation.addBeaconNodes(nodes);
+        if (mLocation != null) {
+            mLocation.addBeaconNodes(nodes);
+            if (!mWifiCheckbox.isChecked()) {
+                mLocation.saveInto(mDatabase.unwrapDatabase());
+                mDatabase.startPushReplication(false);
+            }
+        }
     };
 
     private final Observer<MagneticVector> mMagneticVectorObserver = mv -> {
