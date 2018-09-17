@@ -2,6 +2,7 @@ package it.univr.vlad.fingerprinting;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.couchbase.lite.Manager;
@@ -30,6 +31,7 @@ public class Application extends android.app.Application
     private Manager manager;
     private CBLDatabase fingerprintingDatabase;
     private CBLDatabase localizationDatabase;
+    private DatabaseListener mDatabaseListener;
 
     private String mFingDbName;
     private String mFingDbUrl;
@@ -56,13 +58,21 @@ public class Application extends android.app.Application
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
+        refresh();
+
+        // enableLogging();
+        Log.d(TAG, "APP Started");
+    }
+
+    public void refresh() {
         loadPreferences();
 
         initFingerprintingDatabase();
         initLocalizationDatabase();
 
-        // enableLogging();
-        Log.d(TAG, "APP Started");
+        if (fingerprintingDatabase != null || localizationDatabase != null) {
+            if (mDatabaseListener != null) mDatabaseListener.onDatabaseCreatedListener();
+        }
     }
 
     @Override
@@ -70,46 +80,78 @@ public class Application extends android.app.Application
         switch (key) {
             case FING_DB_NAME_KEY:
                 mFingDbName = sharedPreferences.getString(key, "");
-                fingerprintingDatabase.changeName(manager, mFingDbName);
+
+                if (fingerprintingDatabase == null) initFingerprintingDatabase();
+                else fingerprintingDatabase.changeName(manager, mFingDbName);
+
                 break;
             case FING_DB_URL_KEY:
                 mFingDbUrl= sharedPreferences.getString(key, "");
-                fingerprintingDatabase.changeUrl(mFingDbUrl);
+
+                if (fingerprintingDatabase == null) initFingerprintingDatabase();
+                else fingerprintingDatabase.changeUrl(mFingDbUrl);
+
                 break;
             case FING_DB_USER_KEY:
                 mFingUsername = sharedPreferences.getString(key, "");
-                fingerprintingDatabase.updateAuthentication(mFingUsername, mFingPassword);
+
+                if (fingerprintingDatabase == null) initFingerprintingDatabase();
+                else fingerprintingDatabase.updateAuthentication(mFingUsername, mFingPassword);
+
                 break;
             case FING_DB_PASSWD_KEY:
                 mFingPassword = sharedPreferences.getString(key, "");
-                fingerprintingDatabase.updateAuthentication(mFingUsername, mFingPassword);
+
+                if (fingerprintingDatabase == null) initFingerprintingDatabase();
+                else fingerprintingDatabase.updateAuthentication(mFingUsername, mFingPassword);
+
                 break;
             case LOC_DB_NAME_KEY:
                 mLocDbName = sharedPreferences.getString(key, "");
-                localizationDatabase.changeName(manager, mLocDbName);
+
+                if (localizationDatabase == null) initLocalizationDatabase();
+                else localizationDatabase.changeName(manager, mLocDbName);
+
                 break;
             case LOC_DB_URL_KEY:
                 mLocDbUrl= sharedPreferences.getString(key, "");
-                localizationDatabase.changeUrl(mLocDbUrl);
+
+                if (localizationDatabase == null) initLocalizationDatabase();
+                else localizationDatabase.changeUrl(mLocDbUrl);
+
                 break;
             case LOC_DB_USER_KEY:
                 mLocUsername = sharedPreferences.getString(key, "");
-                localizationDatabase.updateAuthentication(mLocUsername, mLocPassword);
+
+                if (localizationDatabase == null) initLocalizationDatabase();
+                else localizationDatabase.updateAuthentication(mLocUsername, mLocPassword);
+
                 break;
             case LOC_DB_PASSWD_KEY:
                 mLocPassword = sharedPreferences.getString(key, "");
-                localizationDatabase.updateAuthentication(mLocUsername, mLocPassword);
+
+                if (localizationDatabase == null) initLocalizationDatabase();
+                else localizationDatabase.updateAuthentication(mLocUsername, mLocPassword);
+
                 break;
         }
     }
 
+    public void setOnDatabaseListener(DatabaseListener databaseListener) {
+        this.mDatabaseListener = databaseListener;
+    }
+
     public CBLDatabase getFingerprintingDatabase() {
-        if (!fingerprintingDatabase.isOpen()) initFingerprintingDatabase();
+        if (fingerprintingDatabase == null || !fingerprintingDatabase.isOpen()) {
+            initFingerprintingDatabase();
+        }
         return fingerprintingDatabase;
     }
 
     public CBLDatabase getLocalizationDatabase() {
-        if (!localizationDatabase.isOpen()) initLocalizationDatabase();
+        if (localizationDatabase == null || !localizationDatabase.isOpen()) {
+            initLocalizationDatabase();
+        }
         return localizationDatabase;
     }
 
@@ -126,21 +168,29 @@ public class Application extends android.app.Application
     ///////////////////////////////////////////////
 
     private void initFingerprintingDatabase() {
-        fingerprintingDatabase = new CBLDatabase(
-                manager,
-                mFingDbName,
-                mFingDbUrl,
-                mFingUsername,
-                mFingPassword);
+        if (fingerprintingDatabase == null
+                && !TextUtils.isEmpty(mFingDbName)
+                && !TextUtils.isEmpty(mFingDbUrl)) {
+            fingerprintingDatabase = new CBLDatabase(
+                    manager,
+                    mFingDbName,
+                    mFingDbUrl,
+                    mFingUsername,
+                    mFingPassword);
+        }
     }
 
     private void initLocalizationDatabase() {
-        localizationDatabase = new CBLDatabase(
-                manager,
-                mLocDbName,
-                mLocDbUrl,
-                mLocUsername,
-                mLocPassword);
+        if (localizationDatabase == null
+                && !TextUtils.isEmpty(mLocDbName)
+                && !TextUtils.isEmpty(mLocDbUrl)) {
+            localizationDatabase = new CBLDatabase(
+                    manager,
+                    mLocDbName,
+                    mLocDbUrl,
+                    mLocUsername,
+                    mLocPassword);
+        }
     }
 
     private void loadPreferences() {
@@ -165,5 +215,9 @@ public class Application extends android.app.Application
         com.couchbase.lite.Manager.enableLogging(com.couchbase.lite.util.Log.TAG_QUERY, Log.VERBOSE);
         com.couchbase.lite.Manager.enableLogging(com.couchbase.lite.util.Log.TAG_VIEW, Log.VERBOSE);
         Manager.enableLogging(com.couchbase.lite.util.Log.TAG_DATABASE, Log.VERBOSE);
+    }
+
+    public interface DatabaseListener {
+        void onDatabaseCreatedListener();
     }
 }

@@ -17,8 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CBLDatabase implements Replication.ChangeListener {
 
@@ -75,27 +73,23 @@ public class CBLDatabase implements Replication.ChangeListener {
     /**
      * Creates new PUSH replication and start.
      * @param continuous type of replication
-     * @return this db instance
      */
-    public CBLDatabase startPushReplication(boolean continuous) {
+    public void startPushReplication(boolean continuous) {
         this.push = true;
         this.continuousPushReplication = continuous;
         startPushReplication(continuous, pushFilter);
         running = true;
-        return this;
     }
 
     /**
      * Creates new PULL replication and start.
      * @param continuous type of replication
-     * @return this db instance
      */
-    public CBLDatabase startPullReplication(boolean continuous) {
+    public void startPullReplication(boolean continuous) {
         this.pull = true;
         this.continuousPullReplication = continuous;
         startPullReplication(continuous, pullFilter);
         running = true;
-        return this;
     }
 
     /**

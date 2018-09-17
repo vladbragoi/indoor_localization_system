@@ -15,9 +15,9 @@ import it.univr.vlad.fingerprinting.templates.Node;
 public class Location {
 
     private final static String DIRECTION_KEY = "direction";
-    private final static String MEASURE_KEY = "measurations";
+    private final static String MEASURE_KEY = "measures";
 
-    private Measuration measuration = new Measuration();
+    private Measure measuration = new Measure();
     private String user;
     private String direction;
 
