@@ -67,6 +67,6 @@
     <string name="vlad">vlad.bragoi@gmail.com</string>
     <string name="florenc">florenc.demrozi@univr.it</string>
     <string name="sync">Sync</string>
-    <string name="refreshing">Syncing</string>
+    <string name="syncing">Syncing</string>
     <string name="sync_button_press">Synchronize pressing sync button above.</string>
 </resources>

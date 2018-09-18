@@ -21,7 +21,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -31,10 +30,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -177,8 +172,8 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_sync:
                 Application application = (Application) getApplication();
-                Toasty.info(this, getString(R.string.refreshing), Toast.LENGTH_SHORT).show();
-                application.refresh();
+                Toasty.info(this, getString(R.string.syncing), Toast.LENGTH_SHORT).show();
+                // application.refresh();
                 return true;
         }
 
