@@ -23,6 +23,7 @@ public class CBLDatabase implements Replication.ChangeListener {
     private String mDatabaseName;
     private String mDatabaseUrl;
 
+    private Manager mManager;
     private Database mDatabase;
     private Replication mPushReplication;
     private Replication mPullReplication;
@@ -43,10 +44,11 @@ public class CBLDatabase implements Replication.ChangeListener {
     public CBLDatabase(Manager manager, String databaseName, String databaseUrl,
                        String username, String password) {
 
+        this.mManager = manager;
         this.mDatabaseName = databaseName;
         this.mDatabaseUrl = databaseUrl;
 
-        openDatabase(manager);
+        openDatabase();
         setAuthentication(username, password);
     }
 
@@ -123,16 +125,16 @@ public class CBLDatabase implements Replication.ChangeListener {
                 RemoteRequestResponseException exception = (RemoteRequestResponseException) lastError;
                 switch (exception.getCode()) {
                     case 401:
-                        Log.e(mDatabase.getName(), "Authentication failed");
+                        Log.e(getDatabase().getName(), "Authentication failed");
                         break;
                     case 400:
-                        Log.e(mDatabase.getName(), "Bad request");
+                        Log.e(getDatabase().getName(), "Bad request");
                         break;
                     case 404:
-                        Log.e(mDatabase.getName(), "Not found");
+                        Log.e(getDatabase().getName(), "Not found");
                         break;
                     default:
-                        Log.e(mDatabase.getName(), "Code error: " + exception.getCode());
+                        Log.e(getDatabase().getName(), "Code error: " + exception.getCode());
                 }
             }
         }
@@ -155,12 +157,12 @@ public class CBLDatabase implements Replication.ChangeListener {
         setAuthentication(username, password);
 
         if (push) {
-            mPushReplication.clearAuthenticationStores();
+            if (mPushReplication.isRunning()) mPushReplication.clearAuthenticationStores();
             mPushReplication.setAuthenticator(mAuthenticator);
         }
 
         if (pull) {
-            mPullReplication.clearAuthenticationStores();
+            if (mPullReplication.isRunning()) mPullReplication.clearAuthenticationStores();
             mPullReplication.setAuthenticator(mAuthenticator);
         }
 
@@ -170,16 +172,15 @@ public class CBLDatabase implements Replication.ChangeListener {
 
     /**
      * Changes DB name.
-     * @param manager Database manager
      * @param databaseName New Database name
      */
-    public void changeName(Manager manager, String databaseName) {
+    public void changeName(String databaseName) {
         boolean wasRunning = running;
         if (running) stop();
-        mDatabase.close();
+        if (mDatabase.isOpen()) mDatabase.close();
 
         this.mDatabaseName = databaseName;
-        openDatabase(manager);
+        openDatabase();
 
         if (wasRunning) start();
         Log.d(mDatabaseName, "DB name changed");
@@ -192,7 +193,7 @@ public class CBLDatabase implements Replication.ChangeListener {
     public void changeUrl(String databaseUrl) {
         boolean wasRunning = running;
         if (running) stop();
-        mDatabase.close();
+        if (mDatabase.isOpen()) mDatabase.close();
 
         this.mDatabaseUrl = databaseUrl;
 
@@ -205,7 +206,7 @@ public class CBLDatabase implements Replication.ChangeListener {
      */
     public void close() {
         stop();
-        mDatabase.close();
+        if (mDatabase.isOpen()) mDatabase.close();
     }
 
     /**
@@ -221,7 +222,7 @@ public class CBLDatabase implements Replication.ChangeListener {
      * @return a Document instance
      */
     public Document getDocument(String docName) {
-        return mDatabase.getDocument(docName);
+        return getDatabase().getDocument(docName);
     }
 
     /**
@@ -229,7 +230,7 @@ public class CBLDatabase implements Replication.ChangeListener {
      * @return unwrapped database instance
      */
     public Database unwrapDatabase() {
-        return mDatabase;
+        return getDatabase();
     }
 
     /**
@@ -243,7 +244,7 @@ public class CBLDatabase implements Replication.ChangeListener {
     //            PRIVATE METHODS
     ///////////////////////////////////////////////
 
-    private void openDatabase(@NotNull Manager manager) {
+    private void openDatabase() {
         /* FOR DB TO BE ENCRYPTED
         DatabaseOptions options = new DatabaseOptions();
         options.setCreate(true);
@@ -258,7 +259,13 @@ public class CBLDatabase implements Replication.ChangeListener {
         clientFactory.allowSelfSignedSSLCertificates();
         manager.setDefaultHttpClientFactory(clientFactory);*/
         try {
-            mDatabase = manager.getDatabase(mDatabaseName);
+            mDatabase = mManager.getDatabase(mDatabaseName);
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            mDatabase.open();
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
@@ -344,5 +351,10 @@ public class CBLDatabase implements Replication.ChangeListener {
 
     private void setAuthentication(String username, String password) {
         mAuthenticator = AuthenticatorFactory.createBasicAuthenticator(username, password);
+    }
+
+    private Database getDatabase() {
+        if (!mDatabase.isOpen()) openDatabase();
+        return mDatabase;
     }
 }

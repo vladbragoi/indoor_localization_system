@@ -2,9 +2,9 @@ package it.univr.vlad.fingerprinting.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceFragmentCompat;
 
 import it.univr.vlad.fingerprinting.R;
 
@@ -27,7 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
         return true;
     }
 
-    public static class SettingsFragment extends PreferenceFragment {
+    public static class SettingsFragment extends PreferenceFragmentCompat {
 
         @Override
         public void onCreate(final Bundle savedInstanceState) {

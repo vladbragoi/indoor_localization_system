@@ -6,7 +6,8 @@
         android:id="@+id/action_sync"
         android:title="@string/sync"
         android:icon="@drawable/ic_sync_white_24dp"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:enabled="false" />
 
     <item
         android:id="@+id/action_settings"
