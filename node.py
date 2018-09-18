@@ -1,7 +1,10 @@
+from cloudant.document import Document
+
+
 class Node:
 
     def __init__(self, node_id, x, y, borders):
-        self.id = int(node_id)
+        self.id = node_id
         self.x = int(x)
         self.y = int(y)
         self.borders = borders
@@ -19,3 +22,13 @@ class Node:
         return self.x in range(source.x - distance, source.x + distance + 1) \
                and self.y in range(source.y - distance, source.y + distance + 1) \
                and self != source
+
+    def save_into(self, database, doc_id):
+        with Document(database, doc_id) as document:
+            if document.exists():
+                document.delete()
+            document['fingerprint'] = self.id
+            document['type'] = 'result_doc'
+            document['x'] = self.x
+            document['y'] = self.y
+        # document saved

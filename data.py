@@ -46,14 +46,14 @@ class Data:
     @staticmethod
     def convert_direction(direction):
         """Converts the direction string in input to tuple type using conventions below:
-        0 -> NORTH (N)
-        1 -> SOUTH (S)
-        2 -> EAST (E)
-        3 -> WEST (W).
+        1 -> NORTH (N)
+        2 -> SOUTH (S)
+        3 -> EAST (E)
+        4 -> WEST (W).
         :param direction: usually a string of form NORTH or N, S, ...
-        :return: a tuple such as ('0', '1', '3') or a string e.g. 'N', 'S', etc.
+        :return: a tuple such as ('1', '2', '3') or a string e.g. 'N', 'S', etc.
         """
-        conventions = {'N': '0', 'S': '1', 'E': '2', 'W': '3'}
+        conventions = {'N': '1', 'S': '2', 'E': '3', 'W': '4'}
         out_direction = []
         if ',' in direction:
             direction = direction.split(',')
