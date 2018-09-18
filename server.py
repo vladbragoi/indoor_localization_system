@@ -1,5 +1,7 @@
 from queue import Queue
 from graph import Graph
+from data import Data
+from functools import reduce
 import matlab.engine
 import configparser
 import database
@@ -9,15 +11,30 @@ def loop():
     id = None
     queue = Queue()
 
-    changes = database.changes(database.localization_db(), filter_function="online/dataDoc")
-    for change in changes:
+    for change in database.changes(database.localization_db(), filter_function="online/dataDoc"):
         doc = change['doc']
 
-        mv = doc['measurations']['mv']
-        ble = doc['measurations']['ble']
-        wifi = doc['measurations']['wifi']
+        data = Data()
 
+        data.add_direction(doc['direction'])
+        ble = doc['measures']['ble']
+        wifi = doc['measures']['wifi']
+        mv = doc['measures']['mv']
 
+        mv_x = list(map(lambda x: x['values'][0], mv))
+        mv_y = list(map(lambda y: y['values'][1], mv))
+        mv_z = list(map(lambda z: z['values'][2], mv))
+        mv_mean = [round(reduce(lambda x, y: x + y, mv_x) / len(mv_x), 4),
+                   round(reduce(lambda x, y: x + y, mv_y) / len(mv_y), 4),
+                   round(reduce(lambda x, y: x + y, mv_z) / len(mv_z), 4)]
+        data.add_mv(mv_mean)
+        data.add_wifi_list(wifi.pop())
+
+        mat_data = matlab.double(data.to_list())
+
+        result = _matlab_engine.findRP(mat_data, 1, nargout=8)
+
+        print(result)
         # H = _graph.copy(as_view=False)
         # data = _matlab_engine.double(data.get_list_from(doc))
         # data = data[1:]
@@ -55,26 +72,33 @@ def loop():
         """
 
 
-def run(fingerprint_size):
+def run(update):
     global _graph, _matlab_engine
+    config = configparser.ConfigParser()
+    config.read('setup.ini')
+    fingerprint_size = int(config['Graph']['fingerprint_size'])
+
+    print("Configuring graph...")
     _graph = Graph(fingerprint_size)
-    nodes = database.get_nodes()
-    _graph.add_nodes(nodes)
-    _graph.add_edges(nodes)
+
+    if update:
+        nodes = database.get_nodes()
+        _graph.add_nodes(nodes)
+        _graph.add_edges(nodes)
+        _graph.write_to_json_file()
+    else:
+        _graph.load_from_json_file()
 
     print("Starting matlab...")
-    # _matlab_engine = matlab.engine.start_matlab()
+    _matlab_engine = matlab.engine.start_matlab()
+    _matlab_engine.addpath('matlab')
     print("Matlab started")
-
     loop()
 
 
 def main():
-    config = configparser.ConfigParser()
-    config.read('setup.ini')
-    fingerprint_size = int(config['Graph']['fingerprint_size'])
     database.initialize()
-    run(fingerprint_size)
+    run(update=False)
     database.close()
 
 

@@ -1,4 +1,9 @@
+import json
+
 import networkx
+from networkx.readwrite import json_graph
+
+BACKUP_FILE_NAME = 'graph.json'
 
 
 class Graph(networkx.DiGraph):
@@ -68,3 +73,15 @@ class Graph(networkx.DiGraph):
             direction.append('1')
 
         return tuple(direction)
+
+    def load_from_json_file(self):
+        with open(BACKUP_FILE_NAME, 'r') as json_file:
+            data = json.load(json_file)
+            loaded_graph = json_graph.node_link_graph(data)
+            self.add_nodes_from(loaded_graph.nodes(data=True))
+            self.add_edges_from(loaded_graph.edges(data=True))
+
+    def write_to_json_file(self):
+        data = json_graph.node_link_data(self)
+        with open(BACKUP_FILE_NAME, 'w') as json_file:
+            json.dump(data, json_file)

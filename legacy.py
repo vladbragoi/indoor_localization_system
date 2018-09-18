@@ -12,7 +12,7 @@ import gc
 #   "borders": "0",
 #   "x": "1",
 #   "y": "3",
-#   "measurations": {
+#   "measures": {
 #     "NORTH": {
 #       "wifi": [
 #         [
@@ -75,53 +75,53 @@ def close():
 
 def convert_and_save_to_target(document):
     directions = document['Misurazioni']
-    new_measurations = {}
+    new_measures = {}
 
     for direction in directions.keys():
-        new_measurations[direction] = {
+        new_measures[direction] = {
             'ble': [],
             'mv': [],
             'wifi': []
         }
-        measurations = directions[direction]
-        measuration_keys = list(measurations.keys())
-        measuration_keys.sort(key=lambda x: int(x.replace('Misurazione ', '')))  # order list on number base
+        measures = directions[direction]
+        measure_keys = list(measures.keys())
+        measure_keys.sort(key=lambda x: int(x.replace('Misurazione ', '')))  # order list on number base
 
-        for measuration in measuration_keys:
+        for measure in measure_keys:
             # MAGNETIC VECTOR
-            magnetic_vector = measurations[measuration]['Vettore Magnetico']
-            magnetic_list = new_measurations[direction]['mv']
+            magnetic_vector = measures[measure]['Vettore Magnetico']
+            magnetic_list = new_measures[direction]['mv']
             magnetic_list.append({'values': magnetic_vector})
-            new_measurations[direction]['mv'] = magnetic_list
+            new_measures[direction]['mv'] = magnetic_list
             # WIFI LIST
-            rssi_list = list(measurations[measuration].keys())
+            rssi_list = list(measures[measure].keys())
             if 'Vettore Magnetico' in rssi_list:    # Magnetic Vector just added
                 rssi_list.remove('Vettore Magnetico')
             rssi_list.sort(key=lambda x: int(x.replace('RSSI ', '')))   # order list on number base
 
             node_list = []
             for rssi_key in rssi_list:
-                wifi_node = measurations[measuration][rssi_key]
+                wifi_node = measures[measure][rssi_key]
                 wifi_node['type'] = "WIFI"
                 node_list.append(wifi_node)
 
-            wifi_list = new_measurations[direction]['wifi']
+            wifi_list = new_measures[direction]['wifi']
             wifi_list.append(node_list)
-            new_measurations[direction]['wifi'] = wifi_list
+            new_measures[direction]['wifi'] = wifi_list
 
     data = {
         '_id': document['_id'],
         'x': document['X position'],
         'y': document['Y position'],
         'borders': document['Borders'],
-        'measurations': new_measurations
+        'measures': new_measures
     }
     new_document = _target_db.create_document(data)
     if new_document.exists():
         print(new_document['_id'], "converted.")
         del directions
         del data
-        del new_measurations
+        del new_measures
         del new_document
 
 
