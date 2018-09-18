@@ -83,7 +83,10 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
     };
 
     private final Observer<MagneticVector> mMagneticVectorObserver = mv -> {
-        if (mLocation != null) mLocation.addMagneticVector(mv);
+        if (mLocation != null) {
+            mLocation.addMagneticVector(mv);
+            mLocation.setDirection(mv.toString());
+        }
     };
 
     private Observer<MagneticVector> mDirectionObserver = magneticVector ->
