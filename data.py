@@ -1,6 +1,4 @@
 import configparser
-import csv
-from node import Node
 
 DIRECTION_KEY = 'direction'
 MV_X_KEY = 'mv[x]'
@@ -11,6 +9,7 @@ MV_Z_KEY = 'mv[z]'
 class Data:
 
     def __init__(self):
+        """Initialize a wrapper of dict in order to preserve associations with `_fields` list."""
         self._dictionary = Data.get_initialized_dict()
         self._fields = [DIRECTION_KEY] + Data.get_ap5ghz() + Data.get_ap24ghz() + [MV_X_KEY, MV_Y_KEY, MV_Z_KEY]
 
@@ -18,30 +17,27 @@ class Data:
         return str(self.to_list())
 
     def add_wifi_list(self, wifi_list):
+        """Adds a list of wifi nodes to the dictionary.
+        :param wifi_list: a wifi node list"""
         for wifi_node in wifi_list:
             if wifi_node['id'] in self._dictionary.keys():
                 self._dictionary[wifi_node['id']] = wifi_node['value']
 
     def add_mv(self, mv):
+        """Adds magnetic vector to the dictionary.
+        :param mv: a magnetic vector of form [x, y, z]"""
         self._dictionary[MV_X_KEY] = mv[0]
         self._dictionary[MV_Y_KEY] = mv[1]
         self._dictionary[MV_Z_KEY] = mv[2]
 
     def add_direction(self, direction):
+        """Adds """
         # noinspection PyTypeChecker
         self._dictionary[DIRECTION_KEY] = Data.convert_direction(direction)
 
     def to_list(self):
         dict_list = sorted(self._dictionary.items(), key=lambda pair: self._fields.index(pair[0]))
         return [float(x[1]) for x in dict_list]
-
-    @staticmethod
-    def load_nodes_from_file(nodes, path):
-        with open(path, 'r') as csv_file:
-            rows = csv.DictReader(csv_file)
-            for row in rows:
-                node = Node(node_id=row['id'], x=row['x'], y=row['y'], borders=row['borders'])
-                nodes[node.y][node.x] = node
 
     @staticmethod
     def convert_direction(direction):

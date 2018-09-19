@@ -4,45 +4,44 @@ from cloudant.result import Result
 import configparser
 import gc
 
-
-# Some functions to convert old json document structure to the new one:
-# {
-#   "_id": "x",
-#   "_rev": "xxx",
-#   "borders": "0",
-#   "x": "1",
-#   "y": "3",
-#   "measures": {
-#     "NORTH": {
-#       "wifi": [
-#         [
-#           {
-#             "id": "34:db:fd:a4:cd:0e",
-#             "value": -45,
-#             "type": "WIFI"
-#           },
-#           ...,
-#           {<->}
-#         ],
-#         [<->]
-#       ],
-#       "ble": [<->],
-#       "mv": [
-#         {
-#           "values": [
-#             -21.440125,
-#             0.29144287,
-#             -39.4516
-#           ]
-#         },
-#         {<->}
-#       ]
-#     },
-#     "SOUTH": {<->},
-#     "EAST": {<->},
-#     "WEST": {<->}
-#   }
-
+"""This script should be used to convert old json document structure to the new one:
+document {
+    "_id": "x",
+    "_rev": "xxx",
+    "borders": "0",
+    "x": "1",
+    "y": "3",
+    "measures": {
+    "NORTH": {
+      "wifi": [
+        [
+          {
+            "id": "34:db:fd:a4:cd:0e",
+            "value": -45,
+            "type": "WIFI"
+          },
+          ...,
+          {<->}
+        ],
+        [<->]
+      ],
+      "ble": [<->],
+      "mv": [
+        {
+          "values": [
+            -21.440125,
+            0.29144287,
+            -39.4516
+          ]
+        },
+        {<->}
+      ]
+    },
+    "SOUTH": {<->},
+    "EAST": {<->},
+    "WEST": {<->}
+    }
+"""
 
 _client = None
 _source_db = None
@@ -50,6 +49,7 @@ _target_db = None
 
 
 def initialize():
+    """Initializes connection to server."""
     global _client
     config = configparser.ConfigParser()
     config.read('setup.ini')
@@ -60,16 +60,21 @@ def initialize():
 
 
 def _init_source_db(db_name):
+    """Gets source db instance.
+    :param db_name: the source database name"""
     global _source_db
     _source_db = CouchDatabase(_client, db_name)
 
 
 def _init_target_db(db_name):
+    """Gets target db instance.
+    :param db_name: the target database name"""
     global _target_db
     _target_db = CouchDatabase(_client, db_name)
 
 
 def close():
+    """Closes the connection."""
     _client.disconnect()
 
 
@@ -117,6 +122,7 @@ def convert_and_save_to_target(document):
         'measures': new_measures
     }
     new_document = _target_db.create_document(data)
+    new_document.save()
     if new_document.exists():
         print(new_document['_id'], "converted.")
         del directions

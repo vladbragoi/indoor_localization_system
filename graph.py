@@ -12,7 +12,7 @@ class Graph(networkx.DiGraph):
     def _calculate_direction(source, target):
         """ Direction could be one or more between [0..3]
         and represents the direction of the edge between source and target.
-        [0..3] indices could be 0->NORTH, 1->SOUTH, 2->EAST and 3->WEST
+        [1..4] indices could be 1->NORTH, 2->SOUTH, 3->EAST and 4->WEST
         and depends on the reference system specified in the 'setup.ini'
         configuration file.
         """
@@ -22,14 +22,14 @@ class Graph(networkx.DiGraph):
         # print("source:", source.id, "target:", target.id, "x", x_direction, "y", y_direction)
 
         if x_direction < 0:
-            direction.append('3')
+            direction.append('4')
         elif x_direction > 0:
-            direction.append('2')
+            direction.append('3')
 
         if y_direction < 0:
-            direction.append('0')
-        elif y_direction > 0:
             direction.append('1')
+        elif y_direction > 0:
+            direction.append('2')
 
         return tuple(direction)
 
@@ -79,6 +79,12 @@ class Graph(networkx.DiGraph):
                     self[edge[0]][edge[1]]["weight"] = 0
 
     def lighter_route(self, sources, targets):
+        """Returns the rp in targets list, that have minimum path length
+        from sources to each targets.
+        :param sources: a list of source nodes
+        :param targets: a list of target nodes
+        :return: the target with min path length
+        """
         min_target = None
         min_path_length = maxsize
 
