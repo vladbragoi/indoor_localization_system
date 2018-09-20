@@ -113,6 +113,7 @@ class Graph(networkx.DiGraph):
 
 
 if __name__ == '__main__':
+    # TESTS
     G = Graph(9)
     G.add_nodes_from([1, 2, 3])
     G.add_edges_from(((1, 2), (2, 3), (3, 1)))

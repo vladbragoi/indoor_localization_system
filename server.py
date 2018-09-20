@@ -10,7 +10,7 @@ import database
 
 def loop():
     queue = Queue()
-    for change in database.changes(database.localization_db(), filter_function="online/dataDoc"):
+    for change in database.changes(database.localization_db, filter_function="online/dataDoc"):
         doc = change['doc']
 
         data = Data()
@@ -49,7 +49,7 @@ def loop():
             node_id = updated_graph.lighter_route(sources, targets)
             node = updated_graph.node[node_id]
             node = Node(node_id=node_id, x=node['x'], y=node['y'], borders="")
-            node.save_into(database.localization_db(), doc['_id'] + "_result")
+            node.save_into(database.get_localization_db(), doc['_id'] + "_result")
 
 
 def run(update):

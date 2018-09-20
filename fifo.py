@@ -25,6 +25,7 @@ class Queue(list):
 
 
 if __name__ == '__main__':
+    # TESTS
     q = Queue()
     q.add_all([1, 2, 3])
     q.dequeue()

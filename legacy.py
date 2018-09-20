@@ -1,5 +1,6 @@
 from cloudant.client import CouchDB
 from cloudant.database import CouchDatabase
+from cloudant.document import Document
 from cloudant.result import Result
 import configparser
 import gc
@@ -41,6 +42,7 @@ document {
     "EAST": {<->},
     "WEST": {<->}
     }
+For old document structure see at the end of this file.
 """
 
 _client = None
@@ -121,14 +123,17 @@ def convert_and_save_to_target(document):
         'borders': document['Borders'],
         'measures': new_measures
     }
-    new_document = _target_db.create_document(data)
-    new_document.save()
-    if new_document.exists():
-        print(new_document['_id'], "converted.")
-        del directions
-        del data
-        del new_measures
-        del new_document
+
+    with Document(_target_db, data['_id']) as document:
+        document.update(data)
+
+    if document.exists():
+        print(document['_id'], "converted.")
+
+    del directions
+    del data
+    del new_measures
+    del document
 
 
 def start():
@@ -154,3 +159,30 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+"""Old document structure:
+document {
+    "_id": "x",
+    "_rev": "xxx",
+    "Misurazioni": {
+        "NORTH": {
+            "Misurazione 0": {
+                "RSSI 0": {
+                "id": "34:a8:4e:70:cd:1f",
+                "value": -84
+                },
+                ...
+                "RSSI N": {<->}
+            }, 
+            ...
+            "Misurazione M": {<->}
+        },
+        "SOUTH": {<->},
+        "EAST": {<->},
+        "WEST": {<->}
+    },
+    "X position": "1",
+    "Borders": "N, W",
+    "Y position": "1"
+}
+"""

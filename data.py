@@ -1,4 +1,5 @@
 import configparser
+import re
 
 DIRECTION_KEY = 'direction'
 MV_X_KEY = 'mv[x]'
@@ -49,6 +50,7 @@ class Data:
         :param direction: usually a string of form NORTH or N, S, ...
         :return: a tuple such as ('1', '2', '3') or a string e.g. 'N', 'S', etc.
         """
+        pattern = re.compile('[NSEW]')
         conventions = {'N': '1', 'S': '2', 'E': '3', 'W': '4'}
         out_direction = []
         if ',' in direction:
@@ -58,7 +60,9 @@ class Data:
 
         if type(direction) == list or type(direction) == tuple:
             for dir in direction:
-                out_direction.append(conventions[dir.strip()[0].upper()])
+                dir = dir.strip().upper()
+                if pattern.match(dir[0]):
+                    out_direction.append(conventions[dir[0]])
             return tuple(out_direction)
         else:
             return conventions[direction[0].upper()]
@@ -68,11 +72,12 @@ class Data:
         """Initializes a dictionary with pairs: ap mac address and -110 default rssi value.
         :return: a dictionary populated by ap mac addresses and -110 default rssi values
         """
-        dictionary = {DIRECTION_KEY: '',
-                      MV_X_KEY: 0,
-                      MV_Y_KEY: 0,
-                      MV_Z_KEY: 0
-                      }
+        dictionary = {
+            DIRECTION_KEY: '',
+            MV_X_KEY: 0,
+            MV_Y_KEY: 0,
+            MV_Z_KEY: 0
+        }
         for mac in Data.get_ap5ghz():
             dictionary[mac] = -110
         for mac in Data.get_ap24ghz():
@@ -83,17 +88,19 @@ class Data:
     def get_ap5ghz():
         config = configparser.ConfigParser()
         config.read('setup.ini')
-        return [ap.replace('\n', '') for ap in str(config['Access Points']['ap5ghz']).split(',')]
+        return [ap.replace('\n', '').strip() for ap in str(config['Access Points']['ap5ghz']).split(',')]
 
     @staticmethod
     def get_ap24ghz():
         config = configparser.ConfigParser()
         config.read('setup.ini')
-        return [ap.replace('\n', '') for ap in str(config['Access Points']['ap24ghz']).split(',')]
+        return [ap.replace('\n', '').strip() for ap in str(config['Access Points']['ap24ghz']).split(',')]
 
 
 if __name__ == '__main__':
+    # TESTS
     data = Data()
     data.add_direction('NORTH')
     print(data._dictionary)
-    print(data.to_list())
+    print(data)
+    print(Data.convert_direction("N,S"))
