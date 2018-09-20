@@ -35,6 +35,7 @@ class Graph(networkx.DiGraph):
 
     def __init__(self, node_distance=0, **attr):
         """A directed graph object that extends a networkx DiGraph.
+
         :param neighbor_distance: distance of neighborhood
         """
         super().__init__(**attr)
@@ -46,6 +47,7 @@ class Graph(networkx.DiGraph):
 
     def add_nodes(self, nodes):
         """Adds nodes from nodes list.
+
         :param nodes: a list of nodes
         """
         for node in nodes:
@@ -55,6 +57,7 @@ class Graph(networkx.DiGraph):
         """Adds edges iterating the nodes list and decorating each edge with direction (dir) and a
         specific weight given by a static probability: 100 / node out-degree, where out-degree is
         the length of the target node list.
+
         :param nodes: a list of nodes
         """
         for source in nodes:
@@ -69,10 +72,13 @@ class Graph(networkx.DiGraph):
 
     def update_weights(self, nodes, direction):
         """ Updates weight of edges in nodes list that match direction specified.
-        @param nodes: a list of nodes
-        @param direction: a tuple of direction strings ('0', '1', ...)
+
+        :param nodes: a list of nodes
+        :param direction: a tuple of direction strings ('0', '1', ...)
         """
         for node in nodes:
+            if node not in self.nodes:
+                continue
             adj_list = self.edges(node)
             for edge in adj_list:
                 if self[edge[0]][edge[1]]["dir"] == direction:
@@ -81,6 +87,7 @@ class Graph(networkx.DiGraph):
     def lighter_route(self, sources, targets):
         """Returns the rp in targets list, that have minimum path length
         from sources to each targets.
+
         :param sources: a list of source nodes
         :param targets: a list of target nodes
         :return: the target with min path length
@@ -90,25 +97,25 @@ class Graph(networkx.DiGraph):
 
         for source in sources:
             for target in targets:
-                if source != target:
+                if source != target and all(x in self.nodes for x in (source, target)):
                     path_length = networkx.dijkstra_path_length(self, source, target)
                     if path_length < min_path_length:
                         min_path_length = path_length
                         min_target = target
         return min_target
 
-    def load_from_json_file(self):
+    def load_from_json_file(self, filename=BACKUP_FILE_NAME):
         """Loads graph from json file."""
-        with open(BACKUP_FILE_NAME, 'r') as json_file:
+        with open(filename, 'r') as json_file:
             data = json.load(json_file)
             loaded_graph = json_graph.node_link_graph(data)
             self.add_nodes_from(loaded_graph.nodes(data=True))
             self.add_edges_from(loaded_graph.edges(data=True))
 
-    def write_to_json_file(self):
+    def write_to_json_file(self, filename=BACKUP_FILE_NAME):
         """Writes graph to json file."""
         data = json_graph.node_link_data(self)
-        with open(BACKUP_FILE_NAME, 'w') as json_file:
+        with open(filename, 'w') as json_file:
             json.dump(data, json_file)
 
 

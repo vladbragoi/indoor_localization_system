@@ -47,6 +47,7 @@ def initialize():
 
 def get_localization_db():
     """This function creates a localization db instance and returns it to the caller.
+
     :return localization_db_instance: the instance
     """
     localization_db_instance = _start(localization_db)
@@ -69,6 +70,7 @@ def get_localization_db():
 
 def _start(db_name):
     """This function creates an instance of the database specified and returns it to the caller.
+
     :return: the CouchDatabase instance
     """
     if _client is None:
@@ -87,6 +89,8 @@ def changes(db_name, filter_function):
     :param db_name: the source database name for changes
     :param filter_function: function for filtering documents in changes
     :return: an infinite_changes object
+
+    .. seealso:: :ref:`CouchDatabase.infinite_changes()`
     """
     database = _start(db_name)
     return database.infinite_changes(
@@ -99,6 +103,7 @@ def changes(db_name, filter_function):
 def get_nodes(db_name=None):
     """Returns a list of nodes from the specified database.
     If None is passed, default fingerprinting db will be used.
+
     :param db_name: the database name
     :return: a list of nodes
     """
@@ -114,6 +119,7 @@ def get_nodes(db_name=None):
 
 def load_nodes_from_csv_file(path):
     """Return a list of nodes, loaded from specified csv file.
+
     :param path: the path to the file
     :return: a list of nodes
     """
@@ -122,7 +128,7 @@ def load_nodes_from_csv_file(path):
         return [Node(row['id'], x=row['x'], y=row['y'], borders=row['borders']) for row in rows]
 
 
-def convert_old_document_type(filename, db_name):
+def _convert_old_document_type(filename, db_name):
     database = _start(db_name)
     query = Query(database, selector={'_id': {'$gt': None}}, fields=['_id'], use_index='_all_docs')
 
@@ -165,7 +171,9 @@ def convert_old_document_type(filename, db_name):
                 print("\t", direction, "converted.")
 
 
-def convert_new_document_type(filename, db_name):
+def _convert_new_document_type(filename, db_name):
+    """ ``todo:: ble beacons and magnetic field need to be saved to the csv file ``
+    """
     database = _start(db_name)
     query = Query(database, selector={'_id': {'$gt': None}}, fields=['_id'], use_index='_all_docs')
 
@@ -197,23 +205,32 @@ def convert_new_document_type(filename, db_name):
                     writer.writerow(dictionary)
                     index += 1
                 print("\t", direction, "converted.")
-    pass
 
 
 def export_db_to_csv(filename, doc_type='new', db_name=None):
+    """Exports all documents from specified database to a csv file.
+
+    :param filename: the csv file where to export documents
+    :param doc_type: the structure type of documents
+    :param db_name: the database to export
+
+    .. note:: Use 'new' as doc_type for new json document structure, 'old', for old one.
+    .. seealso:: :ref:`legacy.py` for the new json document structure
+    """
     if _client is None:
         initialize()
     if db_name is None:
         db_name = fingerprints_db
 
     if doc_type == 'new':
-        convert_new_document_type(filename, db_name)
+        _convert_new_document_type(filename, db_name)
     else:
-        convert_old_document_type(filename, db_name)
+        _convert_old_document_type(filename, db_name)
 
 
 def get_initialized_dict():
     """Initializes a dictionary with pairs: ap mac address and -110 default rssi value.
+
     :return: a dictionary populated by ap mac addresses and -110 default rssi values
     """
     dictionary = {}.fromkeys(CSV_FIELDS)

@@ -6,6 +6,7 @@ import configparser
 import gc
 
 """This script should be used to convert old json document structure to the new one:
+
 document {
     "_id": "x",
     "_rev": "xxx",
@@ -63,6 +64,7 @@ def initialize():
 
 def _init_source_db(db_name):
     """Gets source db instance.
+
     :param db_name: the source database name"""
     global _source_db
     _source_db = CouchDatabase(_client, db_name)
@@ -70,6 +72,7 @@ def _init_source_db(db_name):
 
 def _init_target_db(db_name):
     """Gets target db instance.
+
     :param db_name: the target database name"""
     global _target_db
     _target_db = CouchDatabase(_client, db_name)

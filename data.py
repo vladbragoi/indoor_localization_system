@@ -19,6 +19,7 @@ class Data:
 
     def add_wifi_list(self, wifi_list):
         """Adds a list of wifi nodes to the dictionary.
+
         :param wifi_list: a wifi node list"""
         for wifi_node in wifi_list:
             if wifi_node['id'] in self._dictionary.keys():
@@ -26,6 +27,7 @@ class Data:
 
     def add_mv(self, mv):
         """Adds magnetic vector to the dictionary.
+
         :param mv: a magnetic vector of form [x, y, z]"""
         self._dictionary[MV_X_KEY] = mv[0]
         self._dictionary[MV_Y_KEY] = mv[1]
@@ -43,10 +45,12 @@ class Data:
     @staticmethod
     def convert_direction(direction):
         """Converts the direction string in input to tuple type using conventions below:
+
         1 -> NORTH (N)
         2 -> SOUTH (S)
         3 -> EAST (E)
         4 -> WEST (W).
+
         :param direction: usually a string of form NORTH or N, S, ...
         :return: a tuple such as ('1', '2', '3') or a string e.g. 'N', 'S', etc.
         """
@@ -70,6 +74,7 @@ class Data:
     @staticmethod
     def get_initialized_dict():
         """Initializes a dictionary with pairs: ap mac address and -110 default rssi value.
+
         :return: a dictionary populated by ap mac addresses and -110 default rssi values
         """
         dictionary = {

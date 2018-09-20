@@ -35,7 +35,6 @@ def loop():
 
         result = _matlab_engine.findRP(mat_data, 2, nargout=8)
 
-        print(result)
         updated_graph.update_weights(result[4:], Data.convert_direction(direction))
 
         queue.enqueue(result[4:])  # take from the 4th to 8th element from result list
