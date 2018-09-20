@@ -119,3 +119,4 @@ def load_nodes_from_file(path):
 if __name__ == '__main__':
     initialize()
     print([str(x) for x in get_nodes()])
+    close()
