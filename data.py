@@ -34,7 +34,8 @@ class Data:
         self._dictionary[MV_Z_KEY] = mv[2]
 
     def add_direction(self, direction):
-        """Adds """
+        """Adds direction to the dictionary.
+        """
         # noinspection PyTypeChecker
         self._dictionary[DIRECTION_KEY] = Data.convert_direction(direction)
 

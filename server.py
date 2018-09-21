@@ -33,7 +33,7 @@ def loop():
 
         mat_data = matlab.double(data.to_list())
 
-        result = _matlab_engine.findRP(mat_data, 2, nargout=8)
+        result = _matlab_engine.findRP(mat_data, 1, nargout=8)
 
         updated_graph.update_weights(result[4:], Data.convert_direction(direction))
 
