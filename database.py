@@ -29,11 +29,11 @@ localization_db = ""
 
 def initialize():
     """Starts the connection with the server, which parameters
-    are specified in the configuration file: setup.ini.
+    are specified in the configuration file: config.ini.
     """
     global _client, fingerprints_db, localization_db
     config = configparser.ConfigParser()
-    config.read('setup.ini')
+    config.read('config.ini')
 
     url = config['Database']['url']
     username = config['Database']['username']

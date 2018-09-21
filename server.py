@@ -1,3 +1,5 @@
+import sys
+
 from graph import Graph
 from fifo import Queue
 from node import Node
@@ -8,7 +10,7 @@ import configparser
 import database
 
 
-def loop():
+def loop(mode=2):
     queue = Queue()
     for change in database.changes(database.localization_db, filter_function="online/dataDoc"):
         doc = change['doc']
@@ -33,7 +35,10 @@ def loop():
 
         mat_data = matlab.double(data.to_list())
 
-        result = _matlab_engine.findRP(mat_data, 1, nargout=8)
+        ###############################################################################
+        #                   MACHINE LEARNING ALGORITHM HERE
+        ###############################################################################
+        result = _matlab_engine.findRP(mat_data, mode, nargout=8)
 
         updated_graph.update_weights(result[4:], Data.convert_direction(direction))
 
@@ -51,10 +56,10 @@ def loop():
             node.save_into(database.get_localization_db(), doc['_id'] + "_result")
 
 
-def run(update):
+def run(update, mode):
     global _graph, _matlab_engine
     config = configparser.ConfigParser()
-    config.read('setup.ini')
+    config.read('config.ini')
     fingerprint_size = int(config['Graph']['fingerprint_size'])
 
     print("Configuring graph...")
@@ -72,14 +77,15 @@ def run(update):
     _matlab_engine = matlab.engine.start_matlab()
     _matlab_engine.addpath('matlab')
     print("Matlab started")
-    loop()
+    loop(mode)
 
 
 def main():
     database.initialize()
-    run(update=False)
+    run(update=False, mode=2)
     database.close()
 
 
 if __name__ == '__main__':
+    # TODO: create a menu parsing input arguments, and a help message
     main()

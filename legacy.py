@@ -55,7 +55,7 @@ def initialize():
     """Initializes connection to server."""
     global _client
     config = configparser.ConfigParser()
-    config.read('setup.ini')
+    config.read('config.ini')
     url = config['Database']['url']
     username = config['Database']['username']
     password = config['Database']['password']

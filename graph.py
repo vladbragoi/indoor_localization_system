@@ -10,11 +10,10 @@ class Graph(networkx.DiGraph):
 
     @staticmethod
     def _calculate_direction(source, target):
-        """ Direction could be one or more between [0..3]
+        """ Direction could be one or more between [1..4]
         and represents the direction of the edge between source and target.
         [1..4] indices could be 1->NORTH, 2->SOUTH, 3->EAST and 4->WEST
-        and depends on the reference system specified in the 'setup.ini'
-        configuration file.
+        and depends on your the system reference.
         """
         direction = []
         x_direction = target.x - source.x

@@ -93,13 +93,13 @@ class Data:
     @staticmethod
     def get_ap5ghz():
         config = configparser.ConfigParser()
-        config.read('setup.ini')
+        config.read('config.ini')
         return [ap.replace('\n', '').strip() for ap in str(config['Access Points']['ap5ghz']).split(',')]
 
     @staticmethod
     def get_ap24ghz():
         config = configparser.ConfigParser()
-        config.read('setup.ini')
+        config.read('config.ini')
         return [ap.replace('\n', '').strip() for ap in str(config['Access Points']['ap24ghz']).split(',')]
 
 

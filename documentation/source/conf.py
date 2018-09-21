@@ -51,7 +51,7 @@ extensions = [
     'sphinx.ext.napoleon',
 ]
 
-autodoc_mock_imports = ['data', 'database', 'setup.ini', 'server', 'setup']
+autodoc_mock_imports = ['data', 'database', 'config.ini', 'server', 'setup']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
