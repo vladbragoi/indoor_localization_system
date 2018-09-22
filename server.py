@@ -1,3 +1,4 @@
+import signal
 import sys
 
 from graph import Graph
@@ -80,7 +81,15 @@ def run(update, mode):
     loop(mode)
 
 
+def signal_handler(sig, frame):
+        if sig == signal.SIGINT:
+            print('Closing...')
+            database.close()
+            sys.exit(0)
+
+
 def main():
+    signal.signal(signal.SIGINT, signal_handler)
     database.initialize()
     run(update=False, mode=2)
     database.close()
