@@ -20,10 +20,13 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import it.univr.vlad.fingerprinting.templates.Node;
@@ -80,9 +83,20 @@ public class WifiScanner extends BroadcastReceiver {
 
         for (ScanResult result : mWifiManager.getScanResults()) {
             if (debug)
-                mResults.add(new WifiNode(result.BSSID, result.SSID, result.level));
+                mResults.add(new WifiNode(
+                        result.BSSID,
+                        result.SSID,
+                        result.level,
+                        new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS",
+                                Locale.getDefault()).format(new Date())
+                        ));
             else if (addresses.contains(result.BSSID)) {
-                mResults.add(new WifiNode(result.BSSID, result.SSID, result.level));
+                mResults.add(new WifiNode(
+                        result.BSSID,
+                        result.SSID,
+                        result.level,
+                        new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS",
+                                Locale.getDefault()).format(new Date())));
             }
         }
 
