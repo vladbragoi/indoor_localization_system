@@ -13,10 +13,13 @@ public abstract class Node implements Comparable{
 
     private int value;      /// Rssi
 
-    protected Node(String id, int value, String type) {
+    private String timestamp;
+
+    protected Node(String id, int value, String timestamp, String type) {
         this.type = type;
         this.id = id;
         this.value = value;
+        this.timestamp = timestamp;
     }
 
     public String getId() {
@@ -30,6 +33,8 @@ public abstract class Node implements Comparable{
     public String getType() {
         return type;
     }
+
+    public String getTimestamp() { return timestamp; }
 
     /**
      * {@inheritDoc}

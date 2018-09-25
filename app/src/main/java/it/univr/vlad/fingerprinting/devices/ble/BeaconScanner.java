@@ -13,9 +13,12 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Region;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import es.dmoral.toasty.Toasty;
 import it.univr.vlad.fingerprinting.templates.Node;
@@ -61,12 +64,18 @@ public class BeaconScanner implements BeaconConsumer {
                             b.getRssi(),
                             b.getId1().toString(),
                             b.getId2().toString(),
-                            b.getId3().toString()));
+                            b.getId3().toString(),
+                            new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS",
+                                    Locale.getDefault()).format(new Date())
+                    ));
 
                 else if (b.getParserIdentifier().equals("Eddystone"))
                     updatingList.add(new EddystoneNode(b.getBluetoothAddress(),
                             b.getRssi(),
-                            b.getId1().toString()));
+                            b.getId1().toString(),
+                            new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS",
+                                    Locale.getDefault()).format(new Date())
+                    ));
 
                 Collections.sort(updatingList, (o1, o2) -> o2.getId().compareTo(o1.getId()));
 

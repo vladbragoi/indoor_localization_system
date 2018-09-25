@@ -13,8 +13,8 @@ public class IBeaconNode extends BleNode {
      * @param major major number
      * @param minor minor number
      */
-    IBeaconNode(String id, int value, String uid, String major, String minor) {
-        super(id, value, uid);
+    IBeaconNode(String id, int value, String uid, String major, String minor, String timestamp) {
+        super(id, value, uid, timestamp);
         this.major = major;
         this.minor = minor;
     }

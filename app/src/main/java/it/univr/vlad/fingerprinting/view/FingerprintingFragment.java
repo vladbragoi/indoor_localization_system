@@ -305,7 +305,7 @@ public class FingerprintingFragment extends Fragment implements Timer.TimerListe
                         mCurrentFingerprint = new Fingerprint();
                     }
                     if (mCurrentFingerprint.isRunning()) { // Next Measuration on same fingerprint
-                        mCurrentFingerprint.newMeasuration(mDirection.getText().toString());
+                        mCurrentFingerprint.newMeasure(mDirection.getText().toString());
                         startCountdown(seconds);
                     }else { // Sets new fingerprint information data
                         showSetupFingerprintDialog();

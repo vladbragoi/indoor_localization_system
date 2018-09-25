@@ -32,9 +32,9 @@ public class Fingerprint {
 
     public Fingerprint() { }
 
-    public Fingerprint(String number) {
+    /*public Fingerprint(String number) {
         this.number = number;
-    }
+    }*/
 
     public void saveInto(Database database) {
         boolean noErrors = true;
@@ -58,7 +58,7 @@ public class Fingerprint {
         if (noErrors) Log.d(number, "DOC: updated document");
     }
 
-    public void newMeasuration(String direction) {
+    public void newMeasure(String direction) {
         measures.put(this.direction, measure);
         measure = new Measure();
         this.direction = direction;
