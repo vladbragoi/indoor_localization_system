@@ -36,7 +36,7 @@ public final class Dialog {
         AlertDialog dialog = showDialog(
                 activity,
                 activity.getString(R.string.localization),
-                R.layout.dialog_localization_start);
+                R.layout.dialog_start_localization);
 
         dialog.setOnShowListener(showListener);
         if (dismissListener != null) dialog.setOnDismissListener(dismissListener);
