@@ -69,4 +69,5 @@
     <string name="sync">Sync</string>
     <string name="syncing">Syncing</string>
     <string name="sync_button_press">Synchronize pressing sync button above.</string>
+    <string name="cleared">Documents purged.</string>
 </resources>

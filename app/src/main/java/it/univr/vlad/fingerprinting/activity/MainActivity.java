@@ -68,13 +68,19 @@ public class MainActivity extends AppCompatActivity
     private Fragment localizationFragment;
 
     private TextView userTextView;
+    private NavigationView navigationView;
 
     private SharedPreferences sharedPreferences;
     SharedPreferences.OnSharedPreferenceChangeListener changeListener = (sharedPreferences, key) -> {
         if (key.equals("username") && userTextView != null) {
             userTextView.setText(sharedPreferences.getString(key, ""));
         }
+        if (key.equals("debug") && navigationView != null)
+            navigationView.getMenu()
+                    .findItem(R.id.nav_clear)
+                    .setEnabled(sharedPreferences.getBoolean(key, false));
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +99,8 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         checkForPermissions();
 
         View navigationHeaderView = navigationView.getHeaderView(0);
@@ -103,6 +108,10 @@ public class MainActivity extends AppCompatActivity
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(changeListener);
         userTextView.setText(sharedPreferences.getString("username", ""));
+
+        navigationView.getMenu()
+                .findItem(R.id.nav_clear)
+                .setEnabled(sharedPreferences.getBoolean("debug", false));
 
         fingerprintingFragment = new FingerprintingFragment();
         localizationFragment = new LocalizationFragment();
@@ -188,11 +197,23 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_fingerprinting: startFingerprintingFragment(); break;
             case R.id.nav_localization: startLocalizationFragment(); break;
             case R.id.nav_info: Dialog.showInfoDialog(this);break;
+            case R.id.nav_clear: deleteAllDocuments();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void deleteAllDocuments() {
+        if (fingerprintingFragment.isVisible()) {
+            ((Application) getApplication()).getFingerprintingDatabase().clear();
+        }
+        if (localizationFragment.isVisible()) {
+            ((Application) getApplication()).getLocalizationDatabase().clear();
+        }
+
+        Toasty.info(this, getString(R.string.cleared), Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -7,6 +7,9 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.auth.Authenticator;
 import com.couchbase.lite.auth.AuthenticatorFactory;
 import com.couchbase.lite.replicator.RemoteRequestResponseException;
@@ -17,6 +20,9 @@ import org.jetbrains.annotations.NotNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class CBLDatabase implements Replication.ChangeListener {
 
@@ -356,5 +362,37 @@ public class CBLDatabase implements Replication.ChangeListener {
     private Database getDatabase() {
         if (!mDatabase.isOpen()) openDatabase();
         return mDatabase;
+    }
+
+    private List<Document> getDocuments() {
+        List<Document> documents = new ArrayList<>();
+        QueryEnumerator result = null;
+        Query query = mDatabase.createAllDocumentsQuery();
+        query.setAllDocsMode(Query.AllDocsMode.ALL_DOCS);
+
+        try {
+            result = query.run();
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+
+        Iterator<QueryRow> it = result;
+
+        while (it != null && it.hasNext()) {
+            QueryRow row = it.next();
+            documents.add(row.getDocument());
+        }
+
+        return documents;
+    }
+
+    public void clear() {
+        for(Document doc: getDocuments()) {
+            try {
+                doc.purge();
+            } catch (CouchbaseLiteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

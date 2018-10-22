@@ -140,7 +140,6 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
 
         // Start button listener
         mSpeedDialView.setOnChangeListener(this);
-
     }
 
     @Override

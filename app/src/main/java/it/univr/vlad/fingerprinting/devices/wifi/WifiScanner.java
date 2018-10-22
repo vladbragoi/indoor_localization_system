@@ -82,15 +82,16 @@ public class WifiScanner extends BroadcastReceiver {
         mResults.clear();
 
         for (ScanResult result : mWifiManager.getScanResults()) {
-            if (debug)
-                mResults.add(new WifiNode(
-                        result.BSSID,
-                        result.SSID,
-                        result.level,
-                        new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS",
-                                Locale.getDefault()).format(new Date())
-                        ));
-            else if (addresses.contains(result.BSSID)) {
+            if (debug) {
+                if (addresses.contains(result.BSSID)) {
+                    mResults.add(new WifiNode(
+                            result.BSSID,
+                            result.SSID,
+                            result.level,
+                            new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS",
+                                    Locale.getDefault()).format(new Date())));
+                }
+            } else {
                 mResults.add(new WifiNode(
                         result.BSSID,
                         result.SSID,
