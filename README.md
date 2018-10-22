@@ -84,3 +84,6 @@ Make sure the server application is running on the remote computer/server
 
 4. Move in the area and see how values changes
 <img src="screenshots/animated_location.gif" height="400">
+
+## Terms and Licence
+This software is distributed under Apache-2.0 license. See [LICENSE](LICENSE) for details.
