@@ -17,8 +17,8 @@ bind_address = 0.0.0.0
 in the configuration file (`server_ip:5984/_utils/`, *Configuration* tab on the left menu).
 
 ## Python server setup
-Follow the instructions [here](https://github.com/vladbragoi/fingerprinting_server) for configuring 
-and starting the server application.
+Follow the instructions [here](https://github.com/vladbragoi/fingerprinting_server) for the application
+server installation and configuration.
 
 ## Application setup
 Fisrt, Download and install the Android application, then start it, allow permissions and open the 
