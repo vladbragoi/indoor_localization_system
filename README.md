@@ -6,7 +6,7 @@ system.
 ## CouchDB server setup
 First, you need to install and configure your own instance of CouchDB on a remote computer/server.
 
-Follow CouchDB official instructions [here](docs.couchdb.org/en/latest/install/unix.html
+Follow CouchDB official instructions [here](http://docs.couchdb.org/en/latest/install/unix.html
 ) and make sure to let CouchDB listen any available IP address, using:
 
 ```
@@ -61,8 +61,8 @@ you are oriented to.
 will finish.
 <img src="screenshots/scanning_data.jpg" height="400">
  
-6. Change your direction turning left or right and press the *Plus* button and then the 
-*double-arrow* one to repeat the scan values on the new direction.
+6. Change your direction turning left or right, press the *Plus* button and then press the 
+*double-arrow* one to repeat the scan on the new direction.
 <img src="screenshots/next_button.jpg" height="400">
  
 7. Repeat the step 6 in all of the 4 cardinal direction and when you have done, remember to
