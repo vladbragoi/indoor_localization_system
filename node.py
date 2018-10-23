@@ -47,11 +47,15 @@ class Node:
         :param doc_id: the document in which save the node
         :param node_type: the type of the node: by default it is 'result_doc'.
         """
-        with Document(database, doc_id) as document:
-            if document.exists():
-                document.delete()
-            document['fingerprint'] = self.id
-            document['type'] = node_type
-            document['x'] = self.x
-            document['y'] = self.y
-        # document saved
+        try:
+            with Document(database, doc_id) as document:
+                if document.exists():
+                    document.delete()
+                document['fingerprint'] = self.id
+                document['type'] = node_type
+                document['x'] = self.x
+                document['y'] = self.y
+                print(str(self))
+            # document saved
+        except Exception:
+            print("Conflict, skipping document.")

@@ -10,3 +10,4 @@ def inherit_docstring(from_function, sep="\n"):
             func.__doc__ = sep.join([source_doc, func.__doc__])
         return func
     return _decorator
+

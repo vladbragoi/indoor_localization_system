@@ -48,13 +48,18 @@ def loop(mode=2):
             queue.dequeue()
 
         if len(queue) >= 2:
-            print(queue)
             sources = [int(rp) for rp in queue[0]]
             targets = [int(rp) for rp in queue[1]]
-            node_id = updated_graph.lighter_route(sources, targets)
+            print(sources, targets)
+            node_id = str(sources[0])
             node = updated_graph.node[node_id]
             node = Node(node_id=node_id, x=node['x'], y=node['y'], borders="")
             node.save_into(database.get_localization_db(), doc['_id'] + "_result")
+            # node_id = updated_graph.lighter_route(sources, targets)
+            # if node_id is not None:
+            #     node = updated_graph.node[node_id]
+            #     node = Node(node_id=node_id, x=node['x'], y=node['y'], borders="")
+            #     node.save_into(database.get_localization_db(), doc['_id'] + "_result")
 
 
 def run(update, mode):
@@ -71,6 +76,7 @@ def run(update, mode):
         _graph.add_nodes(nodes)
         _graph.add_edges(nodes)
         _graph.write_to_json_file()
+        _graph.write_in_dot_notation()
     else:
         _graph.load_from_json_file()
 
@@ -81,17 +87,17 @@ def run(update, mode):
     loop(mode)
 
 
-def signal_handler(sig, frame):
-        if sig == signal.SIGINT:
-            print('Closing...')
-            database.close()
-            sys.exit(0)
+def signal_handler(sig):
+    if sig == signal.SIGINT:
+        print('Closing...')
+        database.close()
+        sys.exit(0)
 
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
     database.initialize()
-    run(update=False, mode=2)
+    run(update=True, mode=2)
     database.close()
 
 

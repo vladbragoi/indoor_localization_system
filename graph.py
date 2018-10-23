@@ -75,6 +75,7 @@ class Graph(networkx.DiGraph):
         :param nodes: a list of nodes
         :param direction: a tuple of direction strings ('0', '1', ...)
         """
+        # print("UPDATE WEIGHTS: ", nodes, direction)
         for node in nodes:
             if node not in self.nodes:
                 continue
@@ -96,11 +97,16 @@ class Graph(networkx.DiGraph):
 
         for source in sources:
             for target in targets:
-                if source != target and all(x in self.nodes for x in (source, target)):
+                # source and target are nodes of the graph
+                source = str(source)
+                target = str(target)
+                if source != target and all(str(x) in self.nodes for x in (source, target)):
                     path_length = networkx.dijkstra_path_length(self, source, target)
                     if path_length < min_path_length:
                         min_path_length = path_length
                         min_target = target
+                elif min_target is None and str(target) in self.nodes:
+                    min_target = target
         return min_target
 
     def load_from_json_file(self, filename=BACKUP_FILE_NAME):
@@ -117,6 +123,9 @@ class Graph(networkx.DiGraph):
         with open(filename, 'w') as json_file:
             json.dump(data, json_file)
 
+    def write_in_dot_notation(self):
+        networkx.nx_agraph.write_dot(self, "graph.dot")
+
 
 if __name__ == '__main__':
     # TESTS
@@ -128,3 +137,5 @@ if __name__ == '__main__':
     H = G.copy()
     H.add_nodes_from([4, 5, 6])
     print(H.nodes, H.edges, "distance", H._distance, sep='\t')
+
+    G.write_in_dot_notation()

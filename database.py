@@ -215,7 +215,7 @@ def export_db_to_csv(filename, doc_type='new', db_name=None):
     :param db_name: the database to export
 
     .. note:: Use 'new' as doc_type for new json document structure, 'old', for old one.
-    .. seealso:: :ref:`legacy.py` for the new json document structure
+    .. seealso:: :ref:`converter.py` for the new json document structure
     """
     if _client is None:
         initialize()
