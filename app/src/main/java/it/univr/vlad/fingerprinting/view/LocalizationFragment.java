@@ -67,6 +67,10 @@ public class LocalizationFragment extends Fragment implements SpeedDialView.OnCh
     private final Observer<List<Node>> mWifiNodesObserver = nodes -> {
         if (mLocation != null) {
             mLocation.addWifiNodes(nodes);
+
+            // TODO: pay attention here.
+            // Need to create a queue and update a single document in batch
+            // for avoiding high requests of updating the user document
             mLocation.saveInto(mDatabase.unwrapDatabase());
             mDatabase.startPushReplication(false);
         }
