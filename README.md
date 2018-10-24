@@ -18,6 +18,9 @@ synchronized documents)
 Launch ```python3 server.py``` or ```./server.py``` if you want to start the *Localization service*.
 
 Parameters you could specify when launching the server:
+```
+usage: server.py [-h] [-m INT-VALUE] [-i INPUT-FILE] [-o OUTPUT-FILE]
+```
 * -h: to display a help message
 * -m: to specify the mode you want to use for the machine learning algorithm:
     * 2 (the default option), where both RSSI and MV are used to create a single classifier
@@ -28,6 +31,9 @@ Parameters you could specify when launching the server:
 
 Use the ```./converter.py``` if you want to convert a document from old JSON format to new one, as indicated in the script.
 Parameters for the converter script:
+```
+usage: converter.py [-h] [-u URL] [-U USER] [-p PASSWORD]
+```
 * -h: display a help message
 * -u: specify the url of the remote database
 * -U: specify a username
