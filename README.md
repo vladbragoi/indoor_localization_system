@@ -37,5 +37,13 @@ Parameters for the converter script:
 The graph model usage need to be improved. You can modify the `loop` method in the `server.py` script if you have a 
 cleverer mode of using it.
 
+### Dependencies
+* [cloudant](https://python-cloudant.readthedocs.io/en/latest/index.html)
+* [matlab](https://it.mathworks.com/help/matlab/matlab-engine-for-python.html)
+* [networkx](https://networkx.github.io/)
+* matplotlib
+* numpy
+
+
 ## Terms and Licence
 This software is distributed under Apache-2.0 license. See [LICENSE](LICENSE) for details.
