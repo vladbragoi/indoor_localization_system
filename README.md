@@ -29,7 +29,75 @@ usage: server.py [-h] [-m INT-VALUE] [-i INPUT-FILE] [-o OUTPUT-FILE]
 * -o: to specify if you want to export the graph and where 
 (it will export a OUTPUT-FILE.json with graph parameters, and a OUTPUT-FILE.dot with dot notation for Graphviz visualizer).
 
-Use the ```./converter.py``` if you want to convert a document from old JSON format to new one, as indicated in the script.
+Use the ```./converter.py``` if you want to convert a document from old JSON template to new one.
+**Old JSON template:**
+```json
+{
+    "_id": "x",
+    "_rev": "xxx",
+    "Misurazioni": {
+        "NORTH": {
+            "Misurazione 0": {
+                "RSSI 0": {
+                "id": "34:a8:4e:70:cd:1f",
+                "value": -84
+                },
+                ...
+                "RSSI N": {<->}
+            }, 
+            ...
+            "Misurazione M": {<->}
+        },
+        "SOUTH": {<->},
+        "EAST": {<->},
+        "WEST": {<->}
+    },
+    "X position": "1",
+    "Borders": "N, W",
+    "Y position": "1"
+}
+```
+
+**New JSON template:**
+```json
+{
+    "_id": "x",
+    "_rev": "xxx",
+    "borders": "0",
+    "x": "1",
+    "y": "3",
+    "measures": {
+    "NORTH": {
+      "wifi": [
+        [
+          {
+            "id": "34:db:fd:a4:cd:0e",
+            "value": -45,
+            "type": "WIFI"
+          },
+          ...,
+          {<->}
+        ],
+        [<->]
+      ],
+      "ble": [<->],
+      "mv": [
+        {
+          "values": [
+            -21.440125,
+            0.29144287,
+            -39.4516
+          ]
+        },
+        {<->}
+      ]
+    },
+    "SOUTH": {<->},
+    "EAST": {<->},
+    "WEST": {<->}
+}
+```
+
 Parameters for the converter script:
 ```
 usage: converter.py [-h] [-u URL] [-U USER] [-p PASSWORD]
