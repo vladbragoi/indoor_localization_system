@@ -42,15 +42,13 @@ Use the ```./converter.py``` if you want to convert a document from old JSON tem
                 "id": "34:a8:4e:70:cd:1f",
                 "value": -84
                 },
-                ...
-                "RSSI N": {<->}
+                "RSSI N": {}
             }, 
-            ...
-            "Misurazione M": {<->}
+            "Misurazione M": {}
         },
-        "SOUTH": {<->},
-        "EAST": {<->},
-        "WEST": {<->}
+        "SOUTH": {},
+        "EAST": {},
+        "WEST": {}
     },
     "X position": "1",
     "Borders": "N, W",
@@ -75,12 +73,11 @@ Use the ```./converter.py``` if you want to convert a document from old JSON tem
             "value": -45,
             "type": "WIFI"
           },
-          ...,
-          {<->}
+          {}
         ],
-        [<->]
+        []
       ],
-      "ble": [<->],
+      "ble": [],
       "mv": [
         {
           "values": [
@@ -89,12 +86,12 @@ Use the ```./converter.py``` if you want to convert a document from old JSON tem
             -39.4516
           ]
         },
-        {<->}
+        {}
       ]
     },
-    "SOUTH": {<->},
-    "EAST": {<->},
-    "WEST": {<->}
+    "SOUTH": {},
+    "EAST": {},
+    "WEST": {}
 }
 ```
 
