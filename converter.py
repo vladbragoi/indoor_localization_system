@@ -1,3 +1,7 @@
+import argparse
+import signal
+import sys
+
 from cloudant.client import CouchDB
 from cloudant.database import CouchDatabase
 from cloudant.document import Document
@@ -51,14 +55,22 @@ _source_db = None
 _target_db = None
 
 
-def initialize():
-    """Initializes connection to server."""
+def initialize(url, username, password):
+    """Initializes a connection to the server.
+    :param url: the db url
+    :param username: the db username
+    :param password: the db password"""
     global _client
     config = configparser.ConfigParser()
     config.read('config.ini')
-    url = config['Database']['url']
-    username = config['Database']['username']
-    password = config['Database']['password']
+
+    if url is None:
+        url = config['Database']['url']
+    if username is None:
+        username = config['Database']['username']
+    if password is None:
+        password = config['Database']['password']
+
     _client = CouchDB(username, password, url=url, connect=True)
 
 
@@ -139,7 +151,7 @@ def convert_and_save_to_target(document):
     del document
 
 
-def start():
+def run():
     source_db_name = str(input("Insert name of source DB: "))
     target_db_name = str(input("Insert name of target DB: "))
     _init_source_db(source_db_name)
@@ -154,9 +166,26 @@ def start():
         gc.collect()
 
 
+def signal_handler(sig, frame):
+    if sig == signal.SIGINT:
+        print('Closing...')
+        close()
+        sys.exit(0)
+
+
 def main():
-    initialize()
-    start()
+    signal.signal(signal.SIGINT, signal_handler)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-u", "--url", type=str,
+                        help="specify the url of the remote database (if different from http://localhost:5984).")
+    parser.add_argument("-U", "--user", type=str,
+                        help="specify the username of the remote database.")
+    parser.add_argument("-p", "--password", type=str,
+                        help="specify the password of the remote database.")
+    args = parser.parse_args()
+    initialize(args.url, args.user, args.password)
+    run()
     close()
 
 

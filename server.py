@@ -1,3 +1,4 @@
+import argparse
 import signal
 import sys
 
@@ -55,14 +56,17 @@ def loop(mode=2):
             node = updated_graph.node[node_id]
             node = Node(node_id=node_id, x=node['x'], y=node['y'], borders="")
             node.save_into(database.get_localization_db(), doc['_id'] + "_result")
-            # node_id = updated_graph.lighter_route(sources, targets)
-            # if node_id is not None:
-            #     node = updated_graph.node[node_id]
-            #     node = Node(node_id=node_id, x=node['x'], y=node['y'], borders="")
-            #     node.save_into(database.get_localization_db(), doc['_id'] + "_result")
+
+            # PAY ATTENTION HERE
+            # TODO: graph usage need to be improved
+            node_id = updated_graph.lighter_route(sources, targets)
+            if node_id is not None:
+                node = updated_graph.node[node_id]
+                node = Node(node_id=node_id, x=node['x'], y=node['y'], borders="")
+                node.save_into(database.get_localization_db(), doc['_id'] + "_result")
 
 
-def run(update, mode):
+def run(mode, input_file, output_file):
     global _graph, _matlab_engine
     config = configparser.ConfigParser()
     config.read('config.ini')
@@ -71,23 +75,26 @@ def run(update, mode):
     print("Configuring graph...")
     _graph = Graph(fingerprint_size)
 
-    if update:
+    if input_file is not None:
+        _graph.load_from_json_file(input_file)
+    else:
         nodes = database.get_nodes()
         _graph.add_nodes(nodes)
         _graph.add_edges(nodes)
-        _graph.write_to_json_file()
-        _graph.write_in_dot_notation()
-    else:
-        _graph.load_from_json_file()
+
+    if output_file is not None:
+        _graph.write_to_json_file(output_file)
+        _graph.write_in_dot_notation(output_file)
 
     print("Starting matlab...")
     _matlab_engine = matlab.engine.start_matlab()
     _matlab_engine.addpath('matlab')
     print("Matlab started")
+    print("Waiting for values...")
     loop(mode)
 
 
-def signal_handler(sig):
+def signal_handler(sig, frame):
     if sig == signal.SIGINT:
         print('Closing...')
         database.close()
@@ -97,10 +104,22 @@ def signal_handler(sig):
 def main():
     signal.signal(signal.SIGINT, signal_handler)
     database.initialize()
-    run(update=True, mode=2)
-    database.close()
+
+    # MENU
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--mode", default=2, metavar="INT-VALUE", type=int,
+                        help="""specify the mode of the Voting algorithm: 
+                        2 (default) both RSSI and MV are used to create a single classifier;
+                        1 both RSSI and MV are used to create a separated classifier.""")
+    parser.add_argument("-i", "--input", metavar="INPUT-FILE", type=str,
+                        help="specify a file in JSON format to load the graph from.")
+    parser.add_argument("-o", "--output", metavar="OUTPUT-FILE", type=str,
+                        help="specify a file where to save the graph in JSON format.")
+    args = parser.parse_args()
+
+    run(mode=args.mode, input_file=args.input, output_file=args.output)
+    database.close()    # close db connection
 
 
 if __name__ == '__main__':
-    # TODO: create a menu parsing input arguments, and a help message
     main()

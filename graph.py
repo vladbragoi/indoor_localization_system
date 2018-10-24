@@ -3,8 +3,6 @@ import networkx
 from sys import maxsize
 from networkx.readwrite import json_graph
 
-BACKUP_FILE_NAME = 'graph.json'
-
 
 class Graph(networkx.DiGraph):
 
@@ -109,7 +107,7 @@ class Graph(networkx.DiGraph):
                     min_target = target
         return min_target
 
-    def load_from_json_file(self, filename=BACKUP_FILE_NAME):
+    def load_from_json_file(self, filename):
         """Loads graph from json file."""
         with open(filename, 'r') as json_file:
             data = json.load(json_file)
@@ -117,14 +115,14 @@ class Graph(networkx.DiGraph):
             self.add_nodes_from(loaded_graph.nodes(data=True))
             self.add_edges_from(loaded_graph.edges(data=True))
 
-    def write_to_json_file(self, filename=BACKUP_FILE_NAME):
+    def write_to_json_file(self, filename):
         """Writes graph to json file."""
         data = json_graph.node_link_data(self)
         with open(filename, 'w') as json_file:
             json.dump(data, json_file)
 
-    def write_in_dot_notation(self):
-        networkx.nx_agraph.write_dot(self, "graph.dot")
+    def write_in_dot_notation(self, filename):
+        networkx.nx_agraph.write_dot(self, filename.replace('json', 'dot'))
 
 
 if __name__ == '__main__':
