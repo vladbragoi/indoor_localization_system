@@ -107,6 +107,7 @@ usage: converter.py [-h] [-u URL] [-U USER] [-p PASSWORD]
 ### Dev notes
 The graph model usage need to be improved. You can modify the `loop` method in the `server.py` script if you have a 
 cleverer mode of using it.
+If you want to modify the matlab function and voting system, replace them in the `matlab` folder.
 
 ### Dependencies
 * [cloudant](https://python-cloudant.readthedocs.io/en/latest/index.html)
