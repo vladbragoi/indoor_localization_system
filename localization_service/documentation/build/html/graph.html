@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>graph module &mdash; Localization Service (Server) 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Localization Service (Server)
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">graph module</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Localization Service (Server)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>graph module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/graph.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-graph">
+<span id="graph-module"></span><h1>graph module<a class="headerlink" href="#module-graph" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="graph.Graph">
+<em class="property">class </em><code class="descclassname">graph.</code><code class="descname">Graph</code><span class="sig-paren">(</span><em>node_distance=0</em>, <em>**attr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">networkx.classes.digraph.DiGraph</span></code></p>
+<dl class="method">
+<dt id="graph.Graph.add_edges">
+<code class="descname">add_edges</code><span class="sig-paren">(</span><em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph.add_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph.add_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds edges iterating the nodes list and decorating each edge with direction (dir) and a
+specific weight given by a static probability: 100 / node out-degree, where out-degree is
+the length of the target node list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nodes</strong> – a list of nodes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="graph.Graph.add_nodes">
+<code class="descname">add_nodes</code><span class="sig-paren">(</span><em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph.add_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph.add_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds nodes from nodes list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nodes</strong> – a list of nodes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="graph.Graph.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>as_view=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the graph.</p>
+<p>The copy method by default returns a shallow copy of the graph
+and attributes. That is, if an attribute is a container, that
+container is shared by the original an the copy.
+Use Python’s <cite>copy.deepcopy</cite> for new containers.</p>
+<p>If <cite>as_view</cite> is True then a view is returned instead of a copy.</p>
+<p class="rubric">Notes</p>
+<p>All copies reproduce the graph structure, but data attributes
+may be handled in different ways. There are four types of copies
+of a graph that people might want.</p>
+<p>Deepcopy – The default behavior is a “deepcopy” where the graph
+structure as well as all data attributes and any objects they might
+contain are copied. The entire graph object is new so that changes
+in the copy do not affect the original object. (see Python’s
+copy.deepcopy)</p>
+<p>Data Reference (Shallow) – For a shallow copy the graph structure
+is copied but the edge, node and graph attribute dicts are
+references to those in the original graph. This saves
+time and memory but could cause confusion if you change an attribute
+in one graph and it changes the attribute in the other.
+NetworkX does not provide this level of shallow copy.</p>
+<p>Independent Shallow – This copy creates new independent attribute
+dicts and then does a shallow copy of the attributes. That is, any
+attributes that are containers are shared between the new graph
+and the original. This is exactly what <cite>dict.copy()</cite> provides.
+You can obtain this style copy using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">path_graph</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">as_view</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">fresh_copy</span><span class="p">()</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fresh Data – For fresh data, the graph structure is copied while
+new empty data attribute dicts are created. The resulting graph
+is independent of the original and it has no edge, node or graph
+attributes. Fresh copies are not enabled. Instead use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">fresh_copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>View – Inspired by dict-views, graph-views act like read-only
+versions of the original graph, providing a copy of the original
+structure without requiring any memory for copying the information.</p>
+<p>See the Python copy module for more information on shallow
+and deep copies, <a class="reference external" href="https://docs.python.org/2/library/copy.html">https://docs.python.org/2/library/copy.html</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>as_view</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em>, </em><em>optional</em><em> (</em><em>default=False</em><em>)</em>) – If True, the returned graph-view provides a read-only view
+of the original graph without actually copying any data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>G</strong> – A copy of the graph.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#graph.Graph" title="graph.Graph">Graph</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_directed()</span></code></dt>
+<dd>return a directed copy of the graph.</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">path_graph</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># or DiGraph, MultiGraph, MultiDiGraph, etc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="graph.Graph.lighter_route">
+<code class="descname">lighter_route</code><span class="sig-paren">(</span><em>sources</em>, <em>targets</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph.lighter_route"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph.lighter_route" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the rp in targets list, that have minimum path length
+from sources to each targets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sources</strong> – a list of source nodes</li>
+<li><strong>targets</strong> – a list of target nodes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the target with min path length</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="graph.Graph.load_from_json_file">
+<code class="descname">load_from_json_file</code><span class="sig-paren">(</span><em>filename='graph.json'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph.load_from_json_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph.load_from_json_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads graph from json file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="graph.Graph.update_weights">
+<code class="descname">update_weights</code><span class="sig-paren">(</span><em>nodes</em>, <em>direction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph.update_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph.update_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates weight of edges in nodes list that match direction specified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nodes</strong> – a list of nodes</li>
+<li><strong>direction</strong> – a tuple of direction strings (‘0’, ‘1’, …)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="graph.Graph.write_to_json_file">
+<code class="descname">write_to_json_file</code><span class="sig-paren">(</span><em>filename='graph.json'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/graph.html#Graph.write_to_json_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graph.Graph.write_to_json_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes graph to json file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Vladislav Bragoi.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
