@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#417d80</color>
+    <color name="colorPrimaryDark">#3a7679</color>
+    <color name="colorAccent">#d4a778</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="cardWifiBackground">#88d1eae7</color>
+    <color name="cardBeaconBackground">#8deaead1</color>
+    <color name="cardMvBackground">#88d1ead4</color>
+    <color name="colorError">#f44336</color>
+    <color name="colorRunning">#67AE82</color>
+</resources>
