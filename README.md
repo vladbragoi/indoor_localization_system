@@ -1,7 +1,6 @@
 # indoor_localization_system
 This repository contains the source-code for an indoor localization system
 
-## Android application
 * `android_application` folder contains the source-code for an Android app that can be used to collect data in order to create your oun fingerprinting dataset, based on RSSI (WiFi access points/Bluetooth BLE beacons)and Magnetic Field, for an indoor localization system. 
 For more details, please see the README file in that directory.
 
