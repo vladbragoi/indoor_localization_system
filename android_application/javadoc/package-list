@@ -1,0 +1,11 @@
+it.univr.vlad.fingerprinting
+it.univr.vlad.fingerprinting.activity
+it.univr.vlad.fingerprinting.devices.ble
+it.univr.vlad.fingerprinting.devices.mv
+it.univr.vlad.fingerprinting.devices.wifi
+it.univr.vlad.fingerprinting.diffutil
+it.univr.vlad.fingerprinting.model
+it.univr.vlad.fingerprinting.templates
+it.univr.vlad.fingerprinting.util
+it.univr.vlad.fingerprinting.view
+it.univr.vlad.fingerprinting.viewmodel
